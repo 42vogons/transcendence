@@ -56,7 +56,7 @@ The following tools were used in this project:
 
 ## Requirements ##
 
-Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [NestJS](https://nestjs.com/) installed.
+Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Docker](https://www.docker.com/) installed.
 
 ## Starting ##
 
@@ -67,15 +67,16 @@ git clone https://github.com/42vogons/transcendence
 # Access
 cd transcendence
 
-# Install dependencies
-npm i -g @nestjs/cli
-npm install @nestjs/common
-
+# Rename .env_example to .env and edit your variables values
+mv .env_example .env
 
 # Run the project
-npm run start
+docker-compose up --build
 
-# The server will initialize in the <http://localhost:3000>
+# The server will initialize in the:
+# frontend <http://localhost:3000>
+# backend <http://localhost:3001>
+# database <http://localhost:5432>
 ```
 
 ## License ##
