@@ -2,25 +2,44 @@ import { styled } from '..'
 
 export const PageContainer = styled('main', {
 	margin: '0 auto',
-	height: '100vh',
-	width: '80vw',
-	backgroundColor: '$blue900',
+	minHeight: '100vh',
+	height: '100%',
+	minWidth: '96vw',
+	backgroundColor: '$blue600',
 	display: 'flex',
-	flexDirection: 'row',
-	gap: 16,
+	flexDirection: 'column',
+	// gap: 16,
+
+	border: '6px solid $white',
+	borderRadius: 32,
+
+	'@bp2': {
+		minWidth: '80vw',
+		maxWidth: '80vw',
+	},
+
+	'@bp3': {
+		flexDirection: 'row',
+	},
 })
 
 export const ProfileDataContainer = styled('div', {
-	flexBasis: '20%',
-	backgroundColor: '$green500',
-	padding: '2rem 1rem',
+	minHeight: '100%',
+	flexBasis: '25%',
+	padding: '2rem 0.5rem',
 	display: 'flex',
 	flexDirection: 'column',
 	alignItems: 'center',
-	gap: 32,
+	justifyContent: 'space-between',
+	gap: 16,
+	borderRight: '6px solid $white',
+
+	'@bp1': {
+		padding: '2rem 1rem',
+	},
 })
 
-export const ProfileContainer = styled('div', {
+export const ProfileContainer = styled('section', {
 	width: '100%',
 	display: 'flex',
 	flexDirection: 'column',
@@ -36,7 +55,7 @@ export const ProfileImageContainer = styled('div', {
 	marginBottom: 16,
 })
 
-export const UserContainer = styled('div', {
+export const TitleContainer = styled('div', {
 	width: '100%',
 	display: 'flex',
 	flexDirection: 'row',
@@ -46,25 +65,22 @@ export const UserContainer = styled('div', {
 	color: '$white',
 	h2: {
 		textAlign: 'center',
-		fontSize: '3.5rem',
+		fontSize: '2.5rem',
+	},
+
+	'@bp1': {
+		h2: {
+			fontSize: '3.5rem',
+		},
 	},
 })
 
-export const StatsContainer = styled('div', {
-	width: '100%',
-	height: '100%',
+export const MatchHistoryContainer = styled('section', {
+	flexBasis: '75%',
+	// backgroundColor: '$red',
 	display: 'flex',
 	flexDirection: 'column',
 	justifyContent: 'center',
 	alignItems: 'center',
-	backgroundColor: '$blue100',
-})
-
-export const MatchHistoryContainer = styled('div', {
-	flexBasis: '78%',
-	backgroundColor: '$red',
-	display: 'flex',
-	flexDirection: 'column',
-	justifyContent: 'center',
-	alignItems: 'center',
+	borderRadius: '0 28px 28px 0',
 })

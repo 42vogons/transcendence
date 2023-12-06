@@ -8,15 +8,22 @@ import {
 	ProfileContainer,
 	ProfileDataContainer,
 	ProfileImageContainer,
-	StatsContainer,
-	UserContainer,
+	TitleContainer,
 } from '@/styles/pages/profile'
 
 import { FaUserAstronaut } from 'react-icons/fa6'
+import { MdViewList } from 'react-icons/md'
+import Stats from '@/components/stats'
 
 export default function Profile() {
 	const router = useRouter()
 	console.log('router:', router)
+
+	const gamesPlayed = 10
+	const wins = 4
+	const stats = { gamesPlayed, wins }
+
+	const profileUser = router.query.userId ? router.query.userId : 'acarneir'
 	return (
 		<>
 			<Head>
@@ -37,19 +44,24 @@ export default function Profile() {
 						<ProfileImageContainer>
 							<Image
 								src="/assets/user.png"
-								width={300}
-								height={300}
+								width={240}
+								height={240}
 								alt="user"
 							/>
 						</ProfileImageContainer>
-						<UserContainer>
+						<TitleContainer>
 							<FaUserAstronaut size={40} />
-							<h2>acarneir</h2>
-						</UserContainer>
+							<h2>{profileUser}</h2>
+						</TitleContainer>
 					</ProfileContainer>
-					<StatsContainer>Stats</StatsContainer>
+					<Stats stats={stats} />
 				</ProfileDataContainer>
-				<MatchHistoryContainer>Match History</MatchHistoryContainer>
+				<MatchHistoryContainer>
+					<TitleContainer>
+						<MdViewList size={56} />
+						<h2>Match History</h2>
+					</TitleContainer>
+				</MatchHistoryContainer>
 			</PageContainer>
 		</>
 	)
