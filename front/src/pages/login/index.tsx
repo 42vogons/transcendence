@@ -10,7 +10,7 @@ import {
 
 import { FcGoogle } from 'react-icons/fc'
 
-export default function Home() {
+export default function Login() {
 	return (
 		<>
 			<Head>
@@ -27,7 +27,13 @@ export default function Home() {
 			</Head>
 			<LoginContainer>
 				<Title>
-					<Image src="/assets/logo.png" fill alt="Pong" />
+					<Image
+						src="/assets/logo.png"
+						fill
+						sizes="(min-width: 640px) 384"
+						priority
+						alt="Pong"
+					/>
 				</Title>
 				<ConnectButtonContainer>
 					<ConnectButton>
