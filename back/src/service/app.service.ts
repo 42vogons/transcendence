@@ -3,6 +3,7 @@ import axios from 'axios';
 import * as FormData from 'form-data';
 // No topo do seu arquivo, antes de acessar as variáveis de ambiente
 import * as dotenv from 'dotenv';
+dotenv.config();
 
 
 
@@ -18,7 +19,7 @@ export class AppService {
 
   async checkLogin(): Promise<any> {
     try {
-      const url = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-2cee1c10ee2d5b0870296f9dcba4e1adf9ed0db36dfaab25de3e4fd69ae170ce&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fauth%2Fredirect&response_type=code"
+      const url = process.env.URL;
       const response = await axios.get(url);
       return response.data;
     } catch (error) {
@@ -28,7 +29,7 @@ export class AppService {
   }
 
    async getToken (authorizationCode:string) : Promise<any> {
-    dotenv.config();
+    
     const clientId = process.env.CLIENT_ID;
     const clientSecret = process.env.CLIENT_SECRET;
     const redirectUri = process.env.REDIRECT_URI;
