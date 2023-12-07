@@ -29,6 +29,7 @@
   <a href="#technologies">Technologies</a> &#xa0; | &#xa0;
   <a href="#requirements">Requirements</a> &#xa0; | &#xa0;
   <a href="#starting">Starting</a> &#xa0; | &#xa0;
+  <a href="#database">DataBase</a> &#xa0; | &#xa0;
   <a href="#license">License</a> &#xa0; | &#xa0;
   <a href="https://github.com/orgs/42vogons/teams/transcendence-the-last-of-us" target="_blank">Authors</a>
 </p>
@@ -49,10 +50,10 @@ Feature 3;
 
 The following tools were used in this project:
 
-- [Next.js](https://nextjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [React](https://react.dev/)
 - [NestJS](https://nestjs.com/)
 - [Prisma](https://www.prisma.io/)
-- [TypeScript](https://www.typescriptlang.org/)
 
 ## Requirements ##
 
@@ -77,6 +78,26 @@ docker-compose up --build
 # frontend <http://localhost:3000>
 # backend <http://localhost:3001>
 # database <http://localhost:5432>
+```
+
+## DataBase ##
+
+```bash
+# Access
+cd transcendence/back/migrations
+
+# Create a .env file in the migrations directory
+mv .env_example .env
+
+# Make the sql script executable
+chmod +x 202312032330_create_tables.sh
+
+# Execute the script
+bash 202312032330_create_tables.sh
+
+# The script will read configurations from the .env file, connect to your
+# PostgreSQL database in the specified Docker container, and execute
+# the SQL script to create the tables.
 ```
 
 ## License ##
