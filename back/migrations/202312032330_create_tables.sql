@@ -100,3 +100,11 @@ CREATE TABLE UserAchievements (
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
     FOREIGN KEY (achievement_id) REFERENCES Achievements(achievement_id)
 );
+
+CREATE TABLE GameQueue (
+    queue_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    entered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    priority INT DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
