@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Image from 'next/image'
 
 import {
+	MatchCardsContainer,
 	MatchHistoryContainer,
 	PageContainer,
 	ProfileContainer,
@@ -14,6 +15,13 @@ import {
 import { FaUserAstronaut } from 'react-icons/fa6'
 import { MdViewList } from 'react-icons/md'
 import Stats from '@/components/stats'
+import MatchCard from '@/components/matchCard'
+
+interface player {
+	username: string
+	score: number
+	winner?: boolean
+}
 
 export default function Profile() {
 	const router = useRouter()
@@ -22,6 +30,13 @@ export default function Profile() {
 	const gamesPlayed = 10
 	const wins = 4
 	const stats = { gamesPlayed, wins }
+
+	const player1: player = { username: 'acarneir', score: 3 }
+	const player2: player = { username: 'rfelipe-', score: 2 }
+
+	const match1 = [player1, player2]
+	const match2 = [player2, player1]
+	const matchHistory = [match1, match2, match2, match1, match1, match2]
 
 	const profileUser = router.query.userId ? router.query.userId : 'acarneir'
 	return (
@@ -46,10 +61,16 @@ export default function Profile() {
 								src="/assets/user.png"
 								width={240}
 								height={240}
+								priority
 								alt="user"
 							/>
 						</ProfileImageContainer>
-						<TitleContainer>
+						<TitleContainer
+							css={{
+								borderBottom: '2px solid $white',
+								borderRadius: 24,
+							}}
+						>
 							<FaUserAstronaut size={40} />
 							<h2>{profileUser}</h2>
 						</TitleContainer>
@@ -61,6 +82,11 @@ export default function Profile() {
 						<MdViewList size={56} />
 						<h2>Match History</h2>
 					</TitleContainer>
+					<MatchCardsContainer>
+						{matchHistory.map((match, i) => (
+							<MatchCard key={i} players={match} />
+						))}
+					</MatchCardsContainer>
 				</MatchHistoryContainer>
 			</PageContainer>
 		</>

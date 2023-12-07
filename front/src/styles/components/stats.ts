@@ -35,7 +35,8 @@ export const StatsPanelContainer = styled('div', {
 	flexDirection: 'row',
 	flexWrap: 'wrap',
 	gap: 16,
-	'@bp3': {
+
+	'@bp4': {
 		flexDirection: 'column',
 		flexWrap: 'nowrap',
 	},
