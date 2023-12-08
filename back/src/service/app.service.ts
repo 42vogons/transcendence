@@ -16,6 +16,8 @@ export class AppService {
     const redirectUri = process.env.REDIRECT_URI;
 
     console.info("client="+ clientId );
+    console.info("clientSecret="+ clientSecret );
+    console.info("redirectUri="+ redirectUri );
 
     try {
       const formData = new FormData();

@@ -1,14 +1,12 @@
-import { Controller, Body, Post, HttpCode, Query  } from '@nestjs/common';
+import { Controller, Body, Post, HttpCode, Query, Response  } from '@nestjs/common';
 import { AppService } from '../service/app.service';
-
-
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Post("/auth/user")
     @HttpCode(200)
-    async getToken(@Body() body: any): Promise<string> {
+    async getToken(@Body() body: any, @Response() res): Promise<Response> {
       const code = body.code; 
       const token = await this.appService.getToken(code);
       console.error('Código =: ${code}');
@@ -18,7 +16,14 @@ export class AppController {
       console.info("Last Name " , profile.last_name);
       console.info("Email " , profile.email);
       console.info("Imagem " , profile.image.link);
-
-      return `Olá ${profile.login}`;
+      
+      res.cookie('accessToken','teste', {
+        expires: new Date(new Date().getTime() + 30 * 10000),
+        httpOnly: true,
+        domain: 'http://localhost:3000',
+        sameSite: 'none',
+     });
+    
+    return res.send(profile);
     }
 }
