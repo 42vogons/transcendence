@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model achievements {
+  achievement_id    Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(100)
+  description       String?
+  user_achievements user_achievements[]
+}
+
+model admin_actions {
+  action_id                                 Int       @id @default(autoincrement())
+  channel_id                                Int
+  target_user_id                            Int
+  action_type                               String    @db.VarChar(50)
+  executed_by                               Int
+  start_time                                DateTime? @default(now()) @db.Timestamp(6)
+  end_time                                  DateTime? @db.Timestamp(6)
+  channels                                  channels  @relation(fields: [channel_id], references: [channel_id], onDelete: NoAction, onUpdate: NoAction)
+  users_admin_actions_executed_byTousers    users     @relation("admin_actions_executed_byTousers", fields: [executed_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  users_admin_actions_target_user_idTousers users     @relation("admin_actions_target_user_idTousers", fields: [target_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model channel_members {
+  channel_id Int
+  user_id    Int
+  status     String   @default("member") @db.VarChar(50)
+  channels   channels @relation(fields: [channel_id], references: [channel_id], onDelete: NoAction, onUpdate: NoAction)
+  users      users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([channel_id, user_id])
+}
+
+model channels {
+  channel_id      Int               @id @default(autoincrement())
+  name            String            @db.VarChar(100)
+  type            String?           @default("public") @db.VarChar(20)
+  password        String?           @db.VarChar(255)
+  owner_id        Int?
+  admin_actions   admin_actions[]
+  channel_members channel_members[]
+  users           users?            @relation(fields: [owner_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  chat_messages   chat_messages[]
+}
+
+model chat_messages {
+  message_id                             Int       @id @default(autoincrement())
+  sender_id                              Int
+  receiver_id                            Int?
+  channel_id                             Int?
+  content                                String
+  timestamp                              DateTime? @default(now()) @db.Timestamp(6)
+  channels                               channels? @relation(fields: [channel_id], references: [channel_id], onDelete: NoAction, onUpdate: NoAction)
+  users_chat_messages_receiver_idTousers users?    @relation("chat_messages_receiver_idTousers", fields: [receiver_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  users_chat_messages_sender_idTousers   users     @relation("chat_messages_sender_idTousers", fields: [sender_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model friends {
+  user_id                        Int
+  friend_id                      Int
+  users_friends_friend_idTousers users @relation("friends_friend_idTousers", fields: [friend_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  users_friends_user_idTousers   users @relation("friends_user_idTousers", fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([user_id, friend_id])
+}
+
+model game_queue {
+  queue_id   Int       @id @default(autoincrement())
+  user_id    Int
+  entered_at DateTime? @default(now()) @db.Timestamp(6)
+  priority   Int?      @default(0)
+  users      users     @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model games {
+  game_id                       Int             @id @default(autoincrement())
+  player1_id                    Int
+  player2_id                    Int
+  player1_score                 Int?            @default(0)
+  player2_score                 Int?            @default(0)
+  start_time                    DateTime?       @default(now()) @db.Timestamp(6)
+  end_time                      DateTime?       @db.Timestamp(6)
+  users_games_player1_idTousers users           @relation("games_player1_idTousers", fields: [player1_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  users_games_player2_idTousers users           @relation("games_player2_idTousers", fields: [player2_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  match_history                 match_history[]
+}
+
+model match_history {
+  history_id    Int                      @id @default(autoincrement())
+  user_id       Int
+  game_id       Int
+  result        String                   @db.VarChar(10)
+  game_type     String?                  @db.VarChar(50)
+  game_duration Int?
+  games         games                    @relation(fields: [game_id], references: [game_id], onDelete: NoAction, onUpdate: NoAction)
+  users         users                    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user_achievements {
+  user_id        Int
+  achievement_id Int
+  date_achieved  DateTime?    @default(now()) @db.Timestamp(6)
+  achievements   achievements @relation(fields: [achievement_id], references: [achievement_id], onDelete: NoAction, onUpdate: NoAction)
+  users          users        @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([user_id, achievement_id])
+}
+
+model users {
+  user_id                                           Int                 @id @default(autoincrement())
+  username                                          String              @db.VarChar(50)
+  email                                             String?             @db.VarChar(100)
+  password_hash                                     String              @db.VarChar(255)
+  avatar_url                                        String?             @db.VarChar(255)
+  status                                            String?             @default("offline") @db.VarChar(20)
+  two_factor_enabled                                Boolean?            @default(false)
+  total_games                                       Int?                @default(0)
+  total_wins                                        Int?                @default(0)
+  total_losses                                      Int?                @default(0)
+  ladder_level                                      Int?
+  admin_actions_admin_actions_executed_byTousers    admin_actions[]     @relation("admin_actions_executed_byTousers")
+  admin_actions_admin_actions_target_user_idTousers admin_actions[]     @relation("admin_actions_target_user_idTousers")
+  channel_members                                   channel_members[]
+  channels                                          channels[]
+  chat_messages_chat_messages_receiver_idTousers    chat_messages[]     @relation("chat_messages_receiver_idTousers")
+  chat_messages_chat_messages_sender_idTousers      chat_messages[]     @relation("chat_messages_sender_idTousers")
+  friends_friends_friend_idTousers                  friends[]           @relation("friends_friend_idTousers")
+  friends_friends_user_idTousers                    friends[]           @relation("friends_user_idTousers")
+  game_queue                                        game_queue[]
+  games_games_player1_idTousers                     games[]             @relation("games_player1_idTousers")
+  games_games_player2_idTousers                     games[]             @relation("games_player2_idTousers")
+  match_history                                     match_history[]
+  user_achievements                                 user_achievements[]
+}
