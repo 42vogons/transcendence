@@ -6,33 +6,16 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 
-
-
-
 @Injectable()
 export class AppService {
   
-
-  getHello(): string {
-    return 'Hello World!';
-  }
-
-  async checkLogin(): Promise<any> {
-    try {
-      const url = process.env.URL;
-      const response = await axios.get(url);
-      return response.data;
-    } catch (error) {
-      console.error('Erro ao acessar a API externa:', error.message);
-      throw error;
-    }
-  }
-
-   async getToken (authorizationCode:string) : Promise<any> {
+  async getToken (authorizationCode:string) : Promise<any> {
     
     const clientId = process.env.CLIENT_ID;
     const clientSecret = process.env.CLIENT_SECRET;
     const redirectUri = process.env.REDIRECT_URI;
+
+    console.info("client="+ clientId );
 
     try {
       const formData = new FormData();

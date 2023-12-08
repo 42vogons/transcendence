@@ -1,15 +1,10 @@
-import { Controller, Get, Post, Body, HttpCode, Query  } from '@nestjs/common';
+import { Controller, Get, Post, HttpCode, Query  } from '@nestjs/common';
 import { AppService } from '../service/app.service';
 
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
-
-  @Post()
-  getHello(): string {
-    return this.appService.getHello();
-  }
 
   @Get("/auth/redirect")
     @HttpCode(200)
@@ -25,18 +20,4 @@ export class AppController {
 
       return `Olá ${profile.login}`;
     }
-
-  @Get("/login")
-  @HttpCode(200)
-  async checkLogin(): Promise<any> {
-    try {
-      const data = await this.appService.checkLogin();
-      return { success: true, data };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-  // 00e746c0fde2d56dcac6ec1873faaecb5b80a5dda3d899c19e76fcee92fbc51e
-
-
 }
