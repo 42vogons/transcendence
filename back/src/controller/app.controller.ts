@@ -1,4 +1,4 @@
-import { Controller, Get, Post, HttpCode, Query  } from '@nestjs/common';
+import { Controller, Body, Post, HttpCode, Query  } from '@nestjs/common';
 import { AppService } from '../service/app.service';
 
 
@@ -6,9 +6,10 @@ import { AppService } from '../service/app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get("/auth/redirect")
+  @Post("/auth/user")
     @HttpCode(200)
-    async getToken(@Query('code') code: string): Promise<string> {
+    async getToken(@Body() body: any): Promise<string> {
+      const code = body.code; 
       const token = await this.appService.getToken(code);
       console.error('Código =: ${code}');
       const profile = await this.appService.getInfo(token.access_token);
