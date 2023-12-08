@@ -39,6 +39,7 @@ export const {
 			lg: '1.25rem',
 			xl: '1.5rem',
 			'2xl': '2rem',
+			'3xl': '3rem',
 		},
 
 		shadows: {
@@ -69,5 +70,6 @@ export const {
 		bp1: '(min-width: 490px)',
 		bp2: '(min-width: 640px)',
 		bp3: '(min-width: 1024px)',
+		bp4: '(min-width: 1400px)',
 	},
 })
