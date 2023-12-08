@@ -20,8 +20,8 @@ export class AppController {
       res.cookie('accessToken','teste', {
         expires: new Date(new Date().getTime() + 30 * 10000),
         httpOnly: true,
-        domain: 'http://localhost:3000',
-        sameSite: 'none',
+        domain: 'localhost'
+        
      });
     
     return res.send(profile);
