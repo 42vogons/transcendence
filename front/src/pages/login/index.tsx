@@ -36,15 +36,17 @@ export default function Login() {
 					/>
 				</Title>
 				<ConnectButtonContainer>
-					<ConnectButton>
-						<Image
-							src="/assets/42.png"
-							width={48}
-							height={48}
-							alt="42logo"
-						/>
-						Login with 42
-					</ConnectButton>
+					<a href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-2cee1c10ee2d5b0870296f9dcba4e1adf9ed0db36dfaab25de3e4fd69ae170ce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&response_type=code">
+						<ConnectButton>
+							<Image
+								src="/assets/42.png"
+								width={48}
+								height={48}
+								alt="42logo"
+							/>
+							Login with 42
+						</ConnectButton>
+					</a>
 					<ConnectButton>
 						<FcGoogle size={48} />
 						Login Google

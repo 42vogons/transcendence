@@ -17,6 +17,8 @@ import { MdViewList } from 'react-icons/md'
 import Stats from '@/components/stats'
 import MatchCard from '@/components/matchCard'
 
+import userDefaulAvatar from 'public/assets/user.png'
+
 interface player {
 	username: string
 	score: number
@@ -58,10 +60,10 @@ export default function Profile() {
 					<ProfileContainer>
 						<ProfileImageContainer>
 							<Image
-								src="/assets/user.png"
+								src={userDefaulAvatar.src}
 								width={240}
 								height={240}
-								priority
+								priority={true}
 								alt="user"
 							/>
 						</ProfileImageContainer>

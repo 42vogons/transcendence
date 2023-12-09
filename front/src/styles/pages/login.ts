@@ -51,6 +51,9 @@ export const ConnectButtonContainer = styled('div', {
 	display: 'flex',
 	flexDirection: 'column',
 	gap: 16,
+	a: {
+		textDecoration: 'none',
+	},
 
 	'@bp2': {
 		margin: '20rem auto auto',
