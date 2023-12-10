@@ -20,7 +20,7 @@ export default function Home() {
 			</Head>
 			<HomeContainer>
 				<p>Hello word</p>
-				<Link href="/teste">teste</Link>
+				<Link href="/login">Login</Link>
 			</HomeContainer>
 		</>
 	)

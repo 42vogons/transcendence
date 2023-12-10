@@ -1,24 +1,42 @@
+import Loading from '@/components/loading'
 import { api } from '@/services/api'
+import { AuthContainer } from '@/styles/pages/auth'
 import Head from 'next/head'
 
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 
 export default function Auth() {
 	const router = useRouter()
 
+	const [isLoading, setIsLoading] = useState(false)
+
 	console.log(router.query.code)
 
-	async function authUser() {
-		const code = router.query.code
-
-		if (code) {
-			const res = await api.post('/auth/user', { code })
-			console.log('res:', res)
+	useEffect(() => {
+		async function authUser(code: string) {
+			setIsLoading(true)
+			try {
+				const res = await api.post('/auth/user', { code })
+				toast('Login was successful', { type: 'success' })
+				console.log('res:', res)
+				router.push('/profile')
+			} catch (error) {
+				console.log('error:', error)
+				toast('An error occurred during authentication', {
+					type: 'error',
+				})
+				router.push('/login')
+				setIsLoading(false)
+			}
 		}
-	}
-
-	authUser()
+		const code = router.query.code as string
+		console.log('code:', code)
+		if (code) {
+			authUser(code)
+		}
+	}, [router])
 
 	return (
 		<>
@@ -34,7 +52,15 @@ export default function Auth() {
 				/>
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			auth
+			<AuthContainer>{isLoading && <Loading size={120} />}</AuthContainer>
+
+			<button
+				onClick={() => {
+					toast('Authenticated', { type: 'success' })
+				}}
+			>
+				Toast
+			</button>
 		</>
 	)
 }
