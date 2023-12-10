@@ -1,10 +1,11 @@
-import { Controller, Body, Post, HttpCode, Query, Response  } from '@nestjs/common';
-import { AppService } from '../service/app.service';
-@Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+import { Controller, Body, Post, HttpCode, Query, Response   } from '@nestjs/common';
+import { LoginService } from './login.service';
 
-  @Post("/auth/user")
+@Controller('')
+export class LoginController {
+    constructor(private readonly appService: LoginService) {}
+
+    @Post("/auth/user")
     @HttpCode(200)
     async getToken(@Body() body: any, @Response() res): Promise<Response> {
       const code = body.code; 
@@ -26,4 +27,5 @@ export class AppController {
     
     return res.send(profile);
     }
+
 }
