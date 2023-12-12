@@ -6,9 +6,7 @@ COPY ./ ./
 
 RUN npm install
 
-RUN npx prisma migrate dev --name init
-
-RUN npx prisma generate
+RUN npm run build
 
 EXPOSE 3001
 
