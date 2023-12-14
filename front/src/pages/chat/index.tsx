@@ -12,7 +12,10 @@ import {
 	ChatTitle,
 } from '@/styles/pages/chat'
 
+import { MdSend } from 'react-icons/md'
+
 import userDefaulAvatar from 'public/assets/user.png'
+import { FormEvent, useState } from 'react'
 
 interface Message {
 	sender: string
@@ -49,6 +52,14 @@ export default function Chat() {
 		message2,
 	]
 	const loggedUser = 'acarneir'
+
+	const [input, setInput] = useState('')
+
+	function handleSubmit(e: FormEvent<HTMLFormElement>) {
+		e.preventDefault()
+		console.log(e)
+		console.log(input)
+	}
 
 	return (
 		<>
@@ -93,8 +104,15 @@ export default function Chat() {
 						</ChatMessage>
 					))}
 				</ChatMessageContainer>
-				<ChatInputContainer>
-					inpu
+				<ChatInputContainer onSubmit={(e) => handleSubmit(e)}>
+					<input
+						type="text"
+						value={input}
+						onChange={(e) => setInput(e.target.value)}
+					/>
+					<button>
+						<MdSend size={48} />
+					</button>
 				</ChatInputContainer>
 			</ChatContainer>
 		</>
