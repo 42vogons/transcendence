@@ -2,13 +2,13 @@ version: '3'
 
 services:
     db:
-        build: ./db
+        image: postgres:latest
         container_name: transcendence_db
         restart: unless-stopped
         env_file:
             - .env
         volumes:
-            - ./db/dbdata:/var/lib/postgresql/data
+            - ./dbdata:/var/lib/postgresql/data
         environment:
             - POSTGRES_PASSWORD=${DB_PASSWORD}
             - POSTGRES_USER=${DB_USERNAME}
@@ -20,7 +20,7 @@ services:
 
     front:
         build: ./front
-        image: transcendence_front 
+        image: transcendence_front
         container_name: transcendence_front
         restart: unless-stopped
         depends_on:
@@ -53,9 +53,9 @@ services:
         networks:
             - transcendence
         command: >
-          sh -c "npx prisma generate && 
-          npx prisma migrate dev --name init && 
-          npm run start"
+            sh -c "npx prisma generate && 
+            npx prisma migrate dev --name init && 
+            npm run start"
 
 networks:
     transcendence:
