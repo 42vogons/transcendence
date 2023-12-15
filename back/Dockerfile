@@ -1,11 +1,7 @@
-FROM node:latest
+FROM node:lts-alpine
 
 WORKDIR /srcs
 
 COPY ./ ./
 
 RUN npm install
-
-EXPOSE 3001
-
-ENTRYPOINT ["npm", "run", "start"]
