@@ -28,8 +28,8 @@ services:
         env_file:
             - .env
         environment:
-            - REACT_APP_BACK_HOST=${BACK_HOST}
-            - REACT_APP_ENV=${ENV}
+            REACT_APP_BACK_HOST: ${BACK_HOST}
+            REACT_APP_ENV: ${ENV}
         ports:
             - 3000:${FRONT_PORT}
         networks:
@@ -37,7 +37,7 @@ services:
 
     back:
         build: ./back
-        image: transcendence_back 
+        image: transcendence_back
         container_name: transcendence_back
         restart: unless-stopped
         depends_on:
@@ -45,11 +45,17 @@ services:
         env_file:
             - .env
         environment:
-            - DB_HOST=transcendence_db
+            DB_HOST: ${DB_HOST}
+            DATABASE_URL: ${DATABASE_URL}
         ports:
             - 3001:${BACK_PORT}
+            - 5555:5555
         networks:
-            - transcendence 
+            - transcendence
+        command: >
+          sh -c "npx prisma generate && 
+          npx prisma migrate dev --name init && 
+          npm run start"
 
 networks:
     transcendence:
