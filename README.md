@@ -98,6 +98,12 @@ bash 202312032330_create_tables.sh
 # The script will read configurations from the .env file, connect to your
 # PostgreSQL database in the specified Docker container, and execute
 # the SQL script to create the tables.
+
+# How to do a migration using prisma:
+cd back
+# update you back/.env with DB_HOST=localhost
+# run migrate Prisma command
+npx prisma migrate dev --create-only
 ```
 
 ## License ##
