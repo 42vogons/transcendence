@@ -19,12 +19,12 @@ export const TitleContainer = styled('div', {
 	color: '$white',
 	h2: {
 		textAlign: 'center',
-		fontSize: '2.5rem',
+		fontSize: '$2xl',
 	},
 
 	'@bp1': {
 		h2: {
-			fontSize: '3.5rem',
+			fontSize: '$3xl',
 		},
 	},
 })
@@ -45,8 +45,8 @@ export const StatsPanelContainer = styled('div', {
 export const StatsPanel = styled('div', {
 	flex: '1 0 31%',
 	display: 'flex',
-	flexDirection: 'column',
-	justifyContent: 'center',
+	flexDirection: 'row',
+	justifyContent: 'space-between',
 	alignItems: 'center',
 	border: '4px solid $white',
 	borderRadius: 16,
@@ -55,19 +55,19 @@ export const StatsPanel = styled('div', {
 
 	div: {
 		color: '$white',
-		width: '100%',
+		// width: '100%',
 		display: 'flex',
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
 		gap: 16,
 		h2: {
-			fontSize: '$2xl',
+			fontSize: '$xl',
 		},
 
 		'@bp1': {
 			h2: {
-				fontSize: '$3xl',
+				fontSize: '$2xl',
 			},
 		},
 	},
