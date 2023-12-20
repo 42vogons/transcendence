@@ -8,7 +8,7 @@ export const LayoutContainer = styled('div', {
 	justifyContent: 'center',
 	alignItems: 'center',
 
-	'@bp1': {
+	'@bp3': {
 		padding: '0 5%',
 	},
 })
@@ -32,10 +32,15 @@ export const ApplicationContainer = styled('div', {
 export const SidebarContainer = styled('div', {
 	position: 'absolute',
 	top: 0,
-	width: 80,
+	width: 30,
 	height: '100%',
 	backgroundColor: '$blue100',
-	borderRadius: '26px 0 0 26px',
+	borderRadius: '30px 0 0 30px',
+
+	'@bp1': {
+		width: 40,
+		borderRadius: '26px 0 0 26px',
+	},
 })
 
 export const SidePanelContainer = styled('div', {
@@ -55,4 +60,13 @@ export const PageContainer = styled('div', {
 	// flex: '1 1 70%',
 	height: 'calc(100%)',
 	width: 'calc(100%)',
+	marginLeft: 30,
+
+	'@bp1': {
+		marginLeft: 40,
+	},
+
+	'@bp3': {
+		marginLeft: 0,
+	},
 })
