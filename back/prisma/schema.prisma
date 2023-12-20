@@ -113,10 +113,11 @@ model user_achievements {
 }
 
 model users {
-  user_id                                           Int                 @id @default(autoincrement())
+  user_id                                           Int                 @unique @id
   username                                          String              @unique @db.VarChar(50)
   email                                             String?             @unique @db.VarChar(100)
-  password_hash                                     String              @db.VarChar(255)
+  token                                             String?             @db.VarChar(255)
+  token_secret                                      String?             @db.VarChar(255) 
   avatar_url                                        String?             @db.VarChar(255)
   status                                            String?             @default("offline") @db.VarChar(20)
   two_factor_enabled                                Boolean?            @default(false)

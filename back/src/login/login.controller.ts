@@ -1,13 +1,14 @@
 import { Controller, Body, Post, HttpCode, Query, Response   } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { TwoFactorAutenticateService } from './two-factor-autenticate/two-factor-autenticate.service';
-import {ClassSerializerInterceptor, Header, UseInterceptors, Res, UseGuards, Req } from '@nestjs/common';
+import { ClassSerializerInterceptor, Header, UseInterceptors, Res, UseGuards, Req } from '@nestjs/common';
+
+
 @Controller('')
 export class LoginController {
     constructor(
       private readonly loginService: LoginService, 
-      private readonly twoFactorService: TwoFactorAutenticateService
-
+      private readonly twoFactorService: TwoFactorAutenticateService,
       ) {}
 
 
@@ -29,14 +30,8 @@ export class LoginController {
     @HttpCode(200)
     async getToken(@Body() body: any, @Response() res): Promise<Response> {
       const code = body.code; 
-      const token = await this.loginService.getToken(code);
-      console.error('Código =: ${code}');
-      const profile = await this.loginService.getInfo(token.access_token);
-      console.info("Ola " , profile.login);
-      console.info("First Name " , profile.first_name);
-      console.info("Last Name " , profile.last_name);
-      console.info("Email " , profile.email);
-      console.info("Imagem " , profile.image.link);
+      const profile = await this.loginService.getToken(code);
+      
       
       res.cookie('accessToken','teste', {
         expires: new Date(new Date().getTime() + 30 * 10000),

@@ -12,12 +12,15 @@ export class CreateUserDto {
   @IsNotEmpty()
   username: string;
 
+  
+  user_id: number;
+
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
   @IsString()
-  password_hash: string;
+  token_secret: string;
 
   @IsUrl()
   avatar_url: string;
