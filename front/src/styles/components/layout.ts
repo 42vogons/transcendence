@@ -32,24 +32,35 @@ export const ApplicationContainer = styled('div', {
 export const SidebarContainer = styled('div', {
 	position: 'absolute',
 	top: 0,
-	width: 30,
+	width: 32,
 	height: '100%',
-	backgroundColor: '$blue100',
+	backgroundColor: '$blue700',
 	borderRadius: '30px 0 0 30px',
+	borderRight: '1px solid $blue100',
+	display: 'flex',
+	flexDirection: 'column',
+	justifyContent: 'center',
+	alignItems: 'center',
+	gap: 32,
 
 	'@bp1': {
 		width: 40,
 		borderRadius: '26px 0 0 26px',
 	},
+
+	'@bp3': {
+		width: 80,
+	},
 })
 
 export const SidePanelContainer = styled('div', {
-	// flex: '1 1 30%',
+	marginLeft: 80,
 	display: 'none',
-	minWidth: 350,
+	minWidth: 260,
 	height: '100% - 12px',
-	backgroundColor: '$red',
+	backgroundColor: '$blue700',
 	borderRadius: '26px 0 0 26px',
+	borderRight: '4px solid $blue100',
 
 	'@bp3': {
 		display: 'block',
@@ -60,7 +71,7 @@ export const PageContainer = styled('div', {
 	// flex: '1 1 70%',
 	height: 'calc(100%)',
 	width: 'calc(100%)',
-	marginLeft: 30,
+	marginLeft: 32,
 
 	'@bp1': {
 		marginLeft: 40,
