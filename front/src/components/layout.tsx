@@ -1,3 +1,11 @@
+import { ReactNode, useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import { FaGamepad, FaUserAstronaut } from 'react-icons/fa6'
+import { FaUserFriends } from 'react-icons/fa'
+import { BsChatSquareTextFill } from 'react-icons/bs'
+import { RiLogoutBoxFill } from 'react-icons/ri'
+import { MdOutlineMenu } from 'react-icons/md'
+
 import {
 	ApplicationContainer,
 	LayoutContainer,
@@ -5,12 +13,6 @@ import {
 	SidePanelContainer,
 	SidebarContainer,
 } from '@/styles/components/layout'
-import { ReactNode, useEffect, useState } from 'react'
-import { FaGamepad, FaUserAstronaut } from 'react-icons/fa6'
-import { FaUserFriends } from 'react-icons/fa'
-import { RiLogoutBoxFill } from 'react-icons/ri'
-import { BsChatSquareTextFill } from 'react-icons/bs'
-import { useRouter } from 'next/router'
 import IconButton from './iconButton'
 
 interface LayoutProps {
@@ -18,7 +20,8 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-	const iconSize = 32
+	const iconSize = 28
+	const iconSizeMobile = 34
 
 	const router = useRouter()
 
@@ -58,6 +61,10 @@ export default function Layout({ children }: LayoutProps) {
 					</IconButton>
 					<IconButton tooltip="Logout">
 						<RiLogoutBoxFill size={iconSize} />
+					</IconButton>
+
+					<IconButton tooltip="Menu" type="mobile">
+						<MdOutlineMenu size={iconSizeMobile} />
 					</IconButton>
 				</SidebarContainer>
 				<SidePanelContainer>friends</SidePanelContainer>

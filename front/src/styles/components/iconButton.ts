@@ -5,26 +5,22 @@ export const IconButtonContainer = styled('button', {
 	display: 'flex',
 	justifyContent: 'center',
 	alignItems: 'center',
-
-	padding: '12px 12px',
-	borderRadius: 14,
 	color: '$white',
 	backgroundColor: '$blue200',
-	border: '2px solid $white',
+	border: '2px solid transparent',
 	cursor: 'pointer',
 	transition: '0.2s',
 
 	'.tooltip': {
 		display: 'none',
 		position: 'absolute',
-		left: 80,
+		left: 40,
 		backgroundColor: '$white',
 		color: '$blue100',
 		fontSize: '$xl',
 		fontWeight: 800,
 		padding: '4px 16px',
 		borderRadius: 14,
-		// opacity: '0',
 	},
 
 	'&:hover': {
@@ -47,6 +43,36 @@ export const IconButtonContainer = styled('button', {
 					opacity: '80%',
 				},
 			},
+		},
+		type: {
+			mobile: {
+				display: 'flex',
+				padding: '6px 1px',
+				borderRadius: 4,
+				'@bp2': {
+					display: 'none',
+				},
+			},
+			desktop: {
+				display: 'none',
+				'@bp2': {
+					display: 'flex',
+					padding: '6px 1px',
+					borderRadius: 8,
+				},
+				'@bp3': {
+					padding: '12px',
+					borderRadius: 14,
+				},
+			},
+		},
+	},
+
+	'@bp3': {
+		border: '2px solid $white',
+
+		'.tooltip': {
+			left: 80,
 		},
 	},
 })

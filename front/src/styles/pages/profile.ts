@@ -9,7 +9,7 @@ export const PageContainer = styled('main', {
 	backgroundColor: '$blue800',
 	display: 'flex',
 	flexDirection: 'column',
-	borderRadius: 32,
+	borderRadius: '0 32px 32px 0',
 
 	overflowY: 'scroll',
 
@@ -25,10 +25,6 @@ export const PageContainer = styled('main', {
 		'&::-webkit-scrollbar': {
 			width: 4,
 		},
-	},
-
-	'@bp3': {
-		borderRadius: '0 32px 32px 0',
 	},
 
 	'@bp4': {

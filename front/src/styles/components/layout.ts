@@ -25,6 +25,9 @@ export const ApplicationContainer = styled('div', {
 
 	'@bp1': {
 		height: '90%',
+	},
+
+	'@bp3': {
 		border: '6px solid $white',
 	},
 })
@@ -34,21 +37,41 @@ export const SidebarContainer = styled('div', {
 	top: 0,
 	width: 32,
 	height: '100%',
-	backgroundColor: '$blue700',
-	borderRadius: '30px 0 0 30px',
+	maxHeight: '100%',
+	minHeight: '100%',
+	padding: '6rem 0 2rem',
+	backgroundColor: '$blue600',
+	borderRadius: '32px 0 0 32px',
 	borderRight: '1px solid $blue100',
 	display: 'flex',
 	flexDirection: 'column',
 	justifyContent: 'center',
 	alignItems: 'center',
-	gap: 32,
+	gap: 12,
+
+	overflowY: 'scroll',
+
+	'&::-webkit-scrollbar': {
+		width: 2,
+	},
+	'&::-webkit-scrollbar-thumb': {
+		borderRadius: 32,
+		background: '$white',
+	},
 
 	'@bp1': {
 		width: 40,
-		borderRadius: '26px 0 0 26px',
+		'&::-webkit-scrollbar': {
+			width: 4,
+		},
+	},
+
+	'@bp2': {
+		width: 45,
 	},
 
 	'@bp3': {
+		borderRadius: '26px 0 0 26px',
 		width: 80,
 	},
 })
@@ -74,7 +97,7 @@ export const PageContainer = styled('div', {
 	marginLeft: 32,
 
 	'@bp1': {
-		marginLeft: 40,
+		marginLeft: 45,
 	},
 
 	'@bp3': {
