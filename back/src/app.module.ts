@@ -5,7 +5,6 @@ import { LoginService } from './login/login.service';
 import { TwoFactorAutenticateService } from './login/two-factor-autenticate/two-factor-autenticate.service';
 import { LoginModule } from './login/login.module';
 import { UsersModule } from './users/users.module';
-import { UsersService } from './users/users.service';
 
 @Module({
   imports: [LoginModule, UsersModule, JwtModule.register({

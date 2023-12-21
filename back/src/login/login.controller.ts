@@ -1,4 +1,4 @@
-import { Controller, Body, Post, HttpCode, Query, Response   } from '@nestjs/common';
+import { Controller, Body, Post, HttpCode, Query, Response, Headers   } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { TwoFactorAutenticateService } from './two-factor-autenticate/two-factor-autenticate.service';
 import { ClassSerializerInterceptor, Header, UseInterceptors, Res, UseGuards, Req } from '@nestjs/common';
@@ -29,18 +29,34 @@ export class LoginController {
     @Post("/auth/user")
     @HttpCode(200)
     async getToken(@Body() body: any, @Response() res): Promise<Response> {
-      const code = body.code; 
-      const profile = await this.loginService.getToken(code);
       
-      
-      res.cookie('accessToken','teste', {
-        expires: new Date(new Date().getTime() + 30 * 10000),
-        httpOnly: true,
-        domain: 'localhost'
-        
-      });
-    
-    return res.send(profile);
+      const profile = await this.loginService.getToken(body.code, res);
+
+      try {
+        if(profile){
+          res.status(200).send("{ \"action\":\"logged\"");
+          console.log("logado");
+        } else {
+          res.status(200).send("{ \"action\":\"authenticate\"}");
+          console.log("authenticate");
+        }
+          
+      } catch (error) {
+        console.error("Erro ao obter token:", error.message);
+        return res.status(500).send({ error: 'Erro ao obter token' });
+      }
+    }
+
+    @Post("/checkTwoFactor")
+    @HttpCode(200)
+    async checkTwoFactor(@Body() body: any, @Headers('accessToken') authHeader: string, @Response() res){
+      console.log("header:", authHeader);
+      console.log("code:", body);
+      const valid  = await this.loginService.checkTwoFactor(authHeader, body.code);
+      if (valid)
+        res.status(200).send("{ \"action\":\"logged\"");
+      else
+        res.status(401).send("{ \"action\":\"authenticate-fail\"}");
     }
 
 }

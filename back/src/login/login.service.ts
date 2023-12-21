@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Response } from '@nestjs/common';
 import axios from 'axios';
 import * as FormData from 'form-data';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { ProfileDto } from 'src/users/dto/profile.dto';
+import { TwoFactorAutenticateService } from './two-factor-autenticate/two-factor-autenticate.service';
 
 
 @Injectable()
@@ -10,9 +12,10 @@ export class LoginService {
     constructor(
         private readonly usersService: UsersService,
         private readonly jwtService: JwtService,
+        private readonly twoFactorAutenticateService: TwoFactorAutenticateService,
     ) {}
     
-    async getToken (authorizationCode:string) : Promise<any> {
+    async getToken (authorizationCode:string, @Response() res) : Promise<ProfileDto> {
     
         const clientId = process.env.CLIENT_ID;
         const clientSecret = process.env.CLIENT_SECRET;
@@ -31,7 +34,16 @@ export class LoginService {
                 ...formData.getHeaders(),
                 },
             });
-            return this.getInfo(token.data.access_token);
+            
+            
+            const profile = await this.getInfo(token.data.access_token);
+            this.insertToken(profile, res);
+            if (profile.two_factor_enabled === true) {
+                return null;
+            }
+            if (profile)
+                return this.mapToDto(profile, ProfileDto);
+            return null
         } catch (error) {
             throw new Error(`Erro ao obter token ${authorizationCode} de acesso: ${error.message}`);
         }
@@ -45,47 +57,62 @@ export class LoginService {
                 Authorization: `Bearer ${token}`,
             },
             });
-           
-            this.checkUser(response.data);
 
-          return response.data; // ou retorne o que desejar aqui
+            return this.checkUser(response.data);
         } catch (error) {
             console.error('Erro ao fazer a requisição:', error.message);
             throw error; // ou trate o erro de acordo com suas necessidades
         }
     }
 
-    async checkUser(profile : any){
-
-        console.log("user id = " + profile.id);
-        
+    async insertToken(profile : any, @Response() res){
         const payload = {
-           id: profile.id, 
-           login: profile.login
+            id: profile.user_id, 
+            login: profile.username
         }
         const token = this.generateToken(payload);
-
-        console.log("token =" , token);
-
-        const atoken = this.jwtService.decode(token);
-        console.log("destoken = ",atoken);
-
-
-        try {
-            const user = await this.usersService.findOne(profile.id);
-            console.log("user =", user.username);
+        res.cookie('accessToken',token, {
+            expires: new Date(new Date().getTime() + 30 * 10000),
+            httpOnly: true,
+            domain: 'localhost'
             
-
-            if (user == null)
-                console.log("??");
-        } catch (error) {
-            await this.usersService.createNewUser(profile);
-            console.info('User not found');
-        }
+        });
     }
+
+    async checkUser(profile: any): Promise<any | null> {
+        try {
+        const user = await this.usersService.findOne(profile.id);
+        if (!user) {
+            return this.usersService.createNewUser(profile);
+        }
+        return user;
+        } catch (error) {
+          // Trate os erros aqui, por exemplo, registre ou lance uma exceção
+          console.error('Erro ao verificar o usuário:', error.message);
+          throw new Error('Erro ao verificar o usuário');
+        }
+      }
+
+    async checkTwoFactor(token: string, code: string) : Promise<Boolean> {
+        const decodeToken = this.jwtService.decode(token);
+        const user = await this.usersService.findOne(decodeToken.id);
+        console.log(user.token_secret);
+        const valid = this.twoFactorAutenticateService.isTwoFactorAuthenticationCodeValid(code,user.token_secret);
+        return valid;
+    }
+
+    private mapToDto<T>(source: any, dto: new () => T): T {
+        const dtoInstance = new dto();
+        Object.keys(dtoInstance).forEach(key => {
+            if (source.hasOwnProperty(key)) {
+            dtoInstance[key] = source[key];
+            }
+        });
+        return dtoInstance;
+        }
 
     generateToken(payload: any): string {
         return this.jwtService.sign(payload);
-      }
+    }
 
 }
