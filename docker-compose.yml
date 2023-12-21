@@ -50,6 +50,8 @@ services:
         ports:
             - 3001:${BACK_PORT}
             - 5555:5555
+        volumes:
+            - ./back:/srcs
         networks:
             - transcendence
         command: >
