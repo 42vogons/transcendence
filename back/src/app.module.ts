@@ -7,10 +7,14 @@ import { LoginModule } from './login/login.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [LoginModule, UsersModule, JwtModule.register({
-    secret: 'sua_chave_secreta',
-    signOptions: { expiresIn: '1h' },
-  }),],
+  imports: [
+    LoginModule,
+    UsersModule,
+    JwtModule.register({
+      secret: 'sua_chave_secreta',
+      signOptions: { expiresIn: '1h' },
+    }),
+  ],
   controllers: [LoginController],
   providers: [LoginService, TwoFactorAutenticateService],
 })

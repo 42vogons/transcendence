@@ -6,14 +6,15 @@ import { TwoFactorAutenticateService } from './two-factor-autenticate/two-factor
 import { UsersModule } from 'src/users/users.module';
 import { JwtService } from '@nestjs/jwt';
 
-
 @Module({
   controllers: [LoginController],
-  imports: [UsersModule,
+  imports: [
+    UsersModule,
     JwtModule.register({
-      secret: 'sua_chave_secreta', // Substitua pela sua chave secreta
+      secret: 'sua_chave_secreta',
       signOptions: { expiresIn: '1h' },
-    }),], // Importe o UsersModule
-  providers: [LoginService, TwoFactorAutenticateService, JwtService]
+    }),
+  ],
+  providers: [LoginService, TwoFactorAutenticateService, JwtService],
 })
 export class LoginModule {}

@@ -9,17 +9,16 @@ export class UsersService {
   constructor(
     private readonly repository: UsersRepository,
     private readonly jwtService: JwtService,
-    ) {}
+  ) {}
 
-  createNewUser(profile: any){
-    const newUser :CreateUserDto = new CreateUserDto();
+  createNewUser(profile: any) {
+    const newUser: CreateUserDto = new CreateUserDto();
     newUser.username = profile.login;
     newUser.email = profile.email;
     newUser.two_factor_enabled = false;
-    newUser.user_id = parseInt(profile.id,10);
+    newUser.user_id = parseInt(profile.id, 10);
     this.create(newUser);
-    console.log("Novo usuário criado");
-
+    console.log('Novo usuário criado');
   }
 
   create(createUserDto: CreateUserDto) {
@@ -30,7 +29,7 @@ export class UsersService {
     return this.repository.findAll();
   }
 
-  findByToken(token: any){
+  findByToken(token: any) {
     const decodeToken = this.jwtService.decode(token);
     return this.findOne(decodeToken.id);
   }
