@@ -94,8 +94,7 @@ export class LoginService {
       }
 
     async checkTwoFactor(token: string, code: string) : Promise<Boolean> {
-        const decodeToken = this.jwtService.decode(token);
-        const user = await this.usersService.findOne(decodeToken.id);
+        const user = await this.usersService.findByToken(token);
         console.log(user.token_secret);
         const valid = this.twoFactorAutenticateService.isTwoFactorAuthenticationCodeValid(code,user.token_secret);
         return valid;

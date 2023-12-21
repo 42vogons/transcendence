@@ -5,7 +5,11 @@ import { toFileStream } from 'qrcode';
 @Injectable()
 export class TwoFactorAutenticateService {
 
-    public async generateSecret(/*user: User*/) {
+    public async generateSecret(user: String) {
+
+        
+
+
         const appName = "ft_transcendence";
         const email = "cezar@42.com.br"
         const secret = authenticator.generateSecret();

@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './repositories/users.repository';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly repository: UsersRepository) {}
+  constructor(
+    private readonly repository: UsersRepository,
+    private readonly jwtService: JwtService,
+    ) {}
 
   createNewUser(profile: any){
     const newUser :CreateUserDto = new CreateUserDto();
@@ -24,6 +28,11 @@ export class UsersService {
 
   findAll() {
     return this.repository.findAll();
+  }
+
+  findByToken(token: any){
+    const decodeToken = this.jwtService.decode(token);
+    return this.findOne(decodeToken.id);
   }
 
   findOne(user_id: number) {

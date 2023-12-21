@@ -13,8 +13,8 @@ export class LoginController {
 
 
     @Post('generate')
-    async register(@Res() response: Response) {
-      const { otpauthUrl } = await this.twoFactorService.generateSecret();
+    async register(@Res() response: Response, @Headers('accessToken') authHeader: string) {
+      const { otpauthUrl } = await this.twoFactorService.generateSecret(authHeader);
       return this.twoFactorService.pipeQrCodeStream(response, otpauthUrl);
     }
 
@@ -50,8 +50,6 @@ export class LoginController {
     @Post("/checkTwoFactor")
     @HttpCode(200)
     async checkTwoFactor(@Body() body: any, @Headers('accessToken') authHeader: string, @Response() res){
-      console.log("header:", authHeader);
-      console.log("code:", body);
       const valid  = await this.loginService.checkTwoFactor(authHeader, body.code);
       if (valid)
         res.status(200).send("{ \"action\":\"logged\"");
