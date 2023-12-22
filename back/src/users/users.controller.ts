@@ -6,7 +6,7 @@ import {
   Patch,
   Param,
   Delete,
-  Headers,
+  Req,
   Response,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -47,10 +47,8 @@ export class UsersController {
   }
 
   @Post('/activeTwoFactor')
-  async activeTwoFactor(
-    @Headers('accessToken') token: string,
-    @Response() response,
-  ) {
+  async activeTwoFactor(@Req() request, @Response() response) {
+    const token = request.cookies.accessToken;
     const user = await this.usersService.findByToken(token);
     user.two_factor_enabled = user.two_factor_enabled ? false : true;
     if (user.two_factor_enabled) {
@@ -64,7 +62,6 @@ export class UsersController {
       );
     }
     this.usersService.update(user.user_id, user);
-    console.log('passou aqui');
     return response.status(200).send();
   }
 }

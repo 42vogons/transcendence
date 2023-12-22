@@ -99,7 +99,6 @@ export class LoginService {
 
   async checkTwoFactor(token: string, code: string): Promise<boolean> {
     const user = await this.usersService.findByToken(token);
-    console.log(user.token_secret);
     const valid =
       this.twoFactorAutenticateService.isTwoFactorAuthenticationCodeValid(
         code,

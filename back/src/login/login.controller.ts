@@ -4,11 +4,10 @@ import {
   Post,
   HttpCode,
   Response,
-  Headers,
+  Req,
 } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { TwoFactorAutenticateService } from '../two-factor-autenticate/two-factor-autenticate.service';
-import { Res } from '@nestjs/common';
 
 @Controller('')
 export class LoginController {
@@ -16,16 +15,6 @@ export class LoginController {
     private readonly loginService: LoginService,
     private readonly twoFactorService: TwoFactorAutenticateService,
   ) {}
-
-  @Post('generate')
-  async register(
-    @Res() response: Response,
-    @Headers('accessToken') authHeader: string,
-  ) {
-    console.log(authHeader);
-    const { otpauthUrl } = await this.twoFactorService.generateSecret('aaa');
-    return this.twoFactorService.pipeQrCodeStream(response, otpauthUrl);
-  }
 
   @Post('check')
   async checkCode(@Body() body: any) {
@@ -60,12 +49,9 @@ export class LoginController {
 
   @Post('/checkTwoFactor')
   @HttpCode(200)
-  async checkTwoFactor(
-    @Body() body: any,
-    @Headers('accessToken') authHeader: string,
-    @Response() res,
-  ) {
-    const valid = await this.loginService.checkTwoFactor(authHeader, body.code);
+  async checkTwoFactor(@Req() request, @Body() body: any, @Response() res) {
+    const token = request.cookies.accessToken;
+    const valid = await this.loginService.checkTwoFactor(token, body.code);
     if (valid) res.status(200).send('{ "action":"logged"');
     else res.status(401).send('{ "action":"authenticate-fail"}');
   }
