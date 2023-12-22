@@ -21,7 +21,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
 	const iconSize = 28
-	const iconSizeMobile = 34
+	const iconSizeMobile = 24
 
 	const router = useRouter()
 

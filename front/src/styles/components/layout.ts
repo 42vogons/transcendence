@@ -39,7 +39,7 @@ export const SidebarContainer = styled('div', {
 	height: '100%',
 	maxHeight: '100%',
 	minHeight: '100%',
-	padding: '6rem 0 2rem',
+	padding: '2rem 0 2rem',
 	backgroundColor: '$blue600',
 	borderRadius: '32px 0 0 32px',
 	borderRight: '1px solid $blue100',
@@ -49,21 +49,8 @@ export const SidebarContainer = styled('div', {
 	alignItems: 'center',
 	gap: 12,
 
-	overflowY: 'scroll',
-
-	'&::-webkit-scrollbar': {
-		width: 2,
-	},
-	'&::-webkit-scrollbar-thumb': {
-		borderRadius: 32,
-		background: '$white',
-	},
-
 	'@bp1': {
 		width: 40,
-		'&::-webkit-scrollbar': {
-			width: 4,
-		},
 	},
 
 	'@bp2': {
