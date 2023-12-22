@@ -7,7 +7,7 @@ import {
   Headers,
 } from '@nestjs/common';
 import { LoginService } from './login.service';
-import { TwoFactorAutenticateService } from './two-factor-autenticate/two-factor-autenticate.service';
+import { TwoFactorAutenticateService } from '../two-factor-autenticate/two-factor-autenticate.service';
 import { Res } from '@nestjs/common';
 
 @Controller('')
@@ -22,8 +22,8 @@ export class LoginController {
     @Res() response: Response,
     @Headers('accessToken') authHeader: string,
   ) {
-    const { otpauthUrl } =
-      await this.twoFactorService.generateSecret(authHeader);
+    console.log(authHeader);
+    const { otpauthUrl } = await this.twoFactorService.generateSecret('aaa');
     return this.twoFactorService.pipeQrCodeStream(response, otpauthUrl);
   }
 

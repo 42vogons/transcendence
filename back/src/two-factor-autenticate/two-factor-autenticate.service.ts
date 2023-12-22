@@ -4,13 +4,10 @@ import { toFileStream } from 'qrcode';
 
 @Injectable()
 export class TwoFactorAutenticateService {
-  public async generateSecret(user: String) {
+  public async generateSecret(email: string) {
     const appName = 'ft_transcendence';
-    const email = 'cezar@42.com.br';
     const secret = authenticator.generateSecret();
     const otpauthUrl = authenticator.keyuri(email, appName, secret);
-    console.info('secret=' + secret);
-    //await this.usersService.setTwoFactorAuthenticationSecret(secret, user.id);
     return {
       secret,
       otpauthUrl,

@@ -4,7 +4,7 @@ import * as FormData from 'form-data';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ProfileDto } from 'src/users/dto/profile.dto';
-import { TwoFactorAutenticateService } from './two-factor-autenticate/two-factor-autenticate.service';
+import { TwoFactorAutenticateService } from '../two-factor-autenticate/two-factor-autenticate.service';
 
 @Injectable()
 export class LoginService {
