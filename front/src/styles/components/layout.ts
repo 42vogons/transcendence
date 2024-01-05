@@ -48,6 +48,7 @@ export const SidebarContainer = styled('div', {
 	justifyContent: 'center',
 	alignItems: 'center',
 	gap: 12,
+	zIndex: 1,
 
 	'@bp1': {
 		width: 40,
@@ -64,16 +65,51 @@ export const SidebarContainer = styled('div', {
 })
 
 export const SidePanelContainer = styled('div', {
-	marginLeft: 80,
-	display: 'none',
-	minWidth: 260,
-	height: '100% - 12px',
+	// marginLeft: 80,
+	position: 'absolute',
+	display: 'block',
+	width: '90%',
+	height: '100%',
 	backgroundColor: '$blue700',
-	borderRadius: '26px 0 0 26px',
+	// backgroundColor: '$red',
+	borderRadius: '30px 0 0 30px',
 	borderRight: '4px solid $blue100',
+	opacity: '0',
+	transition: 'all 0.2s ease',
+	left: 1,
+	zIndex: 0,
+	padding: '1rem 1rem',
+
+	// '@bp3': {
+	// 	display: 'block',
+	// },
+
+	variants: {
+		isActive: {
+			true: {
+				opacity: '1',
+				zIndex: 2,
+				// '@bp2': {
+				// },
+				'@bp3': {
+					left: 80,
+				},
+			},
+		},
+	},
+
+	'@bp1': {
+		width: 260,
+	},
 
 	'@bp3': {
-		display: 'block',
+		borderRadius: '0',
+	},
+
+	'.closeIcon': {
+		position: 'absolute',
+		top: 0,
+		right: 0,
 	},
 })
 
@@ -81,6 +117,7 @@ export const PageContainer = styled('div', {
 	// flex: '1 1 70%',
 	height: 'calc(100%)',
 	width: 'calc(100%)',
+	transition: 'all 0.1s ease',
 	marginLeft: 32,
 
 	'@bp1': {
@@ -88,6 +125,16 @@ export const PageContainer = styled('div', {
 	},
 
 	'@bp3': {
-		marginLeft: 0,
+		marginLeft: 80,
+	},
+
+	variants: {
+		isSidePanelActive: {
+			true: {
+				'@bp3': {
+					marginLeft: 340,
+				},
+			},
+		},
 	},
 })

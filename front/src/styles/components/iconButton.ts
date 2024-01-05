@@ -49,18 +49,19 @@ export const IconButtonContainer = styled('button', {
 				display: 'flex',
 				padding: '6px 1px',
 				borderRadius: 4,
-				'@bp2': {
+				'@bp3': {
 					display: 'none',
 				},
 			},
 			desktop: {
 				display: 'none',
 				'@bp2': {
-					display: 'flex',
+					// display: 'flex',
 					padding: '6px 1px',
 					borderRadius: 8,
 				},
 				'@bp3': {
+					display: 'flex',
 					padding: '12px',
 					borderRadius: 14,
 				},
