@@ -143,8 +143,8 @@ export default function Layout({ children }: LayoutProps) {
 						<MdOutlineMenu size={iconSizeMobile} />
 					</IconButton>
 				</SidebarContainer>
-				<SidePanelContainer isActive={showSidePanel} ref={ref}>
-					{showSidePanel === true && (
+				{showSidePanel === true && (
+					<SidePanelContainer isActive={showSidePanel} ref={ref}>
 						<div className="menuOptions">
 							{activePanel !== 'menu' && (
 								<IconButton
@@ -170,22 +170,22 @@ export default function Layout({ children }: LayoutProps) {
 								<MdClose size={iconSizeMobile} />
 							</IconButton>
 						</div>
-					)}
-					<div className="content">
-						{showSidePanel === true &&
-							activePanel === 'menu' &&
-							menuItems.map((item: MenuItemType) => (
-								<MenuItem
-									key={item.title}
-									title={item.title}
-									isActive={item.isActive}
-									handleOnClick={item.handleOnClick}
-								>
-									{item.icon}
-								</MenuItem>
-							))}
-					</div>
-				</SidePanelContainer>
+						<div className="content">
+							{showSidePanel === true &&
+								activePanel === 'menu' &&
+								menuItems.map((item: MenuItemType) => (
+									<MenuItem
+										key={item.title}
+										title={item.title}
+										isActive={item.isActive}
+										handleOnClick={item.handleOnClick}
+									>
+										{item.icon}
+									</MenuItem>
+								))}
+						</div>
+					</SidePanelContainer>
+				)}
 				<PageContainer isSidePanelActive={showSidePanel}>
 					{children}
 				</PageContainer>
