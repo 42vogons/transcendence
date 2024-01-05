@@ -67,9 +67,11 @@ export const SidebarContainer = styled('div', {
 export const SidePanelContainer = styled('div', {
 	// marginLeft: 80,
 	position: 'absolute',
-	display: 'block',
 	width: '90%',
 	height: '100%',
+
+	alignItems: 'center',
+
 	backgroundColor: '$blue700',
 	// backgroundColor: '$red',
 	borderRadius: '30px 0 0 30px',
@@ -78,38 +80,72 @@ export const SidePanelContainer = styled('div', {
 	transition: 'all 0.2s ease',
 	left: 1,
 	zIndex: 0,
-	padding: '1rem 1rem',
+	padding: '1rem 0',
+	overflowY: 'scroll',
 
-	// '@bp3': {
-	// 	display: 'block',
-	// },
+	'&::-webkit-scrollbar': {
+		width: 2,
+	},
+	'&::-webkit-scrollbar-thumb': {
+		borderRadius: 32,
+		background: '$white',
+	},
+
+	'.menuOptions': {
+		// position: 'absolute',
+		width: '100%',
+		top: 18,
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		fontSize: '2rem',
+		textTransform: 'capitalize',
+
+		span: {
+			width: '100%',
+			textAlign: 'center',
+		},
+		marginBottom: 24,
+	},
+
+	'.content': {
+		// height: '100%',
+		padding: '0 1rem',
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'center',
+		alignItems: 'center',
+		gap: 16,
+		paddingBottom: 12,
+	},
 
 	variants: {
 		isActive: {
 			true: {
 				opacity: '1',
 				zIndex: 2,
-				// '@bp2': {
-				// },
 				'@bp3': {
 					left: 80,
+					zIndex: 0,
 				},
+			},
+			false: {
+				zIndex: 0,
 			},
 		},
 	},
 
 	'@bp1': {
 		width: 260,
+
+		'&::-webkit-scrollbar': {
+			width: 4,
+		},
 	},
 
 	'@bp3': {
 		borderRadius: '0',
-	},
-
-	'.closeIcon': {
-		position: 'absolute',
-		top: 0,
-		right: 0,
 	},
 })
 

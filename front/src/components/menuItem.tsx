@@ -1,4 +1,4 @@
-import { IconButtonContainer } from '@/styles/components/iconButton'
+import { MenuItemContainer } from '@/styles/components/menuItem'
 import { ReactNode } from 'react'
 
 interface IconButtonProps {
@@ -9,17 +9,15 @@ interface IconButtonProps {
 	handleOnClick?: () => void | undefined
 }
 
-export default function IconButton({
+export default function MenuItem({
 	children,
 	title,
 	isActive,
-	type,
 	handleOnClick,
 }: IconButtonProps) {
 	return (
-		<IconButtonContainer
+		<MenuItemContainer
 			isActive={isActive}
-			type={type || 'desktop'}
 			onClick={
 				handleOnClick
 					? () => {
@@ -29,7 +27,7 @@ export default function IconButton({
 			}
 		>
 			{children}
-			<div className="tooltip">{title}</div>
-		</IconButtonContainer>
+			<div className="title">{title}</div>
+		</MenuItemContainer>
 	)
 }

@@ -27,11 +27,6 @@ export const IconButtonContainer = styled('button', {
 		backgroundColor: '$blue100',
 	},
 
-	'&:hover .tooltip': {
-		display: 'block',
-		opacity: '100%',
-	},
-
 	variants: {
 		isActive: {
 			true: {
@@ -64,6 +59,10 @@ export const IconButtonContainer = styled('button', {
 					display: 'flex',
 					padding: '12px',
 					borderRadius: 14,
+					'&:hover .tooltip': {
+						display: 'block',
+						opacity: '100%',
+					},
 				},
 			},
 		},
