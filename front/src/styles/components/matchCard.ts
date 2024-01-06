@@ -10,33 +10,34 @@ export const MatchCardContainer = styled('div', {
 	paddingBottom: '1rem',
 
 	span: {
-		fontSize: '$2xl',
+		fontSize: '$1xl',
 		color: '$white',
 	},
 
 	'@bp1': {
 		span: {
-			fontSize: '$3xl',
+			fontSize: '$2xl',
 		},
 	},
 
-	'@bp3': {
+	'@bp2': {
 		flexDirection: 'row',
 	},
 })
 
 export const Card = styled('div', {
 	minHeight: 240,
-	width: '100%',
-	margin: '1rem 0.5rem',
+	maxHeight: 240,
+	// width: '100%',
+	margin: '0.5rem',
 	flex: '0 0 100%',
-	maxHeight: '92%',
+	// maxHeight: '92%',
 	display: 'flex',
 	flexDirection: 'column',
 	alignItems: 'center',
 	justifyContent: 'space-between',
 	borderRadius: '12px 12px 32px 32px',
-	padding: '1rem 0',
+	padding: '0.5rem 0',
 
 	variants: {
 		isWinner: {
@@ -59,14 +60,14 @@ export const Card = styled('div', {
 	'@bp1': {
 		margin: '1rem',
 		flexDirection: 'row',
-		padding: '1rem 1rem',
+		padding: '0.5rem',
 		'&:nth-child(3)': {
 			flexDirection: 'row-reverse',
 		},
+		flex: '0 0 45%',
 	},
 
 	'@bp3': {
-		flex: '0 0 45%',
 		margin: '0 0.5rem 0.5rem',
 		borderRadius: '12px 32px 32px 12px',
 
@@ -79,8 +80,12 @@ export const Card = styled('div', {
 export const UserContainer = styled('div', {
 	display: 'flex',
 	flexDirection: 'column',
-	justifyContent: 'center',
+	justifyContent: 'space-between',
 	alignItems: 'center',
+
+	'@bp1': {
+		flexDirection: 'column',
+	},
 })
 
 export const UserImageContainer = styled('div', {
@@ -106,12 +111,6 @@ export const UsernameContainer = styled('div', {
 		textAlign: 'center',
 		fontSize: '$xl',
 	},
-
-	'@bp3': {
-		h2: {
-			fontSize: '$2xl',
-		},
-	},
 })
 
 export const Score = styled('h3', {
@@ -121,9 +120,5 @@ export const Score = styled('h3', {
 
 	'@bp1': {
 		fontSize: '6rem',
-	},
-
-	'@bp3': {
-		fontSize: '10rem',
 	},
 })

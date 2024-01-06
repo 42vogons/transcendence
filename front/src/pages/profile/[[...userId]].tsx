@@ -18,6 +18,8 @@ import Stats from '@/components/stats'
 import MatchCard from '@/components/matchCard'
 
 import userDefaulAvatar from 'public/assets/user.png'
+import Layout from '@/components/layout'
+import { ReactElement } from 'react'
 
 interface player {
 	username: string
@@ -61,8 +63,8 @@ export default function Profile() {
 						<ProfileImageContainer>
 							<Image
 								src={userDefaulAvatar.src}
-								width={240}
-								height={240}
+								width={180}
+								height={180}
 								priority={true}
 								alt="user"
 							/>
@@ -93,4 +95,8 @@ export default function Profile() {
 			</PageContainer>
 		</>
 	)
+}
+
+Profile.getLayout = (page: ReactElement) => {
+	return <Layout>{page}</Layout>
 }

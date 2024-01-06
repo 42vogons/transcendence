@@ -22,6 +22,8 @@ export interface MatchProps {
 }
 
 export default function MatchCard({ players }: MatchProps) {
+	const imgSize = 100
+
 	const player1 = players[0]
 	const player2 = players[1]
 
@@ -39,8 +41,8 @@ export default function MatchCard({ players }: MatchProps) {
 					<UserImageContainer>
 						<Image
 							src="/assets/user.png"
-							width={124}
-							height={124}
+							width={imgSize}
+							height={imgSize}
 							priority
 							alt="user"
 						/>
@@ -58,8 +60,8 @@ export default function MatchCard({ players }: MatchProps) {
 					<UserImageContainer>
 						<Image
 							src="/assets/user.png"
-							width={124}
-							height={124}
+							width={imgSize}
+							height={imgSize}
 							priority
 							alt="user"
 						/>
