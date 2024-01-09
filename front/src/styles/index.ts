@@ -16,11 +16,13 @@ export const {
 
 			gray900: '#121214',
 			gray800: '#202024',
+			gray600: '#808080',
 			gray300: '#c4c4cc',
 			gray100: '#e1e1e6',
 
 			green500: '#00875f',
 			green300: '#00b37e',
+			green100: '#02de2f',
 
 			blue900: '#00111C',
 			blue800: '#001523',
@@ -47,11 +49,13 @@ export const {
 
 			gray900: '#121214',
 			gray800: '#202024',
+			gray600: '#808080',
 			gray300: '#c4c4cc',
 			gray100: '#e1e1e6',
 
 			green500: '#00875f',
 			green300: '#00b37e',
+			green100: '#00b37e',
 
 			blue900: '#00111C',
 			blue800: '#001523',

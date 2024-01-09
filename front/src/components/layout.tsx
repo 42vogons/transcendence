@@ -14,23 +14,25 @@ import {
 	SidebarContainer,
 } from '@/styles/components/layout'
 import IconButton from './iconButton'
-import MenuItem from './menuItem'
+import MenuListItem from './menuListItem'
+
 import { useOutsideClick } from '@/hooks/useOutsideClick'
+import { FriendListItem, iFriendListItem } from './friendListItem'
 
 type activePanelType = 'menu' | 'friends' | 'chat'
 
-interface MenuItemType {
+interface iMenuItemType {
 	icon: ReactNode
 	title: string
 	isActive?: boolean
 	handleOnClick?: () => void | undefined
 }
 
-interface LayoutProps {
+interface iLayoutProps {
 	children: ReactNode
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children }: iLayoutProps) {
 	const iconSize = 28
 	const iconSizeMobile = 24
 
@@ -72,7 +74,7 @@ export default function Layout({ children }: LayoutProps) {
 		return () => window.removeEventListener('resize', handleResize)
 	}, [])
 
-	const menuItems: MenuItemType[] = [
+	const menuItems: iMenuItemType[] = [
 		{
 			icon: <FaGamepad size={iconSize} />,
 			title: 'Game',
@@ -119,11 +121,84 @@ export default function Layout({ children }: LayoutProps) {
 		},
 	]
 
+	const friendList: iFriendListItem[] = [
+		{
+			userAvatarSrc: '',
+			username: 'rfelipe-',
+			userStatus: 'ingame',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'cpereira',
+			userStatus: 'online',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'anoliver',
+			userStatus: 'online',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12341',
+			userStatus: 'offline',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12342',
+			userStatus: 'offline',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12343',
+			userStatus: 'offline',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12344',
+			userStatus: 'offline',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12345',
+			userStatus: 'offline',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12346',
+			userStatus: 'offline',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12347',
+			userStatus: 'offline',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12348',
+			userStatus: 'offline',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12349',
+			userStatus: 'offline',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12350',
+			userStatus: 'offline',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12351',
+			userStatus: 'offline',
+		},
+	]
+
 	return (
 		<LayoutContainer>
 			<ApplicationContainer>
 				<SidebarContainer>
-					{menuItems.map((item: MenuItemType) => (
+					{menuItems.map((item: iMenuItemType) => (
 						<IconButton
 							key={item.title}
 							title={item.title}
@@ -173,15 +248,26 @@ export default function Layout({ children }: LayoutProps) {
 						<div className="content">
 							{showSidePanel === true &&
 								activePanel === 'menu' &&
-								menuItems.map((item: MenuItemType) => (
-									<MenuItem
+								menuItems.map((item: iMenuItemType) => (
+									<MenuListItem
 										key={item.title}
 										title={item.title}
 										isActive={item.isActive}
 										handleOnClick={item.handleOnClick}
 									>
 										{item.icon}
-									</MenuItem>
+									</MenuListItem>
+								))}
+
+							{showSidePanel === true &&
+								activePanel === 'friends' &&
+								friendList.map((item: iFriendListItem) => (
+									<FriendListItem
+										key={item.username}
+										userAvatarSrc={item.userAvatarSrc}
+										username={item.username}
+										userStatus={item.userStatus}
+									/>
 								))}
 						</div>
 					</SidePanelContainer>

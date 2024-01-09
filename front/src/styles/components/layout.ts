@@ -80,8 +80,8 @@ export const SidePanelContainer = styled('div', {
 	transition: 'all 0.2s ease',
 	left: 1,
 	zIndex: 0,
-	padding: '1rem 0',
-	overflowY: 'scroll',
+	padding: '1rem 0 0',
+	overflowY: 'auto',
 
 	'&::-webkit-scrollbar': {
 		width: 2,
@@ -100,6 +100,7 @@ export const SidePanelContainer = styled('div', {
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		fontSize: '2rem',
+		color: '$white',
 		textTransform: 'capitalize',
 
 		span: {
@@ -111,13 +112,14 @@ export const SidePanelContainer = styled('div', {
 
 	'.content': {
 		// height: '100%',
-		padding: '0 1rem',
+		width: '100%',
+		borderTop: '1px solid $blue100',
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'center',
 		alignItems: 'center',
-		gap: 16,
-		paddingBottom: 12,
+		// gap: 16,
+		padding: '0',
 	},
 
 	variants: {

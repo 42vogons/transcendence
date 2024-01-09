@@ -1,7 +1,7 @@
 import { IconButtonContainer } from '@/styles/components/iconButton'
 import { ReactNode } from 'react'
 
-interface IconButtonProps {
+interface iIconButtonProps {
 	children: ReactNode
 	title: string
 	isActive?: boolean
@@ -15,7 +15,7 @@ export default function IconButton({
 	isActive,
 	type,
 	handleOnClick,
-}: IconButtonProps) {
+}: iIconButtonProps) {
 	return (
 		<IconButtonContainer
 			isActive={isActive}

@@ -9,14 +9,14 @@ import { FaGamepad } from 'react-icons/fa6'
 import { IoStatsChartSharp } from 'react-icons/io5'
 import { FaTrophy, FaPercent } from 'react-icons/fa'
 
-export interface StatsProps {
+export interface iStatsProps {
 	stats: {
 		gamesPlayed: number
 		wins: number
 	}
 }
 
-export default function Stats({ stats }: StatsProps) {
+export default function Stats({ stats }: iStatsProps) {
 	return (
 		<StatsContainer>
 			<TitleContainer>

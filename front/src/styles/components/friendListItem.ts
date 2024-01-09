@@ -1,0 +1,104 @@
+import { styled } from '..'
+
+export const FriendListItemContainer = styled('button', {
+	width: '100%',
+	// height: '70px',
+	display: 'flex',
+	flexDirection: 'row',
+	justifyContent: 'space-between',
+	alignItems: 'center',
+	color: '$white',
+	backgroundColor: '$blue600',
+	border: 'none',
+	borderBottom: '1px solid $white',
+	padding: '0.5rem',
+	cursor: 'pointer',
+
+	// variants: {
+	// 	isActive: {
+	// 		true: {
+	// 			color: '$blue100',
+	// 			backgroundColor: '$white',
+	// 			border: '4px solid $blue100',
+	// 			'.title': {
+	// 				color: '$blue100',
+	// 			},
+	// 			'&:hover': {
+	// 				color: '$white',
+	// 				opacity: '80%',
+	// 			},
+	// 		},
+	// 	},
+	// },
+})
+
+export const FriendAvatarContainer = styled('div', {
+	position: 'relative',
+	borderRadius: '50%',
+	display: 'flex',
+	justifyContent: 'center',
+	alignItems: 'center',
+
+	img: {
+		borderRadius: '50%',
+		border: '2px $blue600 solid',
+	},
+
+	'.statusIndicator': {
+		position: 'absolute',
+		width: 15,
+		height: 15,
+		borderRadius: '50%',
+		border: '2px solid $blue600',
+		bottom: 0,
+		right: 0,
+	},
+
+	variants: {
+		status: {
+			online: {
+				'.statusIndicator': {
+					backgroundColor: '$green100',
+				},
+			},
+			ingame: {
+				'.statusIndicator': {
+					backgroundColor: '$red',
+				},
+			},
+			offline: {
+				'.statusIndicator': {
+					backgroundColor: 'transparent',
+				},
+			},
+		},
+	},
+})
+
+export const FriendInfoContainer = styled('div', {
+	height: '100%',
+	display: 'flex',
+	flexDirection: 'column',
+	justifyContent: 'center',
+	alignItems: 'center',
+})
+
+export const FriendName = styled('h2', {
+	fontSize: '$md',
+	fontFamily: 'monospace',
+	fontVariantNnumeric: 'slashed-zero',
+
+	variants: {
+		status: {
+			online: {
+				color: '$white',
+			},
+			ingame: {
+				color: '$white',
+			},
+			offline: {
+				color: '$gray600',
+			},
+		},
+	},
+})

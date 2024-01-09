@@ -33,6 +33,8 @@ export const ChatHeaderTextContainer = styled('div', {
 
 export const ChatTitle = styled('h2', {
 	fontSize: '$lg',
+	fontFamily: 'monospace',
+	fontVariantNnumeric: 'slashed-zero',
 })
 
 export const ChatSubTitle = styled('p', {})

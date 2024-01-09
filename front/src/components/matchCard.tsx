@@ -11,14 +11,14 @@ import {
 
 import { FaUserAstronaut } from 'react-icons/fa6'
 
-interface player {
+interface iPlayer {
 	username: string
 	score: number
 	winner?: boolean
 }
 
 export interface MatchProps {
-	players: player[]
+	players: iPlayer[]
 }
 
 export default function MatchCard({ players }: MatchProps) {
