@@ -18,6 +18,7 @@ import MenuListItem from './menuListItem'
 
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 import { FriendListItem, iFriendListItem } from './friendListItem'
+import { ChatListItem, iChatListItem } from './chatListItem'
 
 type activePanelType = 'menu' | 'friends' | 'chat'
 
@@ -40,11 +41,12 @@ export default function Layout({ children }: iLayoutProps) {
 
 	const [currentPath, setCurrentPath] = useState('')
 	const [showSidePanel, setShowSidePanel] = useState(false)
-	const [activePanel, setActivePanel] = useState<activePanelType>('friends')
 
 	useEffect(() => {
 		setCurrentPath(router.asPath)
 	}, [router.asPath])
+
+	const [activePanel, setActivePanel] = useState<activePanelType>('friends')
 
 	function toggleSidePanel() {
 		setShowSidePanel((previousState) => !previousState)
@@ -64,7 +66,11 @@ export default function Layout({ children }: iLayoutProps) {
 			setActivePanel('menu')
 		} else {
 			setShowSidePanel(true)
-			setActivePanel('friends')
+			if (router.asPath !== '/chat') {
+				setActivePanel('friends')
+			} else {
+				setActivePanel('chat')
+			}
 		}
 	}
 
@@ -78,7 +84,6 @@ export default function Layout({ children }: iLayoutProps) {
 		{
 			icon: <FaGamepad size={iconSize} />,
 			title: 'Game',
-			isActive: false,
 			handleOnClick: () => {
 				console.log('game')
 			},
@@ -89,6 +94,9 @@ export default function Layout({ children }: iLayoutProps) {
 			isActive: currentPath.includes('/profile'),
 			handleOnClick: () => {
 				router.push('/profile')
+				if (window.innerWidth > 1024) {
+					setActivePanel('friends')
+				}
 			},
 		},
 		{
@@ -96,7 +104,6 @@ export default function Layout({ children }: iLayoutProps) {
 			title: 'Chat',
 			isActive: currentPath.includes('/chat'),
 			handleOnClick: () => {
-				router.push('/chat')
 				setActivePanel('chat')
 			},
 		},
@@ -114,7 +121,6 @@ export default function Layout({ children }: iLayoutProps) {
 		{
 			icon: <RiLogoutBoxFill size={iconSize} />,
 			title: 'Logout',
-			isActive: false,
 			handleOnClick: () => {
 				console.log('logout')
 			},
@@ -194,6 +200,94 @@ export default function Layout({ children }: iLayoutProps) {
 		},
 	]
 
+	const chatList: iChatListItem[] = [
+		{
+			userAvatarSrc: '',
+			username: 'rfelipe-',
+			lastMessage: 'test',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'cpereira',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'anoliver',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12341',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12342',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12343',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12344',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12345',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12346',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12347',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12348',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12349',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12350',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+		{
+			userAvatarSrc: '',
+			username: 'abc12351',
+			lastMessage:
+				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
+		},
+	]
+
+	const activeChatUser = 'rfelipe-'
+
 	return (
 		<LayoutContainer>
 			<ApplicationContainer>
@@ -267,6 +361,23 @@ export default function Layout({ children }: iLayoutProps) {
 										userAvatarSrc={item.userAvatarSrc}
 										username={item.username}
 										userStatus={item.userStatus}
+									/>
+								))}
+
+							{showSidePanel === true &&
+								activePanel === 'chat' &&
+								chatList.map((item: iChatListItem) => (
+									<ChatListItem
+										key={item.username}
+										userAvatarSrc={item.userAvatarSrc}
+										username={item.username}
+										lastMessage={item.lastMessage}
+										isActive={
+											activeChatUser === item.username
+										}
+										handleOnClick={() =>
+											router.push('/chat')
+										}
 									/>
 								))}
 						</div>

@@ -2,7 +2,6 @@ import { styled } from '..'
 
 export const FriendListItemContainer = styled('button', {
 	width: '100%',
-	// height: '70px',
 	display: 'flex',
 	flexDirection: 'row',
 	justifyContent: 'space-between',
