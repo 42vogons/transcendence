@@ -11,25 +11,12 @@ export const FriendListItemContainer = styled('button', {
 	backgroundColor: '$blue600',
 	border: 'none',
 	borderBottom: '1px solid $white',
-	padding: '0.5rem',
+	padding: '0.5rem 1rem 0.5rem 0.5rem',
 	cursor: 'pointer',
 
-	// variants: {
-	// 	isActive: {
-	// 		true: {
-	// 			color: '$blue100',
-	// 			backgroundColor: '$white',
-	// 			border: '4px solid $blue100',
-	// 			'.title': {
-	// 				color: '$blue100',
-	// 			},
-	// 			'&:hover': {
-	// 				color: '$white',
-	// 				opacity: '80%',
-	// 			},
-	// 		},
-	// 	},
-	// },
+	'&:hover': {
+		backgroundColor: '$blue200',
+	},
 })
 
 export const FriendAvatarContainer = styled('div', {
