@@ -1,11 +1,11 @@
 import { LoadingContainer } from '@/styles/components/loading'
 import Image from 'next/image'
 
-interface LoadingProps {
+interface iLoadingProps {
 	size: number
 }
 
-export default function Loading({ size }: LoadingProps) {
+export default function Loading({ size }: iLoadingProps) {
 	return (
 		<LoadingContainer>
 			<Image

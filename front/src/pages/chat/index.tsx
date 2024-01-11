@@ -18,7 +18,7 @@ import userDefaulAvatar from 'public/assets/user.png'
 import { FormEvent, ReactElement, useState } from 'react'
 import Layout from '@/components/layout'
 
-interface Message {
+interface iMessage {
 	sender: string
 	content: string
 	timestamp: string
@@ -26,14 +26,14 @@ interface Message {
 
 export default function Chat() {
 	const date = Date.now()
-	const message1: Message = {
+	const message1: iMessage = {
 		sender: 'acarneir',
 		content:
 			'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Velit sit deserunt praesentium nemo accusantium ratione error, quas quaerat omnis perspiciatis est quidem, earum ullam ad dolorum quis optio. Beatae, harum!',
 		timestamp: (date - 10 * 60 * 1000).toLocaleString(),
 	}
 
-	const message2: Message = {
+	const message2: iMessage = {
 		sender: 'rfelipe-',
 		content:
 			'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Velit sit deserunt praesentium nemo accusantium ratione error, quas quaerat omnis perspiciatis est quidem, earum ullam ad dolorum quis optio. Beatae, harum!',

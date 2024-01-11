@@ -1,7 +1,7 @@
-import { MenuItemContainer } from '@/styles/components/menuItem'
+import { MenuListItemContainer } from '@/styles/components/menuListItem'
 import { ReactNode } from 'react'
 
-interface IconButtonProps {
+interface iMenuListItemProps {
 	children: ReactNode
 	title: string
 	isActive?: boolean
@@ -9,14 +9,14 @@ interface IconButtonProps {
 	handleOnClick?: () => void | undefined
 }
 
-export default function MenuItem({
+export default function MenuListItem({
 	children,
 	title,
 	isActive,
 	handleOnClick,
-}: IconButtonProps) {
+}: iMenuListItemProps) {
 	return (
-		<MenuItemContainer
+		<MenuListItemContainer
 			isActive={isActive}
 			onClick={
 				handleOnClick
@@ -28,6 +28,6 @@ export default function MenuItem({
 		>
 			{children}
 			<div className="title">{title}</div>
-		</MenuItemContainer>
+		</MenuListItemContainer>
 	)
 }
