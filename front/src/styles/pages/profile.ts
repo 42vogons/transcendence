@@ -1,20 +1,30 @@
 import { styled } from '..'
 
 export const PageContainer = styled('main', {
-	margin: '0 auto',
-	minHeight: '100vh',
+	minHeight: '100%',
+	maxHeight: '100%',
 	height: '100%',
-	minWidth: '96vw',
+	minWidth: '100%',
+	maxWidth: '100%',
 	backgroundColor: '$blue800',
 	display: 'flex',
 	flexDirection: 'column',
+	borderRadius: '0 32px 32px 0',
 
-	border: '6px solid $white',
-	borderRadius: 32,
+	overflowY: 'scroll',
 
-	'@bp2': {
-		minWidth: '80vw',
-		maxWidth: '80vw',
+	'&::-webkit-scrollbar': {
+		width: 2,
+	},
+	'&::-webkit-scrollbar-thumb': {
+		borderRadius: 32,
+		background: '$white',
+	},
+
+	'@bp1': {
+		'&::-webkit-scrollbar': {
+			width: 4,
+		},
 	},
 
 	'@bp4': {
@@ -23,8 +33,7 @@ export const PageContainer = styled('main', {
 })
 
 export const ProfileDataContainer = styled('div', {
-	minHeight: '100%',
-	flexBasis: '30%',
+	flexBasis: '25%',
 	padding: '2rem 0.5rem',
 	display: 'flex',
 	flexDirection: 'column',
@@ -64,24 +73,26 @@ export const TitleContainer = styled('div', {
 	flexDirection: 'row',
 	justifyContent: 'center',
 	alignItems: 'center',
-	gap: 32,
+	gap: 8,
 	color: '$white',
 	padding: '8px 24px',
 	h2: {
 		textAlign: 'center',
-		fontSize: '2.5rem',
+		fontSize: '$2xl',
 	},
 
 	'@bp1': {
+		gap: 32,
 		h2: {
-			fontSize: '3.5rem',
+			fontSize: '$3xl',
 		},
 	},
 })
 
 export const MatchHistoryContainer = styled('section', {
 	maxHeight: '100vh',
-	flexBasis: '70%',
+	minHeight: '100%',
+	flexBasis: '75%',
 	display: 'flex',
 	flexDirection: 'column',
 	justifyContent: 'center',
@@ -104,7 +115,7 @@ export const MatchCardsContainer = styled('div', {
 	overflowY: 'scroll',
 
 	'&::-webkit-scrollbar': {
-		width: 4,
+		width: 2,
 	},
 	'&::-webkit-scrollbar-thumb': {
 		borderRadius: 32,
@@ -112,14 +123,20 @@ export const MatchCardsContainer = styled('div', {
 	},
 
 	'@bp1': {
-		padding: '0 2rem',
+		// padding: '0 1rem',
+		padding: '0 1rem',
+		// paddingRight: '1rem',
 
 		'&::-webkit-scrollbar': {
-			width: 12,
+			width: 4,
 		},
 	},
 
+	// '@bp2': {
+	// },
+
 	'@bp3': {
 		marginTop: '3rem',
+		padding: '0 2rem',
 	},
 })

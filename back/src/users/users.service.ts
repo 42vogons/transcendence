@@ -4,6 +4,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './repositories/users.repository';
 import { JwtService } from '@nestjs/jwt';
 
+import { NotFoundError } from '../common/errors/types/NotFoundError';
+import { UserEntity } from './entities/user.entity';
 @Injectable()
 export class UsersService {
   constructor(
@@ -35,8 +37,12 @@ export class UsersService {
     return this.findOne(decodeToken.id);
   }
 
-  findOne(user_id: number) {
-    return this.repository.findOne(user_id);
+  async findOne(user_id: number): Promise<UserEntity> {
+    const user = await this.repository.findOne(user_id);
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+    return user;
   }
 
   update(user_id: number, updateUserDto: UpdateUserDto) {

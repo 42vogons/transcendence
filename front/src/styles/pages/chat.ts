@@ -2,21 +2,15 @@ import { styled } from '..'
 
 export const ChatContainer = styled('main', {
 	margin: '0 auto',
-	minHeight: '100vh',
-	mmaxHeight: '100vh',
+	minHeight: '100%',
+	maxHeight: '100%',
 	height: '100%',
-	width: '96vw',
+	width: '100%',
 	backgroundColor: '$blue800',
 	display: 'flex',
 	flexDirection: 'column',
 
-	border: '6px solid $white',
 	borderRadius: 32,
-
-	'@bp2': {
-		minWidth: '80vw',
-		maxWidth: '80vw',
-	},
 })
 
 export const ChatHeader = styled('header', {
@@ -39,11 +33,14 @@ export const ChatHeaderTextContainer = styled('div', {
 
 export const ChatTitle = styled('h2', {
 	fontSize: '$lg',
+	fontFamily: 'monospace',
+	fontVariantNnumeric: 'slashed-zero',
 })
 
 export const ChatSubTitle = styled('p', {})
 
 export const ChatMessageContainer = styled('div', {
+	minHeight: '75%',
 	maxHeight: '78vh',
 	display: 'flex',
 	flexDirection: 'column',
@@ -51,7 +48,7 @@ export const ChatMessageContainer = styled('div', {
 	overflowY: 'scroll',
 
 	'&::-webkit-scrollbar': {
-		width: 4,
+		width: 2,
 	},
 	'&::-webkit-scrollbar-thumb': {
 		borderRadius: 32,
@@ -60,10 +57,14 @@ export const ChatMessageContainer = styled('div', {
 
 	'@bp1': {
 		padding: '1rem 2rem 2rem',
+		minHeight: '33%',
 
 		'&::-webkit-scrollbar': {
-			width: 12,
+			width: 4,
 		},
+	},
+	'@bp3': {
+		minHeight: '77%',
 	},
 })
 
@@ -96,8 +97,7 @@ export const ChatMessage = styled('div', {
 
 export const ChatInputContainer = styled('form', {
 	borderTop: '1px solid $white',
-	minHeight: 'calc(100vh - 60px - 80vh)',
-	height: '100%',
+	height: 'calc(100% - 60px - 80%)',
 	display: 'flex',
 	flexDirection: 'row',
 	alignItems: 'center',
@@ -142,6 +142,7 @@ export const ChatInputContainer = styled('form', {
 
 	'@bp1': {
 		padding: '1rem 1rem',
+		height: 100,
 
 		input: {
 			padding: '1rem',

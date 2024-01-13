@@ -18,8 +18,10 @@ import Stats from '@/components/stats'
 import MatchCard from '@/components/matchCard'
 
 import userDefaulAvatar from 'public/assets/user.png'
+import Layout from '@/components/layout'
+import { ReactElement } from 'react'
 
-interface player {
+interface iPlayer {
 	username: string
 	score: number
 	winner?: boolean
@@ -33,8 +35,8 @@ export default function Profile() {
 	const wins = 4
 	const stats = { gamesPlayed, wins }
 
-	const player1: player = { username: 'acarneir', score: 3 }
-	const player2: player = { username: 'rfelipe-', score: 2 }
+	const player1: iPlayer = { username: 'acarneir', score: 3 }
+	const player2: iPlayer = { username: 'rfelipe-', score: 2 }
 
 	const match1 = [player1, player2]
 	const match2 = [player2, player1]
@@ -61,8 +63,8 @@ export default function Profile() {
 						<ProfileImageContainer>
 							<Image
 								src={userDefaulAvatar.src}
-								width={240}
-								height={240}
+								width={180}
+								height={180}
 								priority={true}
 								alt="user"
 							/>
@@ -93,4 +95,8 @@ export default function Profile() {
 			</PageContainer>
 		</>
 	)
+}
+
+Profile.getLayout = (page: ReactElement) => {
+	return <Layout>{page}</Layout>
 }
