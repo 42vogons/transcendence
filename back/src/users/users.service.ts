@@ -15,6 +15,7 @@ export class UsersService {
 
   createNewUser(profile: any) {
     const newUser: CreateUserDto = new CreateUserDto();
+    newUser.user_id = 1;
     newUser.username = profile.login;
     newUser.email = profile.email;
     newUser.two_factor_enabled = false;

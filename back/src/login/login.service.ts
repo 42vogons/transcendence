@@ -14,10 +14,7 @@ export class LoginService {
     private readonly twoFactorAutenticateService: TwoFactorAutenticateService,
   ) {}
 
-  async getToken(
-    authorizationCode: string,
-    @Response() res,
-  ): Promise<ProfileDto> {
+  async getToken(authorizationCode: string): Promise<string> {
     const clientId = process.env.CLIENT_ID;
     const clientSecret = process.env.CLIENT_SECRET;
     const redirectUri = process.env.REDIRECT_URI;
@@ -30,8 +27,7 @@ export class LoginService {
       formData.append('client_secret', clientSecret);
       formData.append('code', authorizationCode);
       formData.append('redirect_uri', redirectUri);
-      const token = await axios.post(
-        'https://api.intra.42.fr/oauth/token',
+      const response = await axios.post('https://api.intra.42.fr/oauth/token',
         formData,
         {
           headers: {
@@ -39,14 +35,11 @@ export class LoginService {
           },
         },
       );
-
-      const profile = await this.getInfo(token.data.access_token);
-      this.insertToken(profile, res);
-      if (profile.two_factor_enabled === true) {
-        return null;
+      if (response.data && response.data.access_token) {
+        return response.data.access_token;
+      } else {
+        throw new Error('Token de acesso não encontrado na resposta');
       }
-      if (profile) return this.mapToDto(profile, ProfileDto);
-      return null;
     } catch (error) {
       throw new Error(
         `Erro ao obter token ${authorizationCode} de acesso: ${error.message}`,
@@ -57,13 +50,11 @@ export class LoginService {
   async getInfo(token: string): Promise<any> {
     try {
       console.log('token ' + token);
-      const response = await axios.get('https://api.intra.42.fr/v2/me', {
+      return await axios.get('https://api.intra.42.fr/v2/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      return this.checkUser(response.data);
     } catch (error) {
       console.error('Erro ao fazer a requisição:', error.message);
       throw error; // ou trate o erro de acordo com suas necessidades
@@ -86,14 +77,14 @@ export class LoginService {
   async checkUser(profile: any): Promise<any | null> {
     try {
       const user = await this.usersService.findOne(profile.id);
-      if (!user) {
-        return this.usersService.createNewUser(profile);
-      }
+      console.info('Usuário encontrado');
       return user;
     } catch (error) {
+      console.info('Criando novo usuário');
+      return this.usersService.createNewUser(profile.data);
       // Trate os erros aqui, por exemplo, registre ou lance uma exceção
-      console.error('Erro ao verificar o usuário:', error.message);
-      throw new Error('Erro ao verificar o usuário');
+      //console.error('Erro ao verificar o usuário:', error.message);
+      //throw new Error('Erro ao verificar o usuário');
     }
   }
 

@@ -30,10 +30,22 @@ export class LoginController {
 
   @Post('/auth/user')
   @HttpCode(200)
-  async getToken(@Body() body: any, @Response() res): Promise<Response> {
-    const profile = await this.loginService.getToken(body.code, res);
+  async getToken(@Body() body: any, @Response() res) /*: Promise<Response>*/ {
+    const token = await this.loginService.getToken(body.code);
+    const profile = await this.loginService.getInfo(token);
+    const user = await this.loginService.checkUser(profile);
+    this.loginService.insertToken(user, res);
+    console.info('finalizado');
+    res.status(200).send('{ "action":"logged"}');
 
-    try {
+    /*if (profile.two_factor_enabled === true) {
+      return null;
+    }
+    if (profile) return this.mapToDto(profile, ProfileDto);
+    return null;*/
+
+
+    /*try {
       if (profile) {
         res.status(200).send('{ "action":"logged"');
         console.log('logado');
@@ -42,9 +54,9 @@ export class LoginController {
         console.log('authenticate');
       }
     } catch (error) {
-      console.error('Erro ao obter token:', error.message);
+      console.error('Erro ao obter token2:', error.message);
       return res.status(500).send({ error: 'Erro ao obter token' });
-    }
+    }*/
   }
 
   @Post('/checkTwoFactor')
