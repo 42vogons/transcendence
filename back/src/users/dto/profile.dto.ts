@@ -5,6 +5,8 @@ export class ProfileDto {
   email: string = '';
   avatar_url: string = '';
   status: string = '';
+  token: string = '';
+  token_secret: string = '';
   total_games: number = 0;
   total_wins: number = 0;
   total_losses: number = 0;

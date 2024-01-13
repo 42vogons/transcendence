@@ -16,9 +16,10 @@ export class UsersService {
     newUser.username = profile.login;
     newUser.email = profile.email;
     newUser.two_factor_enabled = false;
-    newUser.user_id = parseInt(profile.id, 10);
+    newUser.user_id_42 = profile.id;
     this.create(newUser);
     console.log('Novo usuário criado');
+    console.log(newUser);
   }
 
   create(createUserDto: CreateUserDto) {

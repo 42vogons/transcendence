@@ -6,6 +6,7 @@ export class UserEntity implements users {
   email: string;
   token_secret: string;
   token: string;
+  user_id_42: string;
   avatar_url: string;
   status: string;
   two_factor_enabled: boolean;
