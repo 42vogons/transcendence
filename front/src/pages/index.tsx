@@ -1,7 +1,9 @@
 import Head from 'next/head'
-import Link from 'next/link'
+import { ReactElement } from 'react'
+import { FaGamepad } from 'react-icons/fa6'
 
-import { HomeContainer } from '@/styles/pages/home'
+import { HomeContainer, PlayButton } from '@/styles/pages/home'
+import Layout from '@/components/layout'
 
 export default function Home() {
 	return (
@@ -19,9 +21,15 @@ export default function Home() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<HomeContainer>
-				<p>Hello word</p>
-				<Link href="/login">Login</Link>
+				<PlayButton>
+					<FaGamepad size={40} />
+					Play
+				</PlayButton>
 			</HomeContainer>
 		</>
 	)
+}
+
+Home.getLayout = (page: ReactElement) => {
+	return <Layout>{page}</Layout>
 }
