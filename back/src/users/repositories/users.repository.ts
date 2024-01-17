@@ -9,7 +9,6 @@ export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
-    console.log('entrada', createUserDto);
     return this.prisma.users.create({
       data: createUserDto,
     });
@@ -17,6 +16,14 @@ export class UsersRepository {
 
   async findAll(): Promise<UserEntity[]> {
     return this.prisma.users.findMany();
+  }
+
+  async findEmail(user_email: string): Promise<UserEntity> {
+    return this.prisma.users.findUnique({
+      where: {
+        email: user_email,
+      },
+    });
   }
 
   async findOne(user_id: number): Promise<UserEntity> {

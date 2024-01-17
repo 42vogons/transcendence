@@ -35,7 +35,7 @@ export class CreateUserDto {
 
   @IsBoolean()
   @IsNotEmpty()
-  two_factor_enabled: boolean;
+  two_factor_enabled: boolean = false;
 
   @IsInt()
   total_games: number;

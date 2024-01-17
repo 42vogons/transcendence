@@ -15,12 +15,11 @@ export class UsersService {
 
   createNewUser(profile: any) {
     const newUser: CreateUserDto = new CreateUserDto();
-    newUser.user_id = 1;
     newUser.username = profile.login;
     newUser.email = profile.email;
     newUser.two_factor_enabled = false;
     newUser.user_id_42 = profile.id;
-    this.create(newUser);
+    this.repository.create(newUser);
     console.log('Novo usuário criado');
     console.log(newUser);
   }
@@ -40,6 +39,14 @@ export class UsersService {
 
   async findOne(user_id: number): Promise<UserEntity> {
     const user = await this.repository.findOne(user_id);
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+    return user;
+  }
+
+  async findEmail(user_email: string): Promise<UserEntity> {
+    const user = await this.repository.findEmail(user_email);
     if (!user) {
       throw new NotFoundError('User not found');
     }

@@ -4,7 +4,10 @@ import * as FormData from 'form-data';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ProfileDto } from 'src/users/dto/profile.dto';
+//import { CreateUserDto } from './dto/create-user.dto';
 import { TwoFactorAutenticateService } from '../two-factor-autenticate/two-factor-autenticate.service';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { UserEntity } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class LoginService {
@@ -27,7 +30,8 @@ export class LoginService {
       formData.append('client_secret', clientSecret);
       formData.append('code', authorizationCode);
       formData.append('redirect_uri', redirectUri);
-      const response = await axios.post('https://api.intra.42.fr/oauth/token',
+      const response = await axios.post(
+        'https://api.intra.42.fr/oauth/token',
         formData,
         {
           headers: {
@@ -74,18 +78,24 @@ export class LoginService {
     });
   }
 
-  async checkUser(profile: any): Promise<any | null> {
+  async checkUser(profile: any): Promise<UserEntity | null> {
     try {
-      const user = await this.usersService.findOne(profile.id);
+      const user = await this.usersService.findEmail(profile.data.email);
       console.info('Usuário encontrado');
       return user;
     } catch (error) {
-      console.info('Criando novo usuário');
-      return this.usersService.createNewUser(profile.data);
-      // Trate os erros aqui, por exemplo, registre ou lance uma exceção
-      //console.error('Erro ao verificar o usuário:', error.message);
-      //throw new Error('Erro ao verificar o usuário');
+      return this.createNewUser(profile);
     }
+  }
+
+  private createNewUser(profile: any) {
+    console.info('Criando novo usuário');
+    const newUser: CreateUserDto = new CreateUserDto();
+    newUser.username = profile.data.login;
+    newUser.email = profile.data.email;
+    newUser.two_factor_enabled = false;
+    newUser.user_id_42 = profile.data.id.toString();
+    return this.usersService.create(newUser);
   }
 
   async checkTwoFactor(token: string, code: string): Promise<boolean> {
