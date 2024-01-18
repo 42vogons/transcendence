@@ -1,10 +1,8 @@
-import { Injectable, Response } from '@nestjs/common';
+import { Injectable, Response, Body } from '@nestjs/common';
 import axios from 'axios';
 import * as FormData from 'form-data';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { ProfileDto } from 'src/users/dto/profile.dto';
-//import { CreateUserDto } from './dto/create-user.dto';
 import { TwoFactorAutenticateService } from '../two-factor-autenticate/two-factor-autenticate.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UserEntity } from 'src/users/entities/user.entity';
@@ -106,6 +104,20 @@ export class LoginService {
         user.token_secret,
       );
     return valid;
+  }
+
+  async login(@Body() body: any, @Response() res) {
+    const token = await this.getToken(body.code);
+    const profile = await this.getInfo(token);
+    const user = await this.checkUser(profile);
+    this.insertToken(user, res);
+    console.log('user ' + user);
+    if (user.two_factor_enabled) {
+      console.log('true ');
+      return res.status(200).send('{ "action":"authenticate"}');
+    }
+    console.log('false ');
+    return res.status(200).send('{ "action":"logged"}');
   }
 
   private mapToDto<T>(source: any, dto: new () => T): T {

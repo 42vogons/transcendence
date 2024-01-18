@@ -31,17 +31,7 @@ export class LoginController {
   @Post('/auth/user')
   @HttpCode(200)
   async getToken(@Body() body: any, @Response() res): Promise<Response> {
-    const token = await this.loginService.getToken(body.code);
-    const profile = await this.loginService.getInfo(token);
-    const user = await this.loginService.checkUser(profile);
-    this.loginService.insertToken(user, res);
-    console.log('user ' + user);
-    if (user.two_factor_enabled) {
-      console.log('true ');
-      return res.status(200).send('{ "action":"authenticate"}');
-    }
-    console.log('false ');
-    return res.status(200).send('{ "action":"logged"}');
+    return await this.loginService.login(body, res);
   }
 
   @Post('/checkTwoFactor')
