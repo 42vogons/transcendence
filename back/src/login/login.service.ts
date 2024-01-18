@@ -113,10 +113,8 @@ export class LoginService {
     this.insertToken(user, res);
     console.log('user ' + user);
     if (user.two_factor_enabled) {
-      console.log('true ');
       return res.status(200).send('{ "action":"authenticate"}');
     }
-    console.log('false ');
     return res.status(200).send('{ "action":"logged"}');
   }
 
