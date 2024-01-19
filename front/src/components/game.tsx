@@ -84,7 +84,7 @@ export default function Game() {
 			moveBall(ball)
 			checkCollision()
 			// console.log(ball)
-		}, 1000 / 30)
+		}, 1000 / 60)
 		return () => clearTimeout(play)
 	}, [ball])
 

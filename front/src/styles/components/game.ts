@@ -4,7 +4,6 @@ export const CourtContainer = styled('div', {
 	position: 'relative',
 	backgroundColor: '$blue100',
 	border: '4px solid rgba( 255, 255, 255, 0.9)',
-	// boxShadow: '-6px -6px 12px #0093e0, 6px 6px 12px #00bbff',
 	borderRadius: 24,
 
 	'&:before': {
@@ -60,6 +59,7 @@ export const Score = styled('div', {
 	fontVariantNnumeric: 'slashed-zero',
 	color: '$blue100',
 	outline: 'none',
+	fontWeight: 'bold',
 
 	span: {
 		backgroundColor: '$white',
