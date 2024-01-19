@@ -3,9 +3,10 @@ import { LoginController } from './login/login.controller';
 import { LoginService } from './login/login.service';
 import { LoginModule } from './login/login.module';
 import { UsersModule } from './users/users.module';
+import { GameModule } from './game/game.module';
 
 @Module({
-  imports: [LoginModule, UsersModule],
+  imports: [LoginModule, UsersModule, GameModule],
   controllers: [LoginController],
   providers: [LoginService],
 })
