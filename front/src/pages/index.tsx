@@ -2,10 +2,15 @@ import Head from 'next/head'
 import { ReactElement, useContext, useEffect, useState } from 'react'
 import { FaGamepad } from 'react-icons/fa6'
 
-import { HomeContainer, PlayButton } from '@/styles/pages/home'
+import {
+	HomeContainer,
+	LoadingContainer,
+	PlayButton,
+} from '@/styles/pages/home'
 import Layout from '@/components/layout'
 import Game from '@/components/game'
 import { GameContext } from '@/contexts/GameContext'
+import Loading from '@/components/loading'
 
 export default function Home() {
 	const [showGame, setShowGame] = useState(false)
@@ -32,6 +37,9 @@ export default function Home() {
 
 	useEffect(() => {
 		console.log('GameStatus:', status)
+		if (status === 'found') {
+			setShowGame(true)
+		}
 	}, [status])
 	return (
 		<>
@@ -60,6 +68,11 @@ export default function Home() {
 					</PlayButton>
 				) : (
 					<Game />
+					// <LoadingContainer>
+					// 	<Loading size={200} />
+					// 	<h3>Looking for a match...</h3>
+					// 	<button>Cancel</button>
+					// </LoadingContainer>
 				)}
 			</HomeContainer>
 		</>

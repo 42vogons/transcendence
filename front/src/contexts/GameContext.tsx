@@ -1,5 +1,6 @@
 import { connected, matchFound } from '@/reducers/Game/Action'
 import { GameReducer } from '@/reducers/Game/Reducer'
+import { useRouter } from 'next/router'
 import { ReactNode, createContext, useEffect, useReducer } from 'react'
 import socketClient from 'socket.io-client'
 
@@ -25,12 +26,15 @@ export function GameProvider({ children }: GameProviderProps) {
 
 	const { status } = state
 
+	const router = useRouter()
+
 	useEffect(() => {
 		socket.on('connected', () => {
 			dispatch(connected())
 		})
 		socket.on('match_found', (status) => {
 			dispatch(matchFound(status))
+			router.push('/')
 		})
 		socket.open()
 	}, [])
