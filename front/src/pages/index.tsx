@@ -1,13 +1,38 @@
 import Head from 'next/head'
-import { ReactElement, useState } from 'react'
+import { ReactElement, useContext, useEffect, useState } from 'react'
 import { FaGamepad } from 'react-icons/fa6'
 
 import { HomeContainer, PlayButton } from '@/styles/pages/home'
 import Layout from '@/components/layout'
 import Game from '@/components/game'
+import { GameContext } from '@/contexts/GameContext'
 
 export default function Home() {
-	const [showGame, setShowGame] = useState(true)
+	const [showGame, setShowGame] = useState(false)
+	const { status, joinQueue } = useContext(GameContext)
+
+	const [userID, setUserID] = useState('')
+
+	function getPlayerInfo() {
+		let user = localStorage.getItem('@42Transcendence:user')
+		if (!user) {
+			user = new Date().toLocaleString()
+			localStorage.setItem('@42Transcendence:user', JSON.stringify(user))
+		}
+		return user
+	}
+
+	useEffect(() => {
+		setUserID(getPlayerInfo())
+	}, [])
+
+	useEffect(() => {
+		console.log('userID:', userID)
+	}, [userID])
+
+	useEffect(() => {
+		console.log('GameStatus:', status)
+	}, [status])
 	return (
 		<>
 			<Head>
@@ -24,7 +49,12 @@ export default function Home() {
 			</Head>
 			<HomeContainer>
 				{!showGame ? (
-					<PlayButton onClick={() => setShowGame(true)}>
+					<PlayButton
+						onClick={() => {
+							joinQueue(userID)
+							console.log('userID:', userID)
+						}}
+					>
 						<FaGamepad size={40} />
 						Play
 					</PlayButton>

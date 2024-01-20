@@ -7,6 +7,7 @@ import { UnauthorizedInterceptor } from './common/errors/interceptors/unauthoriz
 import { NotFoundInterceptor } from './common/errors/interceptors/notfound.interceptor';
 import { ConflictInterceptor } from './common/errors/interceptors/conflict.interceptor';
 import { DatabaseInterceptor } from './common/errors/interceptors/database.interceptor';
+import { SocketAdapter } from './socket-io-adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,6 +23,7 @@ async function bootstrap() {
     credentials: true,
     origin: 'http://localhost:3000',
   });
+  app.useWebSocketAdapter(new SocketAdapter(app));
   //app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ConflictInterceptor());
   app.useGlobalInterceptors(new DatabaseInterceptor());
