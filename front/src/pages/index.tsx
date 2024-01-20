@@ -13,8 +13,7 @@ import { GameContext } from '@/contexts/GameContext'
 import Loading from '@/components/loading'
 
 export default function Home() {
-	const [showGame, setShowGame] = useState(false)
-	const { status, joinQueue } = useContext(GameContext)
+	const { status, joinQueue, exitQueue } = useContext(GameContext)
 
 	const [userID, setUserID] = useState('')
 
@@ -37,9 +36,6 @@ export default function Home() {
 
 	useEffect(() => {
 		console.log('GameStatus:', status)
-		if (status === 'found') {
-			setShowGame(true)
-		}
 	}, [status])
 	return (
 		<>
@@ -56,7 +52,7 @@ export default function Home() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<HomeContainer>
-				{!showGame ? (
+				{status === 'connected' && (
 					<PlayButton
 						onClick={() => {
 							joinQueue(userID)
@@ -66,14 +62,15 @@ export default function Home() {
 						<FaGamepad size={40} />
 						Play
 					</PlayButton>
-				) : (
-					<Game />
-					// <LoadingContainer>
-					// 	<Loading size={200} />
-					// 	<h3>Looking for a match...</h3>
-					// 	<button>Cancel</button>
-					// </LoadingContainer>
 				)}
+				{status === 'searching' && (
+					<LoadingContainer>
+						<Loading size={200} />
+						<h3>Looking for a match...</h3>
+						<button onMouseUp={() => exitQueue()}>Cancel</button>
+					</LoadingContainer>
+				)}
+				{status === 'playing' && <Game />}
 			</HomeContainer>
 		</>
 	)

@@ -9,14 +9,7 @@ export function GameReducer(state: GameState, action: any) {
 	console.log('state:', state)
 
 	switch (action.type) {
-		case ActionTypes.CONNECTED: {
-			const newState = {
-				...state,
-				status: action.payload.status,
-			}
-			return newState
-		}
-		case ActionTypes.MATCH_FOUND: {
+		case ActionTypes.STATUS_CHANGE: {
 			const newState = {
 				...state,
 				status: action.payload.status,

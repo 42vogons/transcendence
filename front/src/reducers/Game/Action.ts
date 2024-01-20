@@ -1,21 +1,12 @@
 export enum ActionTypes {
 	CONNECTED = 'CONNECTED',
 	JOIN_QUEUE = 'JOIN_QUEUE',
-	MATCH_FOUND = 'MATCH_FOUND',
+	STATUS_CHANGE = 'STATUS_CHANGE',
 }
 
-export function connected() {
+export function statusChange(status: string) {
 	return {
-		type: ActionTypes.CONNECTED,
-		payload: {
-			status: 'connected',
-		},
-	}
-}
-
-export function matchFound(status: string) {
-	return {
-		type: ActionTypes.MATCH_FOUND,
+		type: ActionTypes.STATUS_CHANGE,
 		payload: {
 			status,
 		},
