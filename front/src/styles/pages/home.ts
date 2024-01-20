@@ -67,3 +67,31 @@ export const PlayButton = styled('button', {
 		transform: 'scaleY(1.1) scaleX(1.05)',
 	},
 })
+
+export const LoadingContainer = styled('div', {
+	backgroundColor: '$white',
+	display: 'flex',
+	flexDirection: 'column',
+	alignItems: 'center',
+	color: '$blue100',
+	padding: '1rem 2rem',
+	borderRadius: 16,
+
+	button: {
+		margin: '2rem 0 1rem',
+		backgroundColor: '$red',
+		color: '$white',
+		fontSize: '$2xl',
+		padding: '0.5rem 1rem',
+		borderRadius: 32,
+		border: '4px solid transparent',
+		cursor: 'pointer',
+		transition: '0.2s',
+
+		'&:hover': {
+			backgroundColor: '$white',
+			color: '$red',
+			border: '4px solid $red',
+		},
+	},
+})
