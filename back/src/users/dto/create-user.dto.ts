@@ -8,16 +8,24 @@ import {
 } from 'class-validator';
 
 export class CreateUserDto {
+  user_id: number;
+
   @IsString()
   @IsNotEmpty()
   username: string;
+
+  @IsString()
+  user_id_42: string;
 
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
   @IsString()
-  password_hash: string;
+  token: string;
+
+  @IsString()
+  token_secret: string;
 
   @IsUrl()
   avatar_url: string;
@@ -27,7 +35,7 @@ export class CreateUserDto {
 
   @IsBoolean()
   @IsNotEmpty()
-  two_factor_enabled: boolean;
+  two_factor_enabled: boolean = false;
 
   @IsInt()
   total_games: number;
