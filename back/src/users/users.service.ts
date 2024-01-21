@@ -60,4 +60,8 @@ export class UsersService {
   remove(user_id: number) {
     return this.repository.remove(user_id);
   }
+
+  findFriends(user_id: number) {
+    return this.repository.findFriends(user_id);
+  }
 }

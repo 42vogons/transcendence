@@ -53,4 +53,15 @@ export class UsersRepository {
       },
     });
   }
+
+  async findFriends(userId: number): Promise<any> {
+    return this.prisma.users.findMany({
+      where: {
+        user_id: userId,
+      },
+      include: {
+        friends_friends_friend_idTousers: true,
+      },
+    });
+  }
 }

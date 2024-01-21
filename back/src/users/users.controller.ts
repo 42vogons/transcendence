@@ -26,6 +26,12 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @Get('/friends')
+  async findFriend() {
+    const friends = this.usersService.findFriends(5);
+    console.log('friends' + friends);
+  }
+
   @Get()
   findAll() {
     return this.usersService.findAll();

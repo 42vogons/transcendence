@@ -8,6 +8,6 @@ export class FriendsService {
   constructor(private readonly repository: FriendsRepository) {}
 
   async addFriend(dto: CreateFriendDto): Promise<friends> {
-    return this.repository.addFriend(dto.userId, dto.friendId);
+    return this.repository.addFriend(dto.user_id, dto.friend_id);
   }
 }
