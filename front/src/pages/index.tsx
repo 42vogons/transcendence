@@ -1,9 +1,13 @@
 import Head from 'next/head'
-import Link from 'next/link'
+import { ReactElement, useState } from 'react'
+import { FaGamepad } from 'react-icons/fa6'
 
-import { HomeContainer } from '@/styles/pages/home'
+import { HomeContainer, PlayButton } from '@/styles/pages/home'
+import Layout from '@/components/layout'
+import Game from '@/components/game'
 
 export default function Home() {
+	const [showGame, setShowGame] = useState(true)
 	return (
 		<>
 			<Head>
@@ -19,9 +23,19 @@ export default function Home() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<HomeContainer>
-				<p>Hello word</p>
-				<Link href="/login">Login</Link>
+				{!showGame ? (
+					<PlayButton onClick={() => setShowGame(true)}>
+						<FaGamepad size={40} />
+						Play
+					</PlayButton>
+				) : (
+					<Game />
+				)}
 			</HomeContainer>
 		</>
 	)
+}
+
+Home.getLayout = (page: ReactElement) => {
+	return <Layout>{page}</Layout>
 }

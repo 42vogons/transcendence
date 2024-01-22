@@ -1,13 +1,17 @@
+import { keyframes } from '@stitches/react'
 import { styled } from '..'
 
 export const HomeContainer = styled('main', {
+	minHeight: '100%',
+	maxHeight: '100%',
+	height: '100%',
+	width: '100%',
 	display: 'flex',
 	flexDirection: 'column',
-	width: '100%',
 	justifyContent: 'center',
 	alignItems: 'center',
-	minHeight: 656,
 	fontSize: '$2xl',
+	borderRadius: 32,
 
 	a: {
 		marginTop: '1rem',
@@ -24,5 +28,42 @@ export const HomeContainer = styled('main', {
 			color: '$green500',
 			background: '$white',
 		},
+	},
+	// background: 'rgba(0,167,255,0.15)',
+	backgroundColor: '$blue800',
+})
+
+const pulse = keyframes({
+	'0%': {
+		boxShadow: '-2px -2px 6px #0093e0,2px 2px 6px #00bbff',
+	},
+	'70%': {
+		boxShadow: '-2px -2px 6px 4px #0093e0,2px 2px 6px 4px #00bbff',
+	},
+})
+
+export const PlayButton = styled('button', {
+	width: 180,
+	display: 'flex',
+	justifyContent: 'space-between',
+	alignItems: 'center',
+	fontSize: '$2xl',
+	fontWeight: 'bold',
+	padding: '0.5rem 1rem',
+	borderRadius: 32,
+	color: '$white',
+	cursor: 'pointer',
+	transition: '0.3s',
+	animation: `${pulse} 1600ms infinite`,
+	border: '4px solid rgba( 255, 255, 255, 0.4 )',
+
+	background: '#00a7ff',
+
+	'&:hover': {
+		background: '$white',
+		color: '#00a7ff',
+		animation: 'none',
+		border: '4px solid rgba( 0, 167, 255, 0.8 )',
+		transform: 'scaleY(1.1) scaleX(1.05)',
 	},
 })
