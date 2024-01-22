@@ -27,9 +27,8 @@ export class UsersController {
   }
 
   @Get('/friends')
-  async findFriend() {
-    const friends = this.usersService.findFriends(5);
-    console.log('friends' + friends);
+  async findFriend(@Req() request) {
+    return this.usersService.findFriends(request.cookies.accessToken);
   }
 
   @Get()

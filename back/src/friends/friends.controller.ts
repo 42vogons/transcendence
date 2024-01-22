@@ -1,14 +1,23 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Post, Req } from '@nestjs/common';
 import { FriendsService } from './friends.service';
-import { CreateFriendDto } from './dto/create-friend.dto';
+import { FriendDto } from './dto/create-friend.dto';
 
 @Controller('friends')
 export class FriendsController {
   constructor(private friendsService: FriendsService) {}
 
   @Post('/add')
-  async addFriend(@Body() createFriendDto: CreateFriendDto) {
-    console.log('friends ' + createFriendDto.friend_id);
-    return this.friendsService.addFriend(createFriendDto);
+  async addFriend(@Req() request, @Body() body: FriendDto) {
+    return this.friendsService.addFriend(
+      request.cookies.accessToken,
+      body.friend_id,
+    );
+  }
+  @Delete('/remove')
+  async removaFriend(@Req() request, @Body() body: FriendDto) {
+    return this.friendsService.removeFriend(
+      request.cookies.accessToken,
+      body.friend_id,
+    );
   }
 }

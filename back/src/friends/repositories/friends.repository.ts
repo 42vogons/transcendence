@@ -14,6 +14,14 @@ export class FriendsRepository {
       },
     });
   }
-
-  
+  async removeFriend(userId: number, friendId: number) {
+    return this.prisma.friends.delete({
+      where: {
+        user_id_friend_id: {
+          user_id: userId,
+          friend_id: friendId,
+        },
+      },
+    });
+  }
 }

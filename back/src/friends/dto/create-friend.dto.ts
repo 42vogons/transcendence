@@ -1,9 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class CreateFriendDto {
-  @IsNotEmpty()
-  user_id: number;
-
+export class FriendDto {
   @IsNotEmpty()
   friend_id: number;
 }

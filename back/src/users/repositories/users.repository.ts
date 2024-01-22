@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserEntity } from '../entities/user.entity';
+import { users } from '@prisma/client';
 
 @Injectable()
 export class UsersRepository {
@@ -54,14 +55,32 @@ export class UsersRepository {
     });
   }
 
-  async findFriends(userId: number): Promise<any> {
-    return this.prisma.users.findMany({
+  async findFriends(userId: number): Promise<users[] | null> {
+    const userWithFriends = await this.prisma.users.findUnique({
       where: {
         user_id: userId,
       },
       include: {
-        friends_friends_friend_idTousers: true,
+        friends_friends_user_idTousers: {
+          select: {
+            users_friends_friend_idTousers: true,
+          },
+        },
+        friends_friends_friend_idTousers: {
+          select: {
+            users_friends_user_idTousers: true,
+          },
+        },
       },
     });
+    const friends = [
+      ...userWithFriends.friends_friends_user_idTousers.map(
+        f => f.users_friends_friend_idTousers,
+      ),
+      ...userWithFriends.friends_friends_friend_idTousers.map(
+        f => f.users_friends_user_idTousers,
+      ),
+    ];
+    return friends;
   }
 }
