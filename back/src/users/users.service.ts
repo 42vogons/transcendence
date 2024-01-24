@@ -63,7 +63,7 @@ export class UsersService {
     return this.repository.remove(user_id);
   }
 
-  findFriends(token: any): Promise<users[] | null> {
+  findFriends(token: any): Promise<Friends[] | null> {
     const decodeToken = this.jwtService.decode(token);
     return this.repository.findFriends(decodeToken.id);
   }

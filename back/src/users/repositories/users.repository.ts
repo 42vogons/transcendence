@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserEntity } from '../entities/user.entity';
-import { users } from '@prisma/client';
+
 
 @Injectable()
 export class UsersRepository {
@@ -55,7 +55,7 @@ export class UsersRepository {
     });
   }
 
-  async findFriends(userId: number): Promise<users[] | null> {
+  async findFriends(userId: number): Promise<Friends[]> {
     const userWithFriends = await this.prisma.users.findUnique({
       where: {
         user_id: userId,
@@ -63,17 +63,30 @@ export class UsersRepository {
       include: {
         friends_friends_user_idTousers: {
           select: {
-            users_friends_friend_idTousers: true,
+            users_friends_friend_idTousers: {
+              select: {
+                user_id: true,
+                username: true,
+              },
+            },
           },
         },
         friends_friends_friend_idTousers: {
           select: {
-            users_friends_user_idTousers: true,
+            users_friends_user_idTousers: {
+              select: {
+                user_id: true,
+                username: true,
+              },
+            },
           },
         },
       },
     });
-    const friends = [
+    if (!userWithFriends) {
+      return [];
+    }
+    const friendsList = [
       ...userWithFriends.friends_friends_user_idTousers.map(
         f => f.users_friends_friend_idTousers,
       ),
@@ -81,6 +94,11 @@ export class UsersRepository {
         f => f.users_friends_user_idTousers,
       ),
     ];
-    return friends;
+    const uniqueFriendIds = new Set(friendsList.map(friend => friend.user_id));
+    const uniqueFriends = Array.from(uniqueFriendIds).map(id => {
+      const friend = friendsList.find(friend => friend.user_id === id);
+      return { user_id: id, username: friend.username };
+    });
+    return uniqueFriends;
   }
 }
