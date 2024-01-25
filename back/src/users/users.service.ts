@@ -6,8 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { NotFoundError } from '../common/errors/types/NotFoundError';
 import { UserEntity } from './entities/user.entity';
-import { promises } from 'dns';
-import { users } from '@prisma/client';
+
 @Injectable()
 export class UsersService {
   constructor(
