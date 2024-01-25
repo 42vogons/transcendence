@@ -8,6 +8,9 @@ import { TwoFactorAutenticateService } from './two-factor-autenticate/two-factor
 import { LoginModule } from './login/login.module';
 import { UsersModule } from './users/users.module';
 import { FriendsModule } from './friends/friends.module';
+import { ChatService } from './chat/chat.service';
+import { ChatController } from './chat/chat.controller';
+import { ChatModule } from './chat/chat.module';
 
 const secretJwt = process.env.SECRET_JWT;
 
@@ -20,8 +23,14 @@ const secretJwt = process.env.SECRET_JWT;
       signOptions: { expiresIn: '1h' },
     }),
     FriendsModule,
+    ChatModule,
   ],
-  controllers: [LoginController, FriendsController],
-  providers: [LoginService, TwoFactorAutenticateService, FriendsService],
+  controllers: [LoginController, FriendsController, ChatController],
+  providers: [
+    LoginService,
+    TwoFactorAutenticateService,
+    FriendsService,
+    ChatService,
+  ],
 })
 export class AppModule {}
