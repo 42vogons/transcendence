@@ -26,6 +26,11 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @Get('/friends')
+  async findFriend(@Req() request) {
+    return this.usersService.findFriends(request.cookies.accessToken);
+  }
+
   @Get()
   findAll() {
     return this.usersService.findAll();

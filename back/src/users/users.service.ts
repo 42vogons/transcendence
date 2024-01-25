@@ -6,6 +6,8 @@ import { JwtService } from '@nestjs/jwt';
 
 import { NotFoundError } from '../common/errors/types/NotFoundError';
 import { UserEntity } from './entities/user.entity';
+import { promises } from 'dns';
+import { users } from '@prisma/client';
 @Injectable()
 export class UsersService {
   constructor(
@@ -59,5 +61,10 @@ export class UsersService {
 
   remove(user_id: number) {
     return this.repository.remove(user_id);
+  }
+
+  findFriends(token: any): Promise<Friends[] | null> {
+    const decodeToken = this.jwtService.decode(token);
+    return this.repository.findFriends(decodeToken.id);
   }
 }
