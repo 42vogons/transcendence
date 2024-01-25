@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FriendsEntity } from '../entities/friends.entity';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class FriendsRepository {
@@ -14,8 +14,9 @@ export class FriendsRepository {
       },
     });
   }
+
   async removeFriend(userId: number, friendId: number) {
-    return this.prisma.friends.delete({
+    return await this.prisma.friends.delete({
       where: {
         user_id_friend_id: {
           user_id: userId,
