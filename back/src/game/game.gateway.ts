@@ -71,4 +71,23 @@ export class GameGateway
     this.players = this.gameService.removeUserFromQueue(client);
     client.emit('status_changed', 'connected');
   }
+
+  @SubscribeMessage('playing')
+  handlePlayingEvent(client: Socket) {
+	const player = this.gameService.findPlayerBySocketID(client.id)
+	const room = this.gameService.findRoomByRoomID(player.roomID)
+	const users = room.users.map(user => {
+		if (user.socketID === player.socketID)
+			user.status = 'playing'
+		return user
+	})
+	player.status = 'playing'
+	this.gameService.updatePlayer(player)
+	room.users = users
+	this.gameService.updateRoom(room)
+	if (room.users[0].status === 'playing' && room.users[1].status === 'playing') {
+    	let matchData = this.gameService.loadGame(room);
+    	this.gameService.gameInProgress(matchData, this.io);
+	}
+  }
 }
