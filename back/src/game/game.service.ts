@@ -20,8 +20,8 @@ export class GameService {
   };
   private ballRadius = this.court.height * 0.025;
   private ballSpeed = {
-    x: this.court.width * 0.01,
-    y: this.court.height * 0.01,
+    x: this.court.width * 0.005,
+    y: this.court.height * 0.005,
   };
   private paddleSpeed = this.paddle.height * 0.2;
   constructor() {}
@@ -277,31 +277,101 @@ export class GameService {
 	  });
   }
 
+  restartMatch(match: MatchData) {
+	match.ball.position.x = this.court.width / 2 - this.ballRadius
+	match.ball.position.y = this.court.height / 2 - this.ballRadius
+	match.ball.direction.x *= -1
+  }
+
   checkCollision(matchData: MatchData) {
-    const ballXPos = matchData.ball.position.x;
-    const ballYPos = matchData.ball.position.y;
+	const ball = matchData.ball;
+	// console.log("ball: ", ball);
+
+    // if (
+    //   ballXPos > matchData.court.width - 2.5 * this.ballRadius ||
+    //   ballXPos < 0
+    // ) {
+    //   matchData.ball.direction.x *= -1;
+    // }
 
     if (
-      ballXPos > matchData.court.width - 2.5 * this.ballRadius ||
-      ballXPos < 0
-    ) {
-      matchData.ball.direction.x *= -1;
-    }
-
-    if (
-      ballYPos > matchData.court.height - 2.5 * this.ballRadius ||
-      ballYPos < 0
+      ball.position.y > matchData.court.height - 2.5 * this.ballRadius ||
+      ball.position.y < 0
     ) {
       matchData.ball.direction.y *= -1;
     }
 
-    if (ballXPos < 2 * this.ballRadius) {
-      matchData.score.p2++;
-    }
+	if (ball.position.y < this.ballRadius) {
+		ball.position.y = this.ballRadius * 2;
+		ball.direction.y = 1;
+	}
 
-    if (ballXPos > matchData.court.width - 2 * this.ballRadius) {
-      matchData.score.p1++;
-    }
+	const { x: bx, y: by } = ball.position;
+	const br = this.ballRadius
+
+	const playerNumber = bx < this.court.width / 2 ? 1 : 2;
+	// console.log("playerNumber: ", playerNumber)
+	const player = `player${playerNumber}`;
+	const { x: px, y: py } = matchData[player].position;
+	const { width: pw, height: ph } = matchData[player]
+	// console.log("matchData[player]: ", matchData[player])
+
+	let testX = bx;
+	let testY = by;
+
+	if (bx < px) {
+		testX = px;
+	} else if (bx > px + pw) {
+		testX = px + pw;
+	}
+
+	if (by < py) {
+		testY = py;
+	} else if (by > py + ph) {
+		testY = py + ph;
+	}
+
+	// console.log("testX: ", testX)
+	// console.log("testY: ", testY)
+	const distX = bx - testX;
+	const distY = by - testY;
+	const distance = Math.sqrt(distX * distX + distY * distY);
+	// console.log("distance: ", distance)
+
+	if ((by >= py && by <= py + ph) 
+		&& ((playerNumber === 1 && bx < px + pw) 
+		|| (playerNumber === 2 && bx > px - 2* br))) {
+		ball.direction.x *= -1;
+		ball.position.x =
+		playerNumber === 1
+			? matchData[player].position.x + matchData[player].width + br * 0.2
+			: matchData[player].position.x - br * 2;
+
+		// const quarterTop = by < ry + rh / 4;
+		// const quarterBottom = by > ry + rh - rh / 4;
+		// const halfTop = by < ry + rh / 2;
+		// const halfBottom = by > ry + rh - rh / 2;
+
+		// if (quarterTop || quarterBottom) {
+		// ball.yspeed += 0.15;
+		// ball.xspeed -= 0.15;
+
+		// ball.ydirection = quarterBottom ? 1 : -1;
+		// } else if (halfTop || halfBottom) {
+		// ball.yspeed += 0.05;
+		// ball.xspeed -= 0.05;
+		// }
+
+		// ball.xspeed *= 1.1;
+		matchData = {...matchData, ball}
+		// console.log("position ball: ", matchData.ball.position)
+	} else if (ball.position.x < matchData.player1.position.x - pw) {
+		matchData.score.p2++;
+		this.restartMatch(matchData);
+	} else if (ball.position.x > matchData.player2.position.x + pw - br) {
+		matchData.score.p1++;
+		this.restartMatch(matchData);
+	}
   }
 
   refreshMatch(
@@ -328,6 +398,6 @@ export class GameService {
 
     this.refreshMatch(match, io);
 
-    setTimeout(() => this.gameInProgress(match.roomID, io), 1000 / 30);
+    setTimeout(() => this.gameInProgress(match.roomID, io), 1000 / 60);
   }
 }
