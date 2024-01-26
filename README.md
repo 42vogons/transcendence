@@ -10,10 +10,6 @@
   <img alt="License" src="https://img.shields.io/github/license/42vogons/transcendence?color=56BEB8">
 
   <img alt="Github issues" src="https://img.shields.io/github/issues/42vogons/transcendence?color=56BEB8" />
-
-  <img alt="Github forks" src="https://img.shields.io/github/forks/42vogons/transcendence?color=56BEB8" />
-
-  <img alt="Github stars" src="https://img.shields.io/github/stars/42vogons/transcendence?color=56BEB8" />
 </p>
 
 
@@ -30,6 +26,7 @@
   <a href="#requirements">Requirements</a> &#xa0; | &#xa0;
   <a href="#starting">Starting</a> &#xa0; | &#xa0;
   <a href="#database">DataBase</a> &#xa0; | &#xa0;
+  <a href="#chat">Chat</a> &#xa0; | &#xa0;
   <a href="#license">License</a> &#xa0; | &#xa0;
   <a href="https://github.com/orgs/42vogons/teams/transcendence-the-last-of-us" target="_blank">Authors</a>
 </p>
@@ -38,7 +35,7 @@
 
 ## About ##
 
-Describe your project
+A pong game
 
 ## Features ##
 
@@ -54,6 +51,7 @@ The following tools were used in this project:
 - [React](https://react.dev/)
 - [NestJS](https://nestjs.com/)
 - [Prisma](https://www.prisma.io/)
+- [Socket.io](https://socket.io/)
 
 ## Requirements ##
 
@@ -85,19 +83,16 @@ docker-compose up --build
 ```bash
 # Access
 cd transcendence/back/migrations
-
 # Create a .env file in the migrations directory
 mv .env_example .env
-
 # Make the sql script executable
 chmod +x 202312032330_create_tables.sh
-
 # Execute the script
 bash 202312032330_create_tables.sh
-
 # The script will read configurations from the .env file, connect to your
 # PostgreSQL database in the specified Docker container, and execute
 # the SQL script to create the tables.
+
 
 # How to do a migration using Prisma:
 # Run docker for db only
@@ -108,6 +103,33 @@ cd back
 # Update prisma.scheme with your migration
 # Run migrate Prisma command
 npx prisma migrate dev --create-only
+
+
+# to open prisma studio
+# open shell in your backend container
+docker exec -it transcendence_back /bin/ash
+# run prisma studio
+npx prisma studio
+# Prisma studio will initialize in the localhost:5555
+```
+
+## Chat ##
+```bash
+# payload to send message
+{
+    "sender_id": 1,
+    "receiver_id": 2,
+    "channel_id": 1,
+    "content": "hello world!"
+}
+
+# users id 1 and 2 must exist, as well channel id 1
+# events to listen
+initialMessages # all messages order by timestamp
+msgToClient
+
+# event to send
+msgToServer
 ```
 
 ## License ##

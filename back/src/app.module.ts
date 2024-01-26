@@ -8,6 +8,7 @@ import { TwoFactorAutenticateService } from './two-factor-autenticate/two-factor
 import { LoginModule } from './login/login.module';
 import { UsersModule } from './users/users.module';
 import { FriendsModule } from './friends/friends.module';
+import { ChatGateway } from './chat/chat.gateway';
 
 const secretJwt = process.env.SECRET_JWT;
 
@@ -22,6 +23,11 @@ const secretJwt = process.env.SECRET_JWT;
     FriendsModule,
   ],
   controllers: [LoginController, FriendsController],
-  providers: [LoginService, TwoFactorAutenticateService, FriendsService],
+  providers: [
+    LoginService,
+    TwoFactorAutenticateService,
+    FriendsService,
+    ChatGateway,
+  ],
 })
 export class AppModule {}
