@@ -1,7 +1,8 @@
+import { MatchData } from './Types'
+
 export enum ActionTypes {
-	CONNECTED = 'CONNECTED',
-	JOIN_QUEUE = 'JOIN_QUEUE',
 	STATUS_CHANGE = 'STATUS_CHANGE',
+	MATCH_UPDATE = 'MATCH_UPDATE',
 }
 
 export function statusChange(status: string) {
@@ -9,6 +10,15 @@ export function statusChange(status: string) {
 		type: ActionTypes.STATUS_CHANGE,
 		payload: {
 			status,
+		},
+	}
+}
+
+export function matchUpdate(match: MatchData) {
+	return {
+		type: ActionTypes.MATCH_UPDATE,
+		payload: {
+			match,
 		},
 	}
 }

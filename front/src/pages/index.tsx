@@ -13,7 +13,7 @@ import { GameContext } from '@/contexts/GameContext'
 import Loading from '@/components/loading'
 
 export default function Home() {
-	const { status, joinQueue, exitQueue } = useContext(GameContext)
+	const { status, joinQueue, exitQueue, playing } = useContext(GameContext)
 
 	const [userID, setUserID] = useState('')
 
@@ -68,6 +68,14 @@ export default function Home() {
 						<Loading size={200} />
 						<h3>Looking for a match...</h3>
 						<button onMouseUp={() => exitQueue()}>Cancel</button>
+					</LoadingContainer>
+				)}
+
+				{status === 'readyToPlay' && (
+					<LoadingContainer>
+						{/* <Loading size={200} /> */}
+						<h3>Ready?</h3>
+						<button onMouseUp={() => playing()}>Ready</button>
 					</LoadingContainer>
 				)}
 				{status === 'playing' && <Game />}

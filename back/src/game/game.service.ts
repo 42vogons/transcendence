@@ -8,11 +8,20 @@ export class GameService {
   private readonly logger = new Logger(GameService.name);
   private players: UserData[] = [];
   private rooms: Room[] = [];
-  private court = {width: 200, height: 100};
-  private paddle = {width: this.court.width * 0.1, height: this.court.height * 0.2}
-  private paddleInitialPosition = {x: this.court.width * 0.05, y: this.court.height / 2 - this.paddle.height / 2};
-  private ballRadius = this.court.height * 0.025
-  private ballSpeed = {x: this.court.width * 0.01, y: this.court.height * 0.01}
+  private court = { width: 200, height: 100 };
+  private paddle = {
+    width: this.court.width * 0.01,
+    height: this.court.height * 0.25,
+  };
+  private paddleInitialPosition = {
+    x: this.court.width * 0.02,
+    y: this.court.height / 2 - this.paddle.height / 2,
+  };
+  private ballRadius = this.court.height * 0.025;
+  private ballSpeed = {
+    x: this.court.width * 0.01,
+    y: this.court.height * 0.01,
+  };
   constructor() {}
 
   isPlayerSocketIDOnList(socketID: string): boolean {
@@ -166,95 +175,113 @@ export class GameService {
   }
 
   loadGame(room: Room): MatchData {
-	let macthData: MatchData = {
-		player1: room.users[0],
-		player2: room.users[1],
-		court: this.court,
-		paddle1: {
-			position: {
-				x: this.paddleInitialPosition.x,
-				y: this.paddleInitialPosition.y
-			},
-			width: this.paddle.width,
-			height: this.paddle.height
-		},
-		paddle2: {
-			position: {
-				x: this.court.width - this.paddleInitialPosition.x,
-				y: this.paddleInitialPosition.y
-			},
-			width: this.paddle.width,
-			height: this.paddle.height
-		},
-		ball: {
-			position: {
-				x: this.court.width / 2 - this.ballRadius,
-				y: this.court.height / 2 - this.ballRadius
-			},
-			radius: this.ballRadius,
-			speed: this.ballSpeed,
-			direction: {
-				x: 1,
-				y: 1
-			}
-		},
-		score: {
-			p1: 0,
-			p2: 0
-		},
-		status: 'play'
-	}
-	return macthData
+    const matchData: MatchData = {
+      player1: room.users[0],
+      player2: room.users[1],
+      court: this.court,
+      paddle1: {
+        position: {
+          x: this.paddleInitialPosition.x - this.paddle.width,
+          y: this.paddleInitialPosition.y,
+        },
+        width: this.paddle.width,
+        height: this.paddle.height,
+      },
+      paddle2: {
+        position: {
+          x:
+            this.court.width - this.paddleInitialPosition.x - this.paddle.width,
+          y: this.paddleInitialPosition.y,
+        },
+        width: this.paddle.width,
+        height: this.paddle.height,
+      },
+      ball: {
+        position: {
+          x: this.court.width / 2 - this.ballRadius,
+          y: this.court.height / 2 - this.ballRadius,
+        },
+        radius: this.ballRadius,
+        speed: this.ballSpeed,
+        direction: {
+          x: 1,
+          y: 1,
+        },
+      },
+      score: {
+        p1: 0,
+        p2: 0,
+      },
+      status: 'play',
+    };
+    return matchData;
   }
 
-  moveBall(macthData: MatchData) {
-	const x = macthData.ball.position.x + macthData.ball.speed.x * macthData.ball.direction.x;
-  	const y = macthData.ball.position.y + macthData.ball.speed.y * macthData.ball.direction.y;
-	macthData.ball.position = {x, y}
+  moveBall(matchData: MatchData) {
+    const x =
+      matchData.ball.position.x +
+      matchData.ball.speed.x * matchData.ball.direction.x;
+    const y =
+      matchData.ball.position.y +
+      matchData.ball.speed.y * matchData.ball.direction.y;
+    matchData.ball.position = { x, y };
   }
 
-  movePaddle(macthData: MatchData) {
-	return
+  movePaddle(matchData: MatchData) {
+    if (matchData) {
+    }
+    return;
   }
 
-  checkCollision(macthData: MatchData) {
-	const ballXPos =  macthData.ball.position.x
-	const ballYPos =  macthData.ball.position.y
+  checkCollision(matchData: MatchData) {
+    const ballXPos = matchData.ball.position.x;
+    const ballYPos = matchData.ball.position.y;
 
-	if (ballXPos > macthData.court.width - this.ballRadius  || ballXPos < this.ballRadius) {
-		macthData.ball.direction.x *= -1;
-	}
+    if (
+      ballXPos > matchData.court.width - 2.5 * this.ballRadius ||
+      ballXPos < 0
+    ) {
+      matchData.ball.direction.x *= -1;
+    }
 
-	if (ballYPos > macthData.court.height - this.ballRadius ||  ballYPos < this.ballRadius) {
-		macthData.ball.direction.y *= -1;
-	}
+    if (
+      ballYPos > matchData.court.height - 2.5 * this.ballRadius ||
+      ballYPos < 0
+    ) {
+      matchData.ball.direction.y *= -1;
+    }
 
-	if (ballXPos < this.ballRadius) {
-		macthData.score.p2++;
-	}
+    if (ballXPos < 2 * this.ballRadius) {
+      matchData.score.p2++;
+    }
 
-	if (ballXPos > macthData.court.width - this.ballRadius) {
-		macthData.score.p1++;
-	}
+    if (ballXPos > matchData.court.width - 2 * this.ballRadius) {
+      matchData.score.p1++;
+    }
   }
 
-  refreshMatch(matchData: MatchData, io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
-	io.to(matchData.player1.roomID).emit('match_updated', matchData)
+  refreshMatch(
+    matchData: MatchData,
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  ) {
+    io.to(matchData.player1.roomID).emit('match_updated', matchData);
   }
 
-  gameInProgress(matchData: MatchData, io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
-	console.log("time: ", new Date().toLocaleString(), "\n", matchData)
-	if (matchData.status === 'end')
-		return;
+  gameInProgress(
+    matchData: MatchData,
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  ) {
+    // console.log('time: ', new Date().toLocaleString(), '\n', matchData);
+    if (matchData.status === 'end') return;
 
-	if (matchData.status === 'play') {
-		this.moveBall(matchData);
-		this.movePaddle(matchData);
-		this.checkCollision(matchData);
-	}
+    if (matchData.status === 'play') {
+      this.moveBall(matchData);
+      this.movePaddle(matchData);
+      this.checkCollision(matchData);
+    }
 
-	this.refreshMatch(matchData, io);
+    this.refreshMatch(matchData, io);
 
-	setTimeout(() => this.gameInProgress(matchData, io), 1000 / 30);
+    setTimeout(() => this.gameInProgress(matchData, io), 1000 / 30);
   }
 }

@@ -59,7 +59,7 @@ export class GameGateway
     if (availablePlayers.length > 0) {
       const roomID = availablePlayers[0].socketID;
       this.players = this.gameService.joinRoom(client, roomID);
-      this.io.to(roomID).emit('status_changed', 'playing');
+      this.io.to(roomID).emit('status_changed', 'readyToPlay');
     } else {
       this.gameService.createRoom(client);
       client.emit('status_changed', 'searching');
@@ -72,22 +72,35 @@ export class GameGateway
     client.emit('status_changed', 'connected');
   }
 
+  @SubscribeMessage('send_key')
+  handleKeyEvent(client: Socket, data) {
+    console.log('client:', client.id);
+    const { type, key } = data;
+    const direction =
+      type === 'keyup' ? 'STOP' : key.replace('Arrow', '').toUpperCase();
+    console.log('direction:', direction);
+    // console.log('type:', type, 'key', key, '\n\n');
+  }
+
   @SubscribeMessage('playing')
   handlePlayingEvent(client: Socket) {
-	const player = this.gameService.findPlayerBySocketID(client.id)
-	const room = this.gameService.findRoomByRoomID(player.roomID)
-	const users = room.users.map(user => {
-		if (user.socketID === player.socketID)
-			user.status = 'playing'
-		return user
-	})
-	player.status = 'playing'
-	this.gameService.updatePlayer(player)
-	room.users = users
-	this.gameService.updateRoom(room)
-	if (room.users[0].status === 'playing' && room.users[1].status === 'playing') {
-    	let matchData = this.gameService.loadGame(room);
-    	this.gameService.gameInProgress(matchData, this.io);
-	}
+    const player = this.gameService.findPlayerBySocketID(client.id);
+    const room = this.gameService.findRoomByRoomID(player.roomID);
+    const users = room.users.map(user => {
+      if (user.socketID === player.socketID) user.status = 'playing';
+      return user;
+    });
+    player.status = 'playing';
+    this.gameService.updatePlayer(player);
+    room.users = users;
+    this.gameService.updateRoom(room);
+    if (
+      room.users[0].status === 'playing' &&
+      room.users[1].status === 'playing'
+    ) {
+      const matchData = this.gameService.loadGame(room);
+      this.io.to(room.ID).emit('status_changed', 'playing');
+      this.gameService.gameInProgress(matchData, this.io);
+    }
   }
 }

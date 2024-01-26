@@ -19,28 +19,13 @@ export const CourtContainer = styled('div', {
 export const Paddle = styled('div', {
 	position: 'absolute',
 	content: '',
-	width: 10,
-	height: 100,
 	backgroundColor: '$white',
 	borderRadius: 16,
-
-	variants: {
-		type: {
-			left: {
-				left: 10,
-			},
-			right: {
-				right: 10,
-			},
-		},
-	},
 })
 
 export const Ball = styled('div', {
 	position: 'absolute',
 	content: '',
-	width: 30,
-	height: 30,
 	backgroundColor: '$white',
 	borderRadius: '50%',
 	zIndex: 1,
