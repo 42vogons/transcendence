@@ -99,15 +99,15 @@ export default function Game() {
 			<Paddle
 				css={{
 					left:
-						(match?.paddle1?.position.x / match?.court?.width) *
+						(match?.player1?.position.x / match?.court?.width) *
 						width,
 					top:
-						(match?.paddle1?.position.y / match?.court?.height) *
+						(match?.player1?.position.y / match?.court?.height) *
 						height,
 					width:
-						(match?.paddle1?.width / match?.court?.width) * width,
+						(match?.player1?.width / match?.court?.width) * width,
 					height:
-						(match?.paddle1?.height / match?.court?.height) *
+						(match?.player1?.height / match?.court?.height) *
 						height,
 				}}
 			/>
@@ -127,15 +127,15 @@ export default function Game() {
 			<Paddle
 				css={{
 					left:
-						(match?.paddle2?.position.x / match?.court?.width) *
+						(match?.player2?.position.x / match?.court?.width) *
 						width,
 					top:
-						(match?.paddle2?.position.y / match?.court?.height) *
+						(match?.player2?.position.y / match?.court?.height) *
 						height,
 					width:
-						(match?.paddle2?.width / match?.court?.width) * width,
+						(match?.player2?.width / match?.court?.width) * width,
 					height:
-						(match?.paddle2?.height / match?.court?.height) *
+						(match?.player2?.height / match?.court?.height) *
 						height,
 				}}
 			/>

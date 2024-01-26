@@ -74,12 +74,16 @@ export class GameGateway
 
   @SubscribeMessage('send_key')
   handleKeyEvent(client: Socket, data) {
-    console.log('client:', client.id);
     const { type, key } = data;
     const direction =
       type === 'keyup' ? 'STOP' : key.replace('Arrow', '').toUpperCase();
-    console.log('direction:', direction);
-    // console.log('type:', type, 'key', key, '\n\n');
+	const player = this.gameService.findPlayerBySocketID(client.id)
+	let match = this.gameService.findMatchByRoomID(player.roomID)
+	if (match.player1.userID === player.userID)
+		match.player1.direction = direction
+	else if (match.player2.userID === player.userID)
+		match.player2.direction = direction
+	this.gameService.updateMatch(match)
   }
 
   @SubscribeMessage('playing')
@@ -100,7 +104,7 @@ export class GameGateway
     ) {
       const matchData = this.gameService.loadGame(room);
       this.io.to(room.ID).emit('status_changed', 'playing');
-      this.gameService.gameInProgress(matchData, this.io);
+      this.gameService.gameInProgress(matchData.roomID, this.io);
     }
   }
 }

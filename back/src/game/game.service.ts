@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Namespace, Socket } from 'socket.io';
-import { Room, UserData, MatchData } from './types';
+import { Room, UserData, MatchData, Paddle } from './types';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 @Injectable()
@@ -8,6 +8,7 @@ export class GameService {
   private readonly logger = new Logger(GameService.name);
   private players: UserData[] = [];
   private rooms: Room[] = [];
+  private matchs: MatchData[] = [];
   private court = { width: 200, height: 100 };
   private paddle = {
     width: this.court.width * 0.01,
@@ -22,6 +23,7 @@ export class GameService {
     x: this.court.width * 0.01,
     y: this.court.height * 0.01,
   };
+  private paddleSpeed = this.paddle.height * 0.2;
   constructor() {}
 
   isPlayerSocketIDOnList(socketID: string): boolean {
@@ -108,6 +110,29 @@ export class GameService {
     });
   }
 
+  findMatchByRoomID(roomID: string): MatchData {
+    const match = this.matchs.filter(m => {
+      return m.roomID === roomID;
+    });
+    if (match.length == 1) return match[0];
+    else return undefined;
+  }
+
+  isMatchIDOnList(roomID: string): boolean {
+    return (
+      this.matchs.filter(m => {
+        return m.roomID === roomID;
+      }).length > 0
+    );
+  }
+
+  updateMatch(match: MatchData) {
+    if (!this.isMatchIDOnList(match.roomID)) return;
+    this.matchs = this.matchs.map(m =>
+      m.roomID === match.roomID ? (m = match) : m,
+    );
+  }
+
   joinQueue(client: Socket, body: string): UserData[] {
     const player: UserData = this.findPlayerBySocketID(client.id);
     if (!player || player.status !== 'idle') return this.players;
@@ -176,26 +201,29 @@ export class GameService {
 
   loadGame(room: Room): MatchData {
     const matchData: MatchData = {
-      player1: room.users[0],
-      player2: room.users[1],
+	  roomID: room.ID,
+      player1: {
+		...room.users[0],
+		position: {
+			x: this.paddleInitialPosition.x - this.paddle.width,
+			y: this.paddleInitialPosition.y
+	  	},
+  	    width: this.paddle.width,
+	    height: this.paddle.height,
+		direction: "STOP"
+	  },
+      player2: {
+		...room.users[1],
+		position: {
+			x:
+			  this.court.width - this.paddleInitialPosition.x - this.paddle.width,
+			y: this.paddleInitialPosition.y,
+		  },
+		  width: this.paddle.width,
+		  height: this.paddle.height,
+		  direction: "STOP"
+	  },
       court: this.court,
-      paddle1: {
-        position: {
-          x: this.paddleInitialPosition.x - this.paddle.width,
-          y: this.paddleInitialPosition.y,
-        },
-        width: this.paddle.width,
-        height: this.paddle.height,
-      },
-      paddle2: {
-        position: {
-          x:
-            this.court.width - this.paddleInitialPosition.x - this.paddle.width,
-          y: this.paddleInitialPosition.y,
-        },
-        width: this.paddle.width,
-        height: this.paddle.height,
-      },
       ball: {
         position: {
           x: this.court.width / 2 - this.ballRadius,
@@ -214,6 +242,7 @@ export class GameService {
       },
       status: 'play',
     };
+	this.matchs.push(matchData);
     return matchData;
   }
 
@@ -227,10 +256,25 @@ export class GameService {
     matchData.ball.position = { x, y };
   }
 
-  movePaddle(matchData: MatchData) {
-    if (matchData) {
-    }
-    return;
+  movePaddle(match: MatchData) {
+    [1, 2].forEach((i) => {
+		const player: UserData & Paddle = match[`player${i}`];
+	
+		switch (player.direction) {
+		  case 'UP':
+			player.position.y -= this.paddleSpeed;
+			break;
+		  case 'DOWN':
+			player.position.y += this.paddleSpeed;
+			break;
+		}
+	
+		if (player.position.y < 0) {
+		  player.position.y = 0;
+		} else if (player.position.y + player.height * 1.05 > this.court.height) {
+		  player.position.y = this.court.height - player.height * 1.05;
+		}
+	  });
   }
 
   checkCollision(matchData: MatchData) {
@@ -264,24 +308,26 @@ export class GameService {
     matchData: MatchData,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
+	this.updateMatch(matchData);
     io.to(matchData.player1.roomID).emit('match_updated', matchData);
   }
 
   gameInProgress(
-    matchData: MatchData,
+    roomID: string,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    // console.log('time: ', new Date().toLocaleString(), '\n', matchData);
-    if (matchData.status === 'end') return;
+	// console.log(this.matchs)
+	let match = this.findMatchByRoomID(roomID);
+    if (match.status === 'end') return;
 
-    if (matchData.status === 'play') {
-      this.moveBall(matchData);
-      this.movePaddle(matchData);
-      this.checkCollision(matchData);
+    if (match.status === 'play') {
+      this.moveBall(match);
+      this.movePaddle(match);
+      this.checkCollision(match);
     }
 
-    this.refreshMatch(matchData, io);
+    this.refreshMatch(match, io);
 
-    setTimeout(() => this.gameInProgress(matchData, io), 1000 / 30);
+    setTimeout(() => this.gameInProgress(match.roomID, io), 1000 / 30);
   }
 }

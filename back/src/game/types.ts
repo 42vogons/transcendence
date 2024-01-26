@@ -33,17 +33,17 @@ export type Paddle = {
   };
   width: number;
   height: number;
+  direction: "UP" | "DOWN" | "STOP"
 };
 
 export type MatchData = {
-  player1: UserData;
-  player2: UserData;
+  roomID: string;
+  player1: UserData & Paddle;
+  player2: UserData & Paddle;
   court: {
     width: number;
     height: number;
   };
-  paddle1: Paddle;
-  paddle2: Paddle;
   ball: Ball;
   score: {
     p1: number;
