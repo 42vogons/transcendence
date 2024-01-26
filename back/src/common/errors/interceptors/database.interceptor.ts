@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   CallHandler,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Observable, catchError } from 'rxjs';
 import { isPrismaError } from '../utils/is-prisma-error.util';
@@ -15,10 +16,15 @@ export class DatabaseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       catchError(error => {
+        if (error.code === 'P2025' || error.code === 'P2003') {
+          throw new NotFoundException('Registro não encontrado.');
+        }
+        console.log('error==' + error.code);
         if (isPrismaError(error)) {
           error = handleDatabaseErrors(error);
         }
         if (error instanceof DatabaseError) {
+          console.log('error' + error.message);
           throw new BadRequestException(error.message);
         } else {
           throw error;
