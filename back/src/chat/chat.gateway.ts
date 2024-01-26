@@ -42,8 +42,18 @@ export class ChatGateway
     this.logger.log(`Init: ${server}`);
   }
 
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
+    try {
+      const messages = await this.prisma.chat_messages.findMany({
+        orderBy: {
+          timestamp: 'asc',
+        },
+      });
+      client.emit('initialMessages', messages);
+    } catch (error) {
+      console.error('Error retrieving initial messages:', error);
+    }
   }
 
   handleDisconnect(client: Socket) {
