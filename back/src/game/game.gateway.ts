@@ -107,4 +107,9 @@ export class GameGateway
       this.gameService.gameInProgress(matchData.roomID, this.io);
     }
   }
+
+  @SubscribeMessage('pause')
+  handlePausePlaying(client: Socket) {
+	
+  }
 }

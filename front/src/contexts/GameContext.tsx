@@ -99,6 +99,9 @@ export function GameProvider({ children }: GameProviderProps) {
 		socket.on('match_updated', (match: MatchData) => {
 			dispatch(matchUpdate(match))
 		})
+		socket.on('end_match', (result: any) => {
+			console.log('end_match: ', result)
+		})
 		socket.open()
 	}, [router])
 

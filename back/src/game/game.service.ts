@@ -1,14 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Namespace, Socket } from 'socket.io';
-import { Room, UserData, MatchData, Paddle } from './types';
+import { Room, UserData, MatchData, Paddle, MatchResult } from './types';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 @Injectable()
 export class GameService {
+  //todo: remover quando implementar conexao com o banco de dados
+  private matchsResults: MatchResult[] = [];
+
   private readonly logger = new Logger(GameService.name);
   private players: UserData[] = [];
   private rooms: Room[] = [];
   private matchs: MatchData[] = [];
+  private maxScore = 5;
   private court = { width: 200, height: 100 };
   private paddle = {
     width: this.court.width * 0.01,
@@ -232,8 +236,8 @@ export class GameService {
         radius: this.ballRadius,
         speed: this.ballSpeed,
         direction: {
-          x: 1,
-          y: 1,
+          x: Math.floor(Math.random() * 100) % 2 == 0 ? 1 : -1,
+          y: Math.floor(Math.random() * 100) % 2 == 0 ? 1 : -1,
         },
       },
       score: {
@@ -241,6 +245,9 @@ export class GameService {
         p2: 0,
       },
       status: 'play',
+	  pausedBy: '',
+	  pausedAt: undefined,
+	  quitterID: ''
     };
 	this.matchs.push(matchData);
     return matchData;
@@ -281,18 +288,14 @@ export class GameService {
 	match.ball.position.x = this.court.width / 2 - this.ballRadius
 	match.ball.position.y = this.court.height / 2 - this.ballRadius
 	match.ball.direction.x *= -1
+
+	if (match.score.p1 === this.maxScore || match.score.p2 == this.maxScore) {
+		match.status = "end"
+	}
   }
 
   checkCollision(matchData: MatchData) {
 	const ball = matchData.ball;
-	// console.log("ball: ", ball);
-
-    // if (
-    //   ballXPos > matchData.court.width - 2.5 * this.ballRadius ||
-    //   ballXPos < 0
-    // ) {
-    //   matchData.ball.direction.x *= -1;
-    // }
 
     if (
       ball.position.y > matchData.court.height - 2.5 * this.ballRadius ||
@@ -310,11 +313,9 @@ export class GameService {
 	const br = this.ballRadius
 
 	const playerNumber = bx < this.court.width / 2 ? 1 : 2;
-	// console.log("playerNumber: ", playerNumber)
 	const player = `player${playerNumber}`;
 	const { x: px, y: py } = matchData[player].position;
 	const { width: pw, height: ph } = matchData[player]
-	// console.log("matchData[player]: ", matchData[player])
 
 	let testX = bx;
 	let testY = by;
@@ -331,12 +332,9 @@ export class GameService {
 		testY = py + ph;
 	}
 
-	// console.log("testX: ", testX)
-	// console.log("testY: ", testY)
 	const distX = bx - testX;
 	const distY = by - testY;
 	const distance = Math.sqrt(distX * distX + distY * distY);
-	// console.log("distance: ", distance)
 
 	if ((by >= py && by <= py + ph) 
 		&& ((playerNumber === 1 && bx < px + pw) 
@@ -347,24 +345,7 @@ export class GameService {
 			? matchData[player].position.x + matchData[player].width + br * 0.2
 			: matchData[player].position.x - br * 2;
 
-		// const quarterTop = by < ry + rh / 4;
-		// const quarterBottom = by > ry + rh - rh / 4;
-		// const halfTop = by < ry + rh / 2;
-		// const halfBottom = by > ry + rh - rh / 2;
-
-		// if (quarterTop || quarterBottom) {
-		// ball.yspeed += 0.15;
-		// ball.xspeed -= 0.15;
-
-		// ball.ydirection = quarterBottom ? 1 : -1;
-		// } else if (halfTop || halfBottom) {
-		// ball.yspeed += 0.05;
-		// ball.xspeed -= 0.05;
-		// }
-
-		// ball.xspeed *= 1.1;
 		matchData = {...matchData, ball}
-		// console.log("position ball: ", matchData.ball.position)
 	} else if (ball.position.x < matchData.player1.position.x - pw) {
 		matchData.score.p2++;
 		this.restartMatch(matchData);
@@ -382,13 +363,85 @@ export class GameService {
     io.to(matchData.player1.roomID).emit('match_updated', matchData);
   }
 
+  removeMatchFromList(matchData: MatchData): MatchData[] {
+	const match = this.findMatchByRoomID(matchData.roomID);
+    if (!match) return this.matchs;
+
+    const room = this.findRoomByRoomID(matchData.roomID);
+    if (room) this.deleteRoomByRoomID(room.ID);
+
+    let player1 = match.player1
+    let player2 = match.player2
+
+    player1.roomID = '';
+    player2.roomID = '';
+	player1.status = 'idle';
+    player2.status = 'idle';
+
+    this.updatePlayer(player1);
+    this.updatePlayer(player2);
+
+	this.matchs = this.matchs.filter(m => {
+		return m.roomID !== match.roomID;
+	  });
+    return this.matchs;
+  }
+
+  saveMatchResult(matchResult: MatchResult) {
+	this.matchsResults.push(matchResult)
+  }
+
+  endMatch(match: MatchData): MatchResult{
+	let endedAt = new Date()
+	let winner: string
+	let looser: string
+
+	if (!match.quitterID) {
+		if (match.score.p1 === this.maxScore) {
+			winner = match.player1.userID
+			looser = match.player2.userID
+		} else {
+			looser = match.player1.userID
+			winner = match.player2.userID
+		}
+	} else {
+		//todo
+	}
+
+	let player1 = {
+		userID: match.player1.userID,
+		score: match.score.p1
+	}
+
+	let player2 = {
+		userID: match.player2.userID,
+		score: match.score.p2
+	}
+
+	let matchResult: MatchResult = {
+		player1,
+		player2,
+		winner,
+		looser,
+		endedAt
+	}
+
+	this.saveMatchResult(matchResult)
+	return matchResult
+  }
+
   gameInProgress(
     roomID: string,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-	// console.log(this.matchs)
 	let match = this.findMatchByRoomID(roomID);
-    if (match.status === 'end') return;
+    if (match.status === 'end') {
+		const matchResult = this.endMatch(match)
+		io.to(roomID).emit('end_match', matchResult)
+		io.to(roomID).emit('status_changed', 'connected')
+		this.removeMatchFromList(match)
+		return
+	};
 
     if (match.status === 'play') {
       this.moveBall(match);

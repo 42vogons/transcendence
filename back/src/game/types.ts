@@ -50,4 +50,21 @@ export type MatchData = {
     p2: number;
   };
   status: 'play' | 'pause' | 'end';
+  pausedBy: string;
+  pausedAt: Date;
+  quitterID: string;
 };
+
+export type MatchResult = {
+	player1: {
+		userID: string
+		score: number
+	};
+	player2: {
+		userID: string
+		score: number
+	};
+	winner: string
+	looser: string
+	endedAt: Date
+}
