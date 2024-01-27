@@ -111,11 +111,16 @@ export class LoginService {
     const profile = await this.getInfo(token);
     const user = await this.checkUser(profile);
     this.insertToken(user, res);
+    //todo adicionar expire do cookie no retorno res
     console.log('user ' + user);
+    let action = 'logged';
+    const { username } = user;
     if (user.two_factor_enabled) {
-      return res.status(200).send('{ "action":"authenticate"}');
+      action = 'authenticate';
+      return res.status(200).send({ action, username });
     }
-    return res.status(200).send('{ "action":"logged"}');
+
+    return res.status(200).send({ action, username });
   }
 
   private mapToDto<T>(source: any, dto: new () => T): T {

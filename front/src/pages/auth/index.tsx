@@ -1,3 +1,4 @@
+import TwoFAInput from '@/components/TwoFAInput'
 import Loading from '@/components/loading'
 import { api } from '@/services/api'
 import { AuthContainer } from '@/styles/pages/auth'
@@ -11,6 +12,7 @@ export default function Auth() {
 	const router = useRouter()
 
 	const [isLoading, setIsLoading] = useState(false)
+	const [request2FA, setRequest2FA] = useState(false)
 
 	console.log(router.query.code)
 
@@ -21,13 +23,21 @@ export default function Auth() {
 				const res = await api.post('/auth/user', { code })
 				toast('Login was successful', { type: 'success' })
 				console.log('res:', res)
-				router.push('/profile')
+				const { action, username } = res.data
+				console.log('username:', username)
+				if (action === 'authenticate') {
+					setRequest2FA(true)
+					setIsLoading(false)
+				}
+				if (action === 'logged') {
+					router.push('/profile')
+				}
 			} catch (error) {
 				console.log('error:', error)
 				toast('An error occurred during authentication', {
 					type: 'error',
 				})
-				router.push('/login')
+				// router.push('/login')
 				setIsLoading(false)
 			}
 		}
@@ -37,6 +47,30 @@ export default function Auth() {
 			authUser(code)
 		}
 	}, [router])
+
+	async function sendCode(twoFAcode: string) {
+		setIsLoading(true)
+		setRequest2FA(false)
+		try {
+			const res = await api.post('/checkTwoFactor', { twoFAcode })
+			toast('Login was successful', { type: 'success' })
+			console.log('res:', res)
+			const { action } = res.data
+			if (action === 'logged') {
+				router.push('/profile')
+			} else {
+				console.log('erro action:', action)
+			}
+		} catch (error) {
+			console.log('error:', error)
+			toast('An error occurred during authentication', {
+				type: 'error',
+			})
+			// router.push('/login')
+			setIsLoading(false)
+			setRequest2FA(true)
+		}
+	}
 
 	return (
 		<>
@@ -52,15 +86,18 @@ export default function Auth() {
 				/>
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			<AuthContainer>{isLoading && <Loading size={120} />}</AuthContainer>
+			<AuthContainer>
+				{isLoading && <Loading size={120} />}
+				{request2FA && <TwoFAInput sendTwoFA={sendCode} />}
 
-			<button
-				onClick={() => {
-					toast('Authenticated', { type: 'success' })
-				}}
-			>
-				Toast
-			</button>
+				{/* <button
+					onClick={() => {
+						toast('Authenticated', { type: 'success' })
+					}}
+				>
+					Toast
+				</button> */}
+			</AuthContainer>
 		</>
 	)
 }
