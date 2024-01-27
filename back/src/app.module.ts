@@ -11,6 +11,7 @@ import { FriendsModule } from './friends/friends.module';
 import { ChannelService } from './chat/channel.service';
 import { ChannelController } from './chat/channel.controller';
 import { ChatModule } from './chat/channel.module';
+import { ChatGateway } from './chat/chat.gateway';
 
 const secretJwt = process.env.SECRET_JWT;
 
@@ -31,6 +32,7 @@ const secretJwt = process.env.SECRET_JWT;
     TwoFactorAutenticateService,
     FriendsService,
     ChannelService,
+    ChatGateway,
   ],
 })
 export class AppModule {}

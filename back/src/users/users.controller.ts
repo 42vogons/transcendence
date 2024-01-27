@@ -4,8 +4,6 @@ import {
   Post,
   Body,
   Patch,
-  Param,
-  Delete,
   Req,
   Response,
 } from '@nestjs/common';
@@ -31,24 +29,22 @@ export class UsersController {
     return this.usersService.findFriends(request.cookies.accessToken);
   }
 
-  @Get()
+  /*@Get()
   findAll() {
     return this.usersService.findAll();
-  }
+  }*/
 
-  @Get(':id')
+  /*@Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
-  }
+  }*/
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @Patch()
+  async update(@Req() request, @Body() updateUserDto: UpdateUserDto) {
+    const token = request.cookies.accessToken;
+    const user = await this.usersService.findByToken(token);
+    console.log('userid' + user.user_id);
+    return this.usersService.update(user.user_id, updateUserDto);
   }
 
   @Post('/activeTwoFactor')

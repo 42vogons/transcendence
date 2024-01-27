@@ -37,7 +37,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   two_factor_enabled: boolean = false;
 
-  @IsInt()
+  /*@IsInt()
   total_games: number;
 
   @IsInt()
@@ -47,5 +47,5 @@ export class CreateUserDto {
   total_losses: number;
 
   @IsInt()
-  ladder_level: number;
+  ladder_level: number;*/
 }
