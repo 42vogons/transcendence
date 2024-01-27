@@ -205,28 +205,28 @@ export class GameService {
 
   loadGame(room: Room): MatchData {
     const matchData: MatchData = {
-	  roomID: room.ID,
+      roomID: room.ID,
       player1: {
-		...room.users[0],
-		position: {
-			x: this.paddleInitialPosition.x - this.paddle.width,
-			y: this.paddleInitialPosition.y
-	  	},
-  	    width: this.paddle.width,
-	    height: this.paddle.height,
-		direction: "STOP"
-	  },
+        ...room.users[0],
+        position: {
+          x: this.paddleInitialPosition.x - this.paddle.width,
+          y: this.paddleInitialPosition.y,
+        },
+        width: this.paddle.width,
+        height: this.paddle.height,
+        direction: 'STOP',
+      },
       player2: {
-		...room.users[1],
-		position: {
-			x:
-			  this.court.width - this.paddleInitialPosition.x - this.paddle.width,
-			y: this.paddleInitialPosition.y,
-		  },
-		  width: this.paddle.width,
-		  height: this.paddle.height,
-		  direction: "STOP"
-	  },
+        ...room.users[1],
+        position: {
+          x:
+            this.court.width - this.paddleInitialPosition.x - this.paddle.width,
+          y: this.paddleInitialPosition.y,
+        },
+        width: this.paddle.width,
+        height: this.paddle.height,
+        direction: 'STOP',
+      },
       court: this.court,
       ball: {
         position: {
@@ -245,11 +245,11 @@ export class GameService {
         p2: 0,
       },
       status: 'play',
-	  pausedBy: '',
-	  pausedAt: undefined,
-	  quitterID: ''
+      pausedBy: '',
+      pausedAt: undefined,
+      quitterID: '',
     };
-	this.matchs.push(matchData);
+    this.matchs.push(matchData);
     return matchData;
   }
 
@@ -264,38 +264,38 @@ export class GameService {
   }
 
   movePaddle(match: MatchData) {
-    [1, 2].forEach((i) => {
-		const player: UserData & Paddle = match[`player${i}`];
-	
-		switch (player.direction) {
-		  case 'UP':
-			player.position.y -= this.paddleSpeed;
-			break;
-		  case 'DOWN':
-			player.position.y += this.paddleSpeed;
-			break;
-		}
-	
-		if (player.position.y < 0) {
-		  player.position.y = 0;
-		} else if (player.position.y + player.height * 1.05 > this.court.height) {
-		  player.position.y = this.court.height - player.height * 1.05;
-		}
-	  });
+    [1, 2].forEach(i => {
+      const player: UserData & Paddle = match[`player${i}`];
+
+      switch (player.direction) {
+        case 'UP':
+          player.position.y -= this.paddleSpeed;
+          break;
+        case 'DOWN':
+          player.position.y += this.paddleSpeed;
+          break;
+      }
+
+      if (player.position.y < 0) {
+        player.position.y = 0;
+      } else if (player.position.y + player.height * 1.05 > this.court.height) {
+        player.position.y = this.court.height - player.height * 1.05;
+      }
+    });
   }
 
   restartMatch(match: MatchData) {
-	match.ball.position.x = this.court.width / 2 - this.ballRadius
-	match.ball.position.y = this.court.height / 2 - this.ballRadius
-	match.ball.direction.x *= -1
+    match.ball.position.x = this.court.width / 2 - this.ballRadius;
+    match.ball.position.y = this.court.height / 2 - this.ballRadius;
+    match.ball.direction.x *= -1;
 
-	if (match.score.p1 === this.maxScore || match.score.p2 == this.maxScore) {
-		match.status = "end"
-	}
+    if (match.score.p1 === this.maxScore || match.score.p2 == this.maxScore) {
+      match.status = 'end';
+    }
   }
 
   checkCollision(matchData: MatchData) {
-	const ball = matchData.ball;
+    const ball = matchData.ball;
 
     if (
       ball.position.y > matchData.court.height - 2.5 * this.ballRadius ||
@@ -304,144 +304,147 @@ export class GameService {
       matchData.ball.direction.y *= -1;
     }
 
-	if (ball.position.y < this.ballRadius) {
-		ball.position.y = this.ballRadius * 2;
-		ball.direction.y = 1;
-	}
+    if (ball.position.y < this.ballRadius) {
+      ball.position.y = this.ballRadius * 2;
+      ball.direction.y = 1;
+    }
 
-	const { x: bx, y: by } = ball.position;
-	const br = this.ballRadius
+    const { x: bx, y: by } = ball.position;
+    const br = this.ballRadius;
 
-	const playerNumber = bx < this.court.width / 2 ? 1 : 2;
-	const player = `player${playerNumber}`;
-	const { x: px, y: py } = matchData[player].position;
-	const { width: pw, height: ph } = matchData[player]
+    const playerNumber = bx < this.court.width / 2 ? 1 : 2;
+    const player = `player${playerNumber}`;
+    const { x: px, y: py } = matchData[player].position;
+    const { width: pw, height: ph } = matchData[player];
 
-	let testX = bx;
-	let testY = by;
+    let testX = bx;
+    let testY = by;
 
-	if (bx < px) {
-		testX = px;
-	} else if (bx > px + pw) {
-		testX = px + pw;
-	}
+    if (bx < px) {
+      testX = px;
+    } else if (bx > px + pw) {
+      testX = px + pw;
+    }
 
-	if (by < py) {
-		testY = py;
-	} else if (by > py + ph) {
-		testY = py + ph;
-	}
+    if (by < py) {
+      testY = py;
+    } else if (by > py + ph) {
+      testY = py + ph;
+    }
 
-	const distX = bx - testX;
-	const distY = by - testY;
-	const distance = Math.sqrt(distX * distX + distY * distY);
+    const distX = bx - testX;
+    const distY = by - testY;
+    const distance = Math.sqrt(distX * distX + distY * distY);
 
-	if ((by >= py && by <= py + ph) 
-		&& ((playerNumber === 1 && bx < px + pw) 
-		|| (playerNumber === 2 && bx > px - 2* br))) {
-		ball.direction.x *= -1;
-		ball.position.x =
-		playerNumber === 1
-			? matchData[player].position.x + matchData[player].width + br * 0.2
-			: matchData[player].position.x - br * 2;
+    if (
+      by >= py &&
+      by <= py + ph &&
+      ((playerNumber === 1 && bx < px + pw) ||
+        (playerNumber === 2 && bx > px - 2 * br))
+    ) {
+      ball.direction.x *= -1;
+      ball.position.x =
+        playerNumber === 1
+          ? matchData[player].position.x + matchData[player].width + br * 0.2
+          : matchData[player].position.x - br * 2;
 
-		matchData = {...matchData, ball}
-	} else if (ball.position.x < matchData.player1.position.x - pw) {
-		matchData.score.p2++;
-		this.restartMatch(matchData);
-	} else if (ball.position.x > matchData.player2.position.x + pw - br) {
-		matchData.score.p1++;
-		this.restartMatch(matchData);
-	}
+      matchData = { ...matchData, ball };
+    } else if (ball.position.x < matchData.player1.position.x - pw) {
+      matchData.score.p2++;
+      this.restartMatch(matchData);
+    } else if (ball.position.x > matchData.player2.position.x + pw - br) {
+      matchData.score.p1++;
+      this.restartMatch(matchData);
+    }
   }
 
   refreshMatch(
     matchData: MatchData,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-	this.updateMatch(matchData);
+    this.updateMatch(matchData);
     io.to(matchData.player1.roomID).emit('match_updated', matchData);
   }
 
   removeMatchFromList(matchData: MatchData): MatchData[] {
-	const match = this.findMatchByRoomID(matchData.roomID);
+    const match = this.findMatchByRoomID(matchData.roomID);
     if (!match) return this.matchs;
 
     const room = this.findRoomByRoomID(matchData.roomID);
     if (room) this.deleteRoomByRoomID(room.ID);
 
-    let player1 = match.player1
-    let player2 = match.player2
+    const player1 = match.player1;
+    const player2 = match.player2;
 
     player1.roomID = '';
     player2.roomID = '';
-	player1.status = 'idle';
+    player1.status = 'idle';
     player2.status = 'idle';
 
     this.updatePlayer(player1);
     this.updatePlayer(player2);
 
-	this.matchs = this.matchs.filter(m => {
-		return m.roomID !== match.roomID;
-	  });
+    this.matchs = this.matchs.filter(m => {
+      return m.roomID !== match.roomID;
+    });
     return this.matchs;
   }
 
   saveMatchResult(matchResult: MatchResult) {
-	this.matchsResults.push(matchResult)
+    this.matchsResults.push(matchResult);
   }
 
-  endMatch(match: MatchData): MatchResult{
-	let endedAt = new Date()
-	let winner: string
-	let looser: string
+  endMatch(match: MatchData): MatchResult {
+    const endedAt = new Date();
+    let winner: string;
+    let looser: string;
 
-	if (!match.quitterID) {
-		if (match.score.p1 === this.maxScore) {
-			winner = match.player1.userID
-			looser = match.player2.userID
-		} else {
-			looser = match.player1.userID
-			winner = match.player2.userID
-		}
-	} else {
-		//todo
-	}
+    if (!match.quitterID) {
+      if (match.score.p1 === this.maxScore) {
+        winner = match.player1.userID;
+        looser = match.player2.userID;
+      } else {
+        looser = match.player1.userID;
+        winner = match.player2.userID;
+      }
+    } else {
+      //todo
+    }
 
-	let player1 = {
-		userID: match.player1.userID,
-		score: match.score.p1
-	}
+    const player1 = {
+      userID: match.player1.userID,
+      score: match.score.p1,
+    };
 
-	let player2 = {
-		userID: match.player2.userID,
-		score: match.score.p2
-	}
+    const player2 = {
+      userID: match.player2.userID,
+      score: match.score.p2,
+    };
 
-	let matchResult: MatchResult = {
-		player1,
-		player2,
-		winner,
-		looser,
-		endedAt
-	}
+    const matchResult: MatchResult = {
+      player1,
+      player2,
+      winner,
+      looser,
+      endedAt,
+    };
 
-	this.saveMatchResult(matchResult)
-	return matchResult
+    this.saveMatchResult(matchResult);
+    return matchResult;
   }
 
   gameInProgress(
     roomID: string,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-	let match = this.findMatchByRoomID(roomID);
+    const match = this.findMatchByRoomID(roomID);
     if (match.status === 'end') {
-		const matchResult = this.endMatch(match)
-		io.to(roomID).emit('end_match', matchResult)
-		io.to(roomID).emit('status_changed', 'connected')
-		this.removeMatchFromList(match)
-		return
-	};
+      const matchResult = this.endMatch(match);
+      io.to(roomID).emit('end_match', matchResult);
+      io.to(roomID).emit('status_changed', 'connected');
+      this.removeMatchFromList(match);
+      return;
+    }
 
     if (match.status === 'play') {
       this.moveBall(match);

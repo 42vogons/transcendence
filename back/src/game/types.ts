@@ -33,7 +33,7 @@ export type Paddle = {
   };
   width: number;
   height: number;
-  direction: "UP" | "DOWN" | "STOP"
+  direction: 'UP' | 'DOWN' | 'STOP';
 };
 
 export type MatchData = {
@@ -56,15 +56,15 @@ export type MatchData = {
 };
 
 export type MatchResult = {
-	player1: {
-		userID: string
-		score: number
-	};
-	player2: {
-		userID: string
-		score: number
-	};
-	winner: string
-	looser: string
-	endedAt: Date
-}
+  player1: {
+    userID: string;
+    score: number;
+  };
+  player2: {
+    userID: string;
+    score: number;
+  };
+  winner: string;
+  looser: string;
+  endedAt: Date;
+};

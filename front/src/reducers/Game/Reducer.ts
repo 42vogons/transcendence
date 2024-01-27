@@ -1,9 +1,11 @@
 import { ActionTypes } from './Action'
-import { MatchData } from './Types'
+import { MatchData, MatchResult } from './Types'
 
 interface GameState {
 	status: string
 	match: MatchData
+	matchResult: MatchResult
+	isMatchCompleted: boolean
 }
 
 export function GameReducer(state: GameState, action: any) {
@@ -22,6 +24,23 @@ export function GameReducer(state: GameState, action: any) {
 			const newState = {
 				...state,
 				match: action.payload.match,
+			}
+			return newState
+		}
+		case ActionTypes.END_MATCH: {
+			const newState = {
+				...state,
+				match: {} as MatchData,
+				matchResult: action.payload.matchResult,
+				isMatchCompleted: true,
+			}
+			return newState
+		}
+		case ActionTypes.CLEAR_MATCH: {
+			const newState = {
+				...state,
+				matchResult: {} as MatchResult,
+				isMatchCompleted: false,
 			}
 			return newState
 		}

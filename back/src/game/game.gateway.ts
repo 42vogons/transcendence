@@ -77,13 +77,13 @@ export class GameGateway
     const { type, key } = data;
     const direction =
       type === 'keyup' ? 'STOP' : key.replace('Arrow', '').toUpperCase();
-	const player = this.gameService.findPlayerBySocketID(client.id)
-	let match = this.gameService.findMatchByRoomID(player.roomID)
-	if (match.player1.userID === player.userID)
-		match.player1.direction = direction
-	else if (match.player2.userID === player.userID)
-		match.player2.direction = direction
-	this.gameService.updateMatch(match)
+    const player = this.gameService.findPlayerBySocketID(client.id);
+    const match = this.gameService.findMatchByRoomID(player.roomID);
+    if (match.player1.userID === player.userID)
+      match.player1.direction = direction;
+    else if (match.player2.userID === player.userID)
+      match.player2.direction = direction;
+    this.gameService.updateMatch(match);
   }
 
   @SubscribeMessage('playing')
@@ -109,7 +109,5 @@ export class GameGateway
   }
 
   @SubscribeMessage('pause')
-  handlePausePlaying(client: Socket) {
-	
-  }
+  handlePausePlaying(client: Socket) {}
 }

@@ -1,6 +1,11 @@
-import { matchUpdate, statusChange } from '@/reducers/Game/Action'
+import {
+	clearMatch,
+	endMatch,
+	matchUpdate,
+	statusChange,
+} from '@/reducers/Game/Action'
 import { GameReducer } from '@/reducers/Game/Reducer'
-import { MatchData } from '@/reducers/Game/Types'
+import { MatchData, MatchResult } from '@/reducers/Game/Types'
 import { useRouter } from 'next/router'
 import { ReactNode, createContext, useEffect, useReducer } from 'react'
 import socketClient from 'socket.io-client'
@@ -8,10 +13,13 @@ import socketClient from 'socket.io-client'
 interface GameContextType {
 	status: string
 	match: MatchData
+	matchResult: MatchResult
+	isMatchCompleted: boolean
 	sendKey: (type: string, key: string) => void
 	joinQueue: (userID: string) => void
 	exitQueue: () => void
 	playing: () => void
+	clearMatchCompleted: () => void
 }
 
 interface GameProviderProps {
@@ -26,68 +34,15 @@ const socket = socketClient('http://localhost:3001/game', {
 
 export const GameContext = createContext({} as GameContextType)
 
-// const matchData: MatchData = {
-// 	player1: {
-// 		roomID: '',
-// 		socketID: '',
-// 		userID: '',
-// 		status: 'idle',
-// 	},
-// 	player2: {
-// 		roomID: '',
-// 		socketID: '',
-// 		userID: '',
-// 		status: 'idle',
-// 	},
-// 	court: {
-// 		width: 0,
-// 		height: 0,
-// 	},
-// 	paddle1: {
-// 		position: {
-// 			x: 0,
-// 			y: 0,
-// 		},
-// 		width: 0,
-// 		height: 0,
-// 	},
-// 	paddle2: {
-// 		position: {
-// 			x: 0,
-// 			y: 0,
-// 		},
-// 		width: 0,
-// 		height: 0,
-// 	},
-// 	ball: {
-// 		position: {
-// 			x: 0,
-// 			y: 0,
-// 		},
-// 		radius: 0,
-// 		speed: {
-// 			x: 0,
-// 			y: 0,
-// 		},
-// 		direction: {
-// 			x: 1,
-// 			y: 1,
-// 		},
-// 	},
-// 	score: {
-// 		p1: 0,
-// 		p2: 0,
-// 	},
-// 	status: 'play',
-// }
-
 export function GameProvider({ children }: GameProviderProps) {
 	const [state, dispatch] = useReducer(GameReducer, {
 		status: 'connected',
-		match: {},
+		match: {} as MatchData,
+		matchResult: {} as MatchResult,
+		isMatchCompleted: false,
 	})
 
-	const { status, match } = state
+	const { status, match, matchResult, isMatchCompleted } = state
 
 	const router = useRouter()
 
@@ -99,8 +54,9 @@ export function GameProvider({ children }: GameProviderProps) {
 		socket.on('match_updated', (match: MatchData) => {
 			dispatch(matchUpdate(match))
 		})
-		socket.on('end_match', (result: any) => {
-			console.log('end_match: ', result)
+		socket.on('end_match', (matchResult: MatchResult) => {
+			console.log('end_match: ', matchResult)
+			dispatch(endMatch(matchResult))
 		})
 		socket.open()
 	}, [router])
@@ -126,9 +82,24 @@ export function GameProvider({ children }: GameProviderProps) {
 	function exitQueue() {
 		socket.emit('exit_queue', '')
 	}
+
+	function clearMatchCompleted() {
+		dispatch(clearMatch())
+	}
+
 	return (
 		<GameContext.Provider
-			value={{ status, match, sendKey, joinQueue, exitQueue, playing }}
+			value={{
+				status,
+				match,
+				matchResult,
+				isMatchCompleted,
+				sendKey,
+				joinQueue,
+				exitQueue,
+				playing,
+				clearMatchCompleted,
+			}}
 		>
 			{children}
 		</GameContext.Provider>

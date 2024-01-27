@@ -1,8 +1,10 @@
-import { MatchData } from './Types'
+import { MatchData, MatchResult } from './Types'
 
 export enum ActionTypes {
 	STATUS_CHANGE = 'STATUS_CHANGE',
 	MATCH_UPDATE = 'MATCH_UPDATE',
+	END_MATCH = 'END_MATCH',
+	CLEAR_MATCH = 'CLEAR_MATCH',
 }
 
 export function statusChange(status: string) {
@@ -20,5 +22,20 @@ export function matchUpdate(match: MatchData) {
 		payload: {
 			match,
 		},
+	}
+}
+
+export function endMatch(matchResult: MatchResult) {
+	return {
+		type: ActionTypes.END_MATCH,
+		payload: {
+			matchResult,
+		},
+	}
+}
+
+export function clearMatch() {
+	return {
+		type: ActionTypes.CLEAR_MATCH,
 	}
 }

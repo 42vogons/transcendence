@@ -13,7 +13,15 @@ import { GameContext } from '@/contexts/GameContext'
 import Loading from '@/components/loading'
 
 export default function Home() {
-	const { status, joinQueue, exitQueue, playing } = useContext(GameContext)
+	const {
+		status,
+		joinQueue,
+		exitQueue,
+		playing,
+		matchResult,
+		isMatchCompleted,
+		clearMatchCompleted,
+	} = useContext(GameContext)
 
 	const [userID, setUserID] = useState('')
 
@@ -52,7 +60,22 @@ export default function Home() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<HomeContainer>
-				{status === 'connected' && (
+				{isMatchCompleted && (
+					<LoadingContainer>
+						{/* <Loading size={200} /> */}
+						<h3>Jogo Acabou</h3>
+						<p>
+							Você{' '}
+							{matchResult.winner === userID
+								? 'venceu'
+								: 'perdeu'}
+						</p>
+						<button onMouseUp={() => clearMatchCompleted()}>
+							OK
+						</button>
+					</LoadingContainer>
+				)}
+				{!isMatchCompleted && status === 'connected' && (
 					<PlayButton
 						onClick={() => {
 							joinQueue(userID)
@@ -63,7 +86,7 @@ export default function Home() {
 						Play
 					</PlayButton>
 				)}
-				{status === 'searching' && (
+				{!isMatchCompleted && status === 'searching' && (
 					<LoadingContainer>
 						<Loading size={200} />
 						<h3>Looking for a match...</h3>
@@ -71,14 +94,14 @@ export default function Home() {
 					</LoadingContainer>
 				)}
 
-				{status === 'readyToPlay' && (
+				{!isMatchCompleted && status === 'readyToPlay' && (
 					<LoadingContainer>
 						{/* <Loading size={200} /> */}
 						<h3>Ready?</h3>
 						<button onMouseUp={() => playing()}>Ready</button>
 					</LoadingContainer>
 				)}
-				{status === 'playing' && <Game />}
+				{!isMatchCompleted && status === 'playing' && <Game />}
 			</HomeContainer>
 		</>
 	)
