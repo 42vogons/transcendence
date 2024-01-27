@@ -53,6 +53,7 @@ export type MatchData = {
   pausedBy: string;
   pausedAt: Date;
   quitterID: string;
+  isResumed: boolean
 };
 
 export type MatchResult = {

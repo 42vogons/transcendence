@@ -109,5 +109,12 @@ export class GameGateway
   }
 
   @SubscribeMessage('pause')
-  handlePausePlaying(client: Socket) {}
+  handlePausePlaying(client: Socket) {
+	this.gameService.pauseMatch(client.id, this.io)
+  }
+
+  @SubscribeMessage('resume')
+  handleResumePlaying(client: Socket) {
+	this.gameService.resumeMatch(client.id, this.io)
+  }
 }

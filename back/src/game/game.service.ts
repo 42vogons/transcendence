@@ -248,6 +248,7 @@ export class GameService {
       pausedBy: '',
       pausedAt: undefined,
       quitterID: '',
+	  isResumed: false
     };
     this.matchs.push(matchData);
     return matchData;
@@ -408,7 +409,13 @@ export class GameService {
         winner = match.player2.userID;
       }
     } else {
-      //todo
+		if (match.quitterID === match.player2.userID) {
+			winner = match.player1.userID;
+			looser = match.player2.userID;
+		} else {
+			looser = match.player1.userID;
+			winner = match.player2.userID;
+		}
     }
 
     const player1 = {
@@ -433,6 +440,61 @@ export class GameService {
     return matchResult;
   }
 
+  findMatchBySocketID(socketID: string): MatchData {
+	const player = this.findPlayerBySocketID(socketID)
+	const match = this.findMatchByRoomID(player.roomID)
+	return match
+  }
+
+  giveUpMatch(matchData: MatchData, io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
+	let match = this.findMatchByRoomID(matchData.roomID)
+
+	if(match.isResumed)
+	 return
+
+	match.status = "end"
+	match.quitterID = match.pausedBy
+	this.updateMatch(match)
+	this.gameInProgress(match.roomID, io)
+  }
+
+  pauseMatch(sockerID: string, io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
+	const player = this.findPlayerBySocketID(sockerID)
+	let match = this.findMatchByRoomID(player.roomID)
+
+	match.isResumed = false
+	match.status = "pause"
+	match.pausedAt = new Date()
+	match.pausedBy = player.userID
+	this.updateMatch(match)
+
+	const timer = setTimeout(() => {
+        this.giveUpMatch(match, io);
+      }, 10000);
+
+
+	this.updateMatch(match)
+  }
+
+  resumeMatch(sockerID: string,
+	io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+	) {
+
+	const player = this.findPlayerBySocketID(sockerID)
+	let match = this.findMatchByRoomID(player.roomID)
+
+	if (match.pausedBy !== player.userID)
+		return
+
+	match.isResumed = true
+	match.status = "play"
+	match.pausedAt = undefined
+	match.pausedBy = ''
+
+	this.updateMatch(match)
+	this.gameInProgress(player.roomID, io)
+  }
+
   gameInProgress(
     roomID: string,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
@@ -445,6 +507,11 @@ export class GameService {
       this.removeMatchFromList(match);
       return;
     }
+
+	if (match.status === 'pause') {
+		this.refreshMatch(match, io);
+		return
+	}
 
     if (match.status === 'play') {
       this.moveBall(match);
