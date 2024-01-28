@@ -1,10 +1,11 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class ChannelDto {
+export class RemoveMemberDto {
   @IsNotEmpty()
   @IsNumber()
   channel_id: number;
 
+  @IsNotEmpty()
   @IsNumber()
-  password: string;
+  member_id: number;
 }

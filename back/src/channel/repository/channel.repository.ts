@@ -30,8 +30,6 @@ export class ChannelRepository {
         owner_id: true,
       },
     });
-    console.log('userr' + user_id);
-    console.log('owner_id' + channelOwner.owner_id);
     return channelOwner ? channelOwner.owner_id === user_id : false;
   }
 
@@ -163,6 +161,17 @@ export class ChannelRepository {
       },
       data: {
         password: password,
+      },
+    });
+  }
+
+  async checkMember(user_id: number, channel_id: number){
+    return await this.prisma.channel_members.findUnique({
+      where: {
+        channel_id_user_id: {
+          channel_id: channel_id,
+          user_id: user_id,
+        },
       },
     });
   }

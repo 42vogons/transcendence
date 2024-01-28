@@ -11,6 +11,8 @@ import { ChannelService } from './channel.service';
 import { MemberDto } from './dto/member.dto';
 import { ChannelDto } from './dto/channel.dto';
 import { CreateChannelDto } from './dto/create-channel.dto';
+import { LeaveDto } from './dto/leave.dto';
+import { RemoveMemberDto } from './dto/removeMember.dto copy';
 
 @Controller('channel')
 export class ChannelController {
@@ -35,10 +37,10 @@ export class ChannelController {
   }
 
   @Delete('/removeMember')
-  removeMember(@Req() request, @Body() member: MemberDto) {
+  removeMember(@Req() request, @Body() member: RemoveMemberDto) {
     const token = request.cookies.accessToken;
     return this.channelService.removeMember(
-      member.user_id,
+      member.member_id,
       member.channel_id,
       token,
     );
@@ -61,7 +63,7 @@ export class ChannelController {
   }
 
   @Post('/leave')
-  leaveChannel(@Req() request, @Body() channel: ChannelDto) {
+  leaveChannel(@Req() request, @Body() channel: LeaveDto) {
     const token = request.cookies.accessToken;
     return this.channelService.leaveChannel(channel.channel_id, token);
   }

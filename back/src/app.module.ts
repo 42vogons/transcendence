@@ -8,9 +8,9 @@ import { TwoFactorAutenticateService } from './two-factor-autenticate/two-factor
 import { LoginModule } from './login/login.module';
 import { UsersModule } from './users/users.module';
 import { FriendsModule } from './friends/friends.module';
-import { ChannelService } from './chat/channel.service';
-import { ChannelController } from './chat/channel.controller';
-import { ChatModule } from './chat/channel.module';
+import { ChannelService } from './channel/channel.service';
+import { ChannelController } from './channel/channel.controller';
+import { ChatModule } from './channel/channel.module';
 import { ChatGateway } from './chat/chat.gateway';
 
 const secretJwt = process.env.SECRET_JWT;
