@@ -2,16 +2,19 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ChannelRepository } from './repository/channel.repository';
 import { CreateChannelDto } from './dto/create-channel.dto';
+import { UsersRepository } from 'src/users/repositories/users.repository';
 
 @Injectable()
 export class ChannelService {
   constructor(
     private readonly repository: ChannelRepository,
+    private readonly userRepository: UsersRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -32,12 +35,15 @@ export class ChannelService {
     status: string,
     token: any,
   ) {
-    //todo verificar se o usuário existe antes de cadastrar
     const decodeToken = this.jwtService.decode(token);
     const userId = decodeToken.id;
     const isAdmin = await this.repository.checkUser(channel_id, userId);
     const isOwner = await this.repository.checkOwner(channel_id, userId);
     if (isAdmin || isOwner) {
+      const user = await this.userRepository.findOne(member_id);
+      if (!user) {
+        throw new NotFoundException('Membro não encontrado');
+      }
       const member = await this.repository.checkMember(member_id, channel_id);
       if (member) {
         throw new ConflictException('O membro já está no canal');
@@ -64,6 +70,7 @@ export class ChannelService {
         throw new BadRequestException('O membro não está no canal');
       }
       this.repository.removeMemberChannel(member_id, channel_id);
+      return 'Membro removido';
     } else {
       throw new UnauthorizedException(
         'Você não é admin ou owner, ou não pode excluir o owner',
@@ -83,6 +90,7 @@ export class ChannelService {
     const isOwner = await this.repository.checkOwner(channel_id, userId);
     if (isAdmin || isOwner) {
       this.repository.changeMemberStatus(member_id, channel_id, status);
+      return 'Status do membro alterado com sucesso';
     } else {
       throw new UnauthorizedException('Você não é admin ou owner');
     }
@@ -106,6 +114,7 @@ export class ChannelService {
     const owner = await this.repository.checkOwner(channel_id, userId);
     if (owner === true) {
       this.repository.changeOwner(admins[0].user_id, channel_id);
+      return 'Deixou o canal';
     }
     return this.repository.leaveChannel(userId, channel_id);
   }
@@ -135,6 +144,7 @@ export class ChannelService {
     const isOwner = await this.repository.checkOwner(channel_id, userId);
     if (isOwner) {
       this.repository.changePassword(channel_id, password);
+      return 'Password alterado';
     } else {
       throw new UnauthorizedException('Você não é owner');
     }
