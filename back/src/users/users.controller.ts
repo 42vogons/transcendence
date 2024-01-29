@@ -6,11 +6,13 @@ import {
   Patch,
   Req,
   Response,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { TwoFactorAutenticateService } from '../two-factor-autenticate/two-factor-autenticate.service';
+import { AuthGuard } from 'src/login/auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -25,8 +27,9 @@ export class UsersController {
   }
 
   @Get('/friends')
+  @UseGuards(AuthGuard)
   async findFriend(@Req() request) {
-    return this.usersService.findFriends(request.cookies.accessToken);
+    return this.usersService.findFriends(request.user.id);
   }
 
   /*@Get()
@@ -40,17 +43,16 @@ export class UsersController {
   }*/
 
   @Patch()
+  @UseGuards(AuthGuard)
   async update(@Req() request, @Body() updateUserDto: UpdateUserDto) {
-    const token = request.cookies.accessToken;
-    const user = await this.usersService.findByToken(token);
-    console.log('userid' + user.user_id);
+    const user = await this.usersService.findByToken(request.user.id);
     return this.usersService.update(user.user_id, updateUserDto);
   }
 
   @Post('/activeTwoFactor')
+  @UseGuards(AuthGuard)
   async activeTwoFactor(@Req() request, @Response() response) {
-    const token = request.cookies.accessToken;
-    const user = await this.usersService.findByToken(token);
+    const user = await this.usersService.findByToken(request.user.id);
     user.two_factor_enabled = user.two_factor_enabled ? false : true;
     if (user.two_factor_enabled) {
       const { secret, otpauthUrl } =

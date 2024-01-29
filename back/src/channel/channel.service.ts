@@ -18,14 +18,12 @@ export class ChannelService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(createChanneltDto: CreateChannelDto, token: any) {
-    const decodeToken = this.jwtService.decode(token);
-    const userId = decodeToken.id;
+  async create(createChanneltDto: CreateChannelDto, userId: any) {
     const channel = await this.repository.createChannel(
       createChanneltDto,
       userId,
     );
-    this.addMember(userId, channel.channel_id, 'Admin', token);
+    this.addMember(userId, channel.channel_id, 'Admin', userId);
     return 'Canal criado';
   }
 
@@ -33,10 +31,8 @@ export class ChannelService {
     member_id: number,
     channel_id: number,
     status: string,
-    token: any,
+    userId: any,
   ) {
-    const decodeToken = this.jwtService.decode(token);
-    const userId = decodeToken.id;
     const isAdmin = await this.repository.checkUser(channel_id, userId);
     const isOwner = await this.repository.checkOwner(channel_id, userId);
     if (isAdmin || isOwner) {
@@ -55,9 +51,7 @@ export class ChannelService {
     }
   }
 
-  async removeMember(member_id: number, channel_id: number, token: any) {
-    const decodeToken = this.jwtService.decode(token);
-    const userId = decodeToken.id;
+  async removeMember(member_id: number, channel_id: number, userId: any) {
     const isAdmin = await this.repository.checkUser(channel_id, userId);
     const isOwner = await this.repository.checkOwner(channel_id, userId);
     const memberIsOwner = await this.repository.checkOwner(
@@ -82,10 +76,8 @@ export class ChannelService {
     member_id: number,
     channel_id: number,
     status: string,
-    token: any,
+    userId: any,
   ) {
-    const decodeToken = this.jwtService.decode(token);
-    const userId = decodeToken.id;
     const isAdmin = await this.repository.checkUser(channel_id, userId);
     const isOwner = await this.repository.checkOwner(channel_id, userId);
     if (isAdmin || isOwner) {
@@ -96,15 +88,11 @@ export class ChannelService {
     }
   }
 
-  async listChannelsByUser(token: any) {
-    const decodeToken = this.jwtService.decode(token);
-    const userId = decodeToken.id;
+  async listChannelsByUser(userId: any) {
     return this.repository.listChannelsByUser(userId);
   }
 
-  async leaveChannel(channel_id: number, token: any) {
-    const decodeToken = this.jwtService.decode(token);
-    const userId = decodeToken.id;
+  async leaveChannel(channel_id: number, userId: any) {
     const admins = await this.repository.checkAdmins(userId, channel_id);
     if (admins.length === 0) {
       throw new ConflictException(
@@ -123,10 +111,8 @@ export class ChannelService {
     return await this.repository.findAllChannels();
   }
 
-  async enterChannel(channel_id: number, password: string, token: any) {
+  async enterChannel(channel_id: number, password: string, userId: any) {
     const channel = await this.repository.findChannel(channel_id);
-    const decodeToken = this.jwtService.decode(token);
-    const userId = decodeToken.id;
     if (
       (channel.password === password || channel.type === 'Public') &&
       channel.type !== 'Restrict'
@@ -138,9 +124,7 @@ export class ChannelService {
     }
   }
 
-  async changePassword(channel_id: number, password: string, token: any) {
-    const decodeToken = this.jwtService.decode(token);
-    const userId = decodeToken.id;
+  async changePassword(channel_id: number, password: string, userId: any) {
     const isOwner = await this.repository.checkOwner(channel_id, userId);
     if (isOwner) {
       this.repository.changePassword(channel_id, password);

@@ -6,6 +6,7 @@ import {
   Get,
   Delete,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { MemberDto } from './dto/member.dto';
@@ -13,7 +14,9 @@ import { ChannelDto } from './dto/channel.dto';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { LeaveDto } from './dto/leave.dto';
 import { RemoveMemberDto } from './dto/removeMember.dto copy';
+import { AuthGuard } from 'src/login/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('channel')
 export class ChannelController {
   jwtService: any;
@@ -21,51 +24,48 @@ export class ChannelController {
 
   @Post('/create-channel')
   create(@Req() request, @Body() createChatDto: CreateChannelDto) {
-    const token = request.cookies.accessToken;
-    return this.channelService.create(createChatDto, token);
+    return this.channelService.create(createChatDto, request.user.id);
   }
 
   @Post('/addMember')
   addMember(@Req() request, @Body() member: MemberDto) {
-    const token = request.cookies.accessToken;
     return this.channelService.addMember(
       member.user_id,
       member.channel_id,
       member.status,
-      token,
+      request.user.id,
     );
   }
 
   @Delete('/removeMember')
   removeMember(@Req() request, @Body() member: RemoveMemberDto) {
-    const token = request.cookies.accessToken;
     return this.channelService.removeMember(
       member.member_id,
       member.channel_id,
-      token,
+      request.user.id,
     );
   }
   @Patch('/changeMemberStatus')
   changeMemberStatus(@Req() request, @Body() member: MemberDto) {
-    const token = request.cookies.accessToken;
     return this.channelService.changeMemberStatus(
       member.user_id,
       member.channel_id,
       member.status,
-      token,
+      request.user.id,
     );
   }
 
   @Get('/channelsByUser')
   listChannelsByUser(@Req() request) {
-    const token = request.cookies.accessToken;
-    return this.channelService.listChannelsByUser(token);
+    return this.channelService.listChannelsByUser(request.user.id);
   }
 
   @Post('/leave')
   leaveChannel(@Req() request, @Body() channel: LeaveDto) {
-    const token = request.cookies.accessToken;
-    return this.channelService.leaveChannel(channel.channel_id, token);
+    return this.channelService.leaveChannel(
+      channel.channel_id,
+      request.user.id,
+    );
   }
 
   @Get('/channels')
@@ -75,21 +75,19 @@ export class ChannelController {
 
   @Post('/enterChannel')
   enterChannel(@Req() request, @Body() channel: ChannelDto) {
-    const token = request.cookies.accessToken;
     return this.channelService.enterChannel(
       channel.channel_id,
       channel.password,
-      token,
+      request.user.id,
     );
   }
 
   @Patch('/changePassword')
   async changePassword(@Req() request, @Body() channel: ChannelDto) {
-    const token = request.cookies.accessToken;
     return await this.channelService.changePassword(
       channel.channel_id,
       channel.password,
-      token,
+      request.user.id,
     );
   }
 
