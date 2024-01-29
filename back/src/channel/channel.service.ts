@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -10,6 +9,8 @@ import { ChannelRepository } from './repository/channel.repository';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UsersRepository } from 'src/users/repositories/users.repository';
 
+import * as argon2 from 'argon2';
+
 @Injectable()
 export class ChannelService {
   constructor(
@@ -18,7 +19,18 @@ export class ChannelService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async hashPassword(password: string): Promise<string> {
+    return await argon2.hash(password);
+  }
+
+  async validatePassword(password: string, hash: string): Promise<boolean> {
+    return await argon2.verify(hash, password);
+  }
+
   async create(createChanneltDto: CreateChannelDto, userId: any) {
+    createChanneltDto.password = await this.hashPassword(
+      createChanneltDto.password,
+    );
     const channel = await this.repository.createChannel(
       createChanneltDto,
       userId,
@@ -113,8 +125,12 @@ export class ChannelService {
 
   async enterChannel(channel_id: number, password: string, userId: any) {
     const channel = await this.repository.findChannel(channel_id);
+    const validPassword = await this.validatePassword(
+      password,
+      channel.password,
+    );
     if (
-      (channel.password === password || channel.type === 'Public') &&
+      (validPassword || channel.type === 'Public') &&
       channel.type !== 'Restrict'
     ) {
       this.repository.addUserToChannel(userId, channel_id, 'Member');
