@@ -126,6 +126,7 @@ model users {
   total_wins                                        Int?                @default(0)
   total_losses                                      Int?                @default(0)
   ladder_level                                      Int?
+  client_id                                         String?             @db.VarChar(255)
   admin_actions_admin_actions_executed_byTousers    admin_actions[]     @relation("admin_actions_executed_byTousers")
   admin_actions_admin_actions_target_user_idTousers admin_actions[]     @relation("admin_actions_target_user_idTousers")
   channel_members                                   channel_members[]

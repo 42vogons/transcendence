@@ -14,4 +14,5 @@ export class UserEntity implements users {
   total_wins: number;
   total_losses: number;
   ladder_level: number;
+  client_id: string;
 }
