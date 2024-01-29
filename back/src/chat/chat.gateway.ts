@@ -9,7 +9,9 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UsersService } from 'src/users/users.service';
 import { ChatDto } from './dto/chat.dto';
+import * as cookie from 'cookie';
 
 @WebSocketGateway()
 export class ChatGateway
@@ -18,7 +20,10 @@ export class ChatGateway
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('AppGateway');
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @SubscribeMessage('msgToServer')
   async handleMessage(client: Socket, payload: ChatDto): Promise<void> {
@@ -44,15 +49,24 @@ export class ChatGateway
 
   async handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
-    try {
-      const messages = await this.prisma.chat_messages.findMany({
-        orderBy: {
-          timestamp: 'asc',
-        },
-      });
-      client.emit('initialMessages', messages);
-    } catch (error) {
-      console.error('Error retrieving initial messages:', error);
+    const cookies = cookie.parse(client.handshake.headers.cookie || '');
+    this.logger.log(`cookies: ${JSON.stringify(cookies)}`);
+    if (cookies.accessToken) {
+      const token = cookies.accessToken;
+      this.logger.log(`accessToken: ${token}`);
+      const user = await this.usersService.findByToken(token);
+      this.logger.log(`user: $${JSON.stringify(user)}`);
+      try {
+        const messages = await this.prisma.chat_messages.findMany({
+          where: { sender_id: user.user_id },
+          orderBy: { timestamp: 'asc' },
+        });
+        client.emit('initialMessages', messages);
+      } catch (error) {
+        console.error('Error retrieving initial messages:', error);
+      }
+    } else {
+      this.logger.log('accessToken not found in cookies');
     }
   }
 
