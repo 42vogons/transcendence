@@ -165,7 +165,7 @@ export class ChannelRepository {
     });
   }
 
-  async checkMember(user_id: number, channel_id: number){
+  async checkMember(user_id: number, channel_id: number) {
     return await this.prisma.channel_members.findUnique({
       where: {
         channel_id_user_id: {
