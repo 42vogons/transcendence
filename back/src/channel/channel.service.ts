@@ -61,7 +61,7 @@ export class ChannelService {
     if ((isAdmin || isOwner) && memberIsOwner == false) {
       const member = await this.repository.checkMember(member_id, channel_id);
       if (!member) {
-        throw new BadRequestException('O membro não está no canal');
+        throw new NotFoundException('O membro não está no canal');
       }
       this.repository.removeMemberChannel(member_id, channel_id);
       return 'Membro removido';
