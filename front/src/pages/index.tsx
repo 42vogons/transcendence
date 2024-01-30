@@ -1,13 +1,50 @@
 import Head from 'next/head'
-import { ReactElement, useState } from 'react'
+import { ReactElement, useContext, useEffect, useState } from 'react'
 import { FaGamepad } from 'react-icons/fa6'
 
-import { HomeContainer, PlayButton } from '@/styles/pages/home'
+import {
+	HomeContainer,
+	LoadingContainer,
+	PlayButton,
+} from '@/styles/pages/home'
 import Layout from '@/components/layout'
 import Game from '@/components/game'
+import { GameContext } from '@/contexts/GameContext'
+import Loading from '@/components/loading'
 
 export default function Home() {
-	const [showGame, setShowGame] = useState(true)
+	const {
+		status,
+		joinQueue,
+		exitQueue,
+		playing,
+		matchResult,
+		isMatchCompleted,
+		clearMatchCompleted,
+	} = useContext(GameContext)
+
+	const [userID, setUserID] = useState('')
+
+	function getPlayerInfo() {
+		let user = localStorage.getItem('@42Transcendence:user')
+		if (!user) {
+			user = new Date().toLocaleString()
+			localStorage.setItem('@42Transcendence:user', JSON.stringify(user))
+		}
+		return user
+	}
+
+	useEffect(() => {
+		setUserID(getPlayerInfo())
+	}, [])
+
+	useEffect(() => {
+		console.log('userID:', userID)
+	}, [userID])
+
+	useEffect(() => {
+		console.log('GameStatus:', status)
+	}, [status])
 	return (
 		<>
 			<Head>
@@ -23,14 +60,48 @@ export default function Home() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<HomeContainer>
-				{!showGame ? (
-					<PlayButton onClick={() => setShowGame(true)}>
+				{isMatchCompleted && (
+					<LoadingContainer>
+						{/* <Loading size={200} /> */}
+						<h3>Jogo Acabou</h3>
+						<p>
+							Você{' '}
+							{matchResult.winner === userID
+								? 'venceu'
+								: 'perdeu'}
+						</p>
+						<button onMouseUp={() => clearMatchCompleted()}>
+							OK
+						</button>
+					</LoadingContainer>
+				)}
+				{!isMatchCompleted && status === 'connected' && (
+					<PlayButton
+						onClick={() => {
+							joinQueue(userID)
+							console.log('userID:', userID)
+						}}
+					>
 						<FaGamepad size={40} />
 						Play
 					</PlayButton>
-				) : (
-					<Game />
 				)}
+				{!isMatchCompleted && status === 'searching' && (
+					<LoadingContainer>
+						<Loading size={200} />
+						<h3>Looking for a match...</h3>
+						<button onMouseUp={() => exitQueue()}>Cancel</button>
+					</LoadingContainer>
+				)}
+
+				{!isMatchCompleted && status === 'readyToPlay' && (
+					<LoadingContainer>
+						{/* <Loading size={200} /> */}
+						<h3>Ready?</h3>
+						<button onMouseUp={() => playing()}>Ready</button>
+					</LoadingContainer>
+				)}
+				{!isMatchCompleted && status === 'playing' && <Game />}
 			</HomeContainer>
 		</>
 	)

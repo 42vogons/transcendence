@@ -7,6 +7,7 @@ import { FriendsService } from './friends/friends.service';
 import { TwoFactorAutenticateService } from './two-factor-autenticate/two-factor-autenticate.service';
 import { LoginModule } from './login/login.module';
 import { UsersModule } from './users/users.module';
+import { GameModule } from './game/game.module';
 import { FriendsModule } from './friends/friends.module';
 import { ChannelService } from './channel/channel.service';
 import { ChannelController } from './channel/channel.controller';
@@ -25,6 +26,7 @@ const secretJwt = process.env.SECRET_JWT;
     }),
     FriendsModule,
     ChatModule,
+    GameModule,
   ],
   controllers: [LoginController, FriendsController, ChannelController],
   providers: [
