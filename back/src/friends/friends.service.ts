@@ -10,13 +10,11 @@ export class FriendsService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async addFriend(token: string, friendId: number): Promise<friends> {
-    const decodeToken = this.jwtService.decode(token);
-    return this.repository.addFriend(decodeToken.id, friendId);
+  async addFriend(userId: any, friendId: number): Promise<friends> {
+    return this.repository.addFriend(userId, friendId);
   }
 
-  async removeFriend(token: string, friendId: number): Promise<any> {
-    const decodeToken = this.jwtService.decode(token);
-    return this.repository.removeFriend(decodeToken.id, friendId);
+  async removeFriend(userId: any, friendId: number): Promise<any> {
+    return this.repository.removeFriend(userId, friendId);
   }
 }

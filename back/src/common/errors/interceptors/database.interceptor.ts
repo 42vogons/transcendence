@@ -19,7 +19,7 @@ export class DatabaseInterceptor implements NestInterceptor {
         if (error.code === 'P2025' || error.code === 'P2003') {
           throw new NotFoundException('Registro não encontrado.');
         }
-        console.log('error==' + error.code);
+        console.log('code error' + error.code);
         if (isPrismaError(error)) {
           error = handleDatabaseErrors(error);
         }

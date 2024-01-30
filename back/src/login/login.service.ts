@@ -68,7 +68,8 @@ export class LoginService {
       id: profile.user_id,
       login: profile.username,
     };
-    const token = this.generateToken(payload);
+    const token = await this.generateToken(payload);
+    console.log('cookie=' + token);
     res.cookie('accessToken', token, {
       expires: new Date(new Date().getTime() + 30 * 10000),
       httpOnly: true,
@@ -133,7 +134,7 @@ export class LoginService {
     return dtoInstance;
   }
 
-  generateToken(payload: any): string {
-    return this.jwtService.sign(payload);
+  async generateToken(payload: any): Promise<string> {
+    return await this.jwtService.signAsync(payload);
   }
 }

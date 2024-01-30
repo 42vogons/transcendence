@@ -9,6 +9,9 @@ import { LoginModule } from './login/login.module';
 import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
 import { FriendsModule } from './friends/friends.module';
+import { ChannelService } from './channel/channel.service';
+import { ChannelController } from './channel/channel.controller';
+import { ChatModule } from './channel/channel.module';
 import { ChatGateway } from './chat/chat.gateway';
 
 const secretJwt = process.env.SECRET_JWT;
@@ -22,13 +25,15 @@ const secretJwt = process.env.SECRET_JWT;
       signOptions: { expiresIn: '1h' },
     }),
     FriendsModule,
+    ChatModule,
     GameModule,
   ],
-  controllers: [LoginController, FriendsController],
+  controllers: [LoginController, FriendsController, ChannelController],
   providers: [
     LoginService,
     TwoFactorAutenticateService,
     FriendsService,
+    ChannelService,
     ChatGateway,
   ],
 })

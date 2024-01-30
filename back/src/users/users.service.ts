@@ -6,8 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { NotFoundError } from '../common/errors/types/NotFoundError';
 import { UserEntity } from './entities/user.entity';
-import { promises } from 'dns';
-import { users } from '@prisma/client';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -34,9 +33,8 @@ export class UsersService {
     return this.repository.findAll();
   }
 
-  findByToken(token: any) {
-    const decodeToken = this.jwtService.decode(token);
-    return this.findOne(decodeToken.id);
+  findByToken(userId: any) {
+    return this.findOne(userId);
   }
 
   async findOne(user_id: number): Promise<UserEntity> {
@@ -63,8 +61,7 @@ export class UsersService {
     return this.repository.remove(user_id);
   }
 
-  findFriends(token: any): Promise<Friends[] | null> {
-    const decodeToken = this.jwtService.decode(token);
-    return this.repository.findFriends(decodeToken.id);
+  findFriends(userId: any): Promise<Friends[] | null> {
+    return this.repository.findFriends(userId);
   }
 }
