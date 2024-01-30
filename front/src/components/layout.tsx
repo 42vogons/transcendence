@@ -86,6 +86,7 @@ export default function Layout({ children }: iLayoutProps) {
 			title: 'Game',
 			handleOnClick: () => {
 				console.log('game')
+				router.push('/')
 			},
 		},
 		{

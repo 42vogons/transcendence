@@ -7,6 +7,7 @@ import { FriendsService } from './friends/friends.service';
 import { TwoFactorAutenticateService } from './two-factor-autenticate/two-factor-autenticate.service';
 import { LoginModule } from './login/login.module';
 import { UsersModule } from './users/users.module';
+import { GameModule } from './game/game.module';
 import { FriendsModule } from './friends/friends.module';
 import { ChatGateway } from './chat/chat.gateway';
 
@@ -21,6 +22,7 @@ const secretJwt = process.env.SECRET_JWT;
       signOptions: { expiresIn: '1h' },
     }),
     FriendsModule,
+    GameModule,
   ],
   controllers: [LoginController, FriendsController],
   providers: [
