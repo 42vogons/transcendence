@@ -18,6 +18,14 @@ export class UsersRepository {
     return this.prisma.users.findMany();
   }
 
+  async findEmail(user_email: string): Promise<UserEntity> {
+    return this.prisma.users.findUnique({
+      where: {
+        email: user_email,
+      },
+    });
+  }
+
   async findOne(user_id: number): Promise<UserEntity> {
     return this.prisma.users.findUnique({
       where: {
@@ -44,5 +52,52 @@ export class UsersRepository {
         user_id: user_id,
       },
     });
+  }
+
+  async findFriends(userId: number): Promise<Friends[]> {
+    const userWithFriends = await this.prisma.users.findUnique({
+      where: {
+        user_id: userId,
+      },
+      include: {
+        friends_friends_user_idTousers: {
+          select: {
+            users_friends_friend_idTousers: {
+              select: {
+                user_id: true,
+                username: true,
+              },
+            },
+          },
+        },
+        friends_friends_friend_idTousers: {
+          select: {
+            users_friends_user_idTousers: {
+              select: {
+                user_id: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!userWithFriends) {
+      return [];
+    }
+    const friendsList = [
+      ...userWithFriends.friends_friends_user_idTousers.map(
+        f => f.users_friends_friend_idTousers,
+      ),
+      ...userWithFriends.friends_friends_friend_idTousers.map(
+        f => f.users_friends_user_idTousers,
+      ),
+    ];
+    const uniqueFriendIds = new Set(friendsList.map(friend => friend.user_id));
+    const uniqueFriends = Array.from(uniqueFriendIds).map(id => {
+      const friend = friendsList.find(friend => friend.user_id === id);
+      return { user_id: id, username: friend.username };
+    });
+    return uniqueFriends;
   }
 }
