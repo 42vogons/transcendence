@@ -39,13 +39,10 @@ export class GameGateway
   }
 
   handleDisconnect(client: Socket) {
-    //todo: derrubar das salas e mudar status dos players
-    const sockets = this.io.sockets;
-
-    this.players = this.gameService.removePlayerFromList(client);
+    this.gameService.disconnectPlayer(client, this.io);
 
     this.logger.log(`Disconnected socket id: ${client.id}`);
-    this.logger.debug(`Number of connected sockets: ${sockets.size}`);
+    this.logger.debug(`Number of connected sockets: ${this.io.sockets.size}`);
   }
 
   @SubscribeMessage('join_queue')
@@ -53,11 +50,11 @@ export class GameGateway
     this.players = this.gameService.joinQueue(client, body);
     let availablePlayers = this.gameService.findPlayerByStatus('searching');
     availablePlayers = availablePlayers.filter(p => {
-      return p.socketID !== client.id;
+		return p.socketID !== client.id;
     });
 
     if (availablePlayers.length > 0) {
-      const roomID = availablePlayers[0].socketID;
+      const roomID = availablePlayers[0].roomID;
       this.players = this.gameService.joinRoom(client, roomID);
       this.io.to(roomID).emit('status_changed', 'readyToPlay');
     } else {
@@ -68,7 +65,7 @@ export class GameGateway
 
   @SubscribeMessage('exit_queue')
   handleExitQueueEvent(client: Socket) {
-    this.players = this.gameService.removeUserFromQueue(client);
+    this.players = this.gameService.removeUserFromQueue(client.id);
     client.emit('status_changed', 'connected');
   }
 

@@ -59,9 +59,9 @@ export class GameService {
     return this.players;
   }
 
-  removePlayerFromList(client: Socket): UserData[] {
+  removePlayerFromList(sockerID: string): UserData[] {
     this.players = this.players.filter(obj => {
-      return obj.socketID !== client.id;
+      return obj.socketID !== sockerID;
     });
     return this.players;
   }
@@ -92,7 +92,7 @@ export class GameService {
     const room = this.rooms.filter(r => {
       return r.ID === roomID;
     });
-    if (room.length == 1) return room[0];
+    if (room.length === 1) return room[0];
     else return undefined;
   }
 
@@ -151,12 +151,13 @@ export class GameService {
   joinRoom(client: Socket, roomID: string): UserData[] {
     //todo: check for unvailable entities errors
     const room = this.findRoomByRoomID(roomID);
+
     if (!room) {
       return this.players;
     }
 
     const player1 = this.findPlayerBySocketID(client.id);
-    const player2 = this.findPlayerBySocketID(roomID);
+    const player2 = this.findPlayerBySocketID(room.users[0].socketID);
     if (!player1 || !player2) {
       return this.players;
     }
@@ -166,6 +167,7 @@ export class GameService {
     this.updatePlayer(player1);
 
     player2.status = 'readyToPlay';
+	player2.roomID = roomID;
     this.updatePlayer(player2);
 
     client.join(roomID);
@@ -189,12 +191,12 @@ export class GameService {
     client.join(client.id);
   }
 
-  removeUserFromQueue(client: Socket): UserData[] {
-    const player = this.findPlayerBySocketID(client.id);
+  removeUserFromQueue(sockerID: string): UserData[] {
+    const player = this.findPlayerBySocketID(sockerID);
     if (!player) return this.players;
 
     const room = this.findRoomByRoomID(player.roomID);
-    if (room) this.deleteRoomByRoomID(room.ID);
+    if (room && room.users.length === 1) this.deleteRoomByRoomID(room.ID);
 
     player.status = 'idle';
     player.roomID = '';
@@ -493,6 +495,41 @@ export class GameService {
 
 	this.updateMatch(match)
 	this.gameInProgress(player.roomID, io)
+  }
+
+  disconnectPlayer(client: Socket, io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
+	const player = this.findPlayerBySocketID(client.id)
+
+	if (player.status === 'playing') {
+		//todo: implementar depois do reconect
+		return;
+	} else if (player.status === 'readyToPlay') {
+		const room = this.findRoomByRoomID(player.roomID)
+		let remainingPlayer : UserData;
+		let leavingPlayer : UserData;
+		if (room.users[0].socketID === player.socketID) {
+			leavingPlayer = player
+			remainingPlayer = this.findPlayerBySocketID(room.users[1].socketID)
+		} else {
+			remainingPlayer = this.findPlayerBySocketID(room.users[0].socketID)
+			leavingPlayer = player
+		}
+		this.removeUserFromQueue(leavingPlayer.socketID)
+		this.removePlayerFromList(leavingPlayer.socketID)
+		remainingPlayer.status = 'searching'
+		this.updatePlayer(remainingPlayer)
+		room.users = room.users.filter(user => {
+			if (user.socketID !== leavingPlayer.socketID)
+				return user
+		})
+		this.updateRoom(room)
+		io.to(remainingPlayer.socketID).emit('status_changed', 'searching');
+	} else if (player.status === 'searching') {
+		this.deleteRoomByRoomID(player.roomID)
+		this.removePlayerFromList(player.socketID)
+	} else {
+		this.removePlayerFromList(player.socketID)
+	}
   }
 
   gameInProgress(
