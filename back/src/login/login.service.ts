@@ -111,9 +111,9 @@ export class LoginService {
     const token = await this.getToken(body.code);
     const profile = await this.getInfo(token);
     const user = await this.checkUser(profile);
-    this.insertToken(user, res);
+    await this.insertToken(user, res);
     //todo adicionar expire do cookie no retorno res
-    console.log('user ' + user);
+    console.log('user ', user);
     let action = 'logged';
     const { username } = user;
     if (user.two_factor_enabled) {

@@ -30,6 +30,7 @@ const socket = socketClient('http://localhost:3001/game', {
 	autoConnect: false,
 	// reconnectionAttempts: 2,
 	reconnectionDelay: 2000,
+	withCredentials: true,
 })
 
 export const GameContext = createContext({} as GameContextType)
@@ -49,7 +50,9 @@ export function GameProvider({ children }: GameProviderProps) {
 	useEffect(() => {
 		socket.on('status_changed', (status) => {
 			dispatch(statusChange(status))
-			router.push('/')
+			if (status === 'readyToPlay') {
+				router.push('/')
+			}
 		})
 		socket.on('match_updated', (match: MatchData) => {
 			dispatch(matchUpdate(match))

@@ -21,7 +21,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.enableCors({
     credentials: true,
-    origin: 'http://localhost:3000',
+    origin: process.env.FRONT_HOST,
   });
   app.useWebSocketAdapter(new SocketAdapter(app));
   //app.useGlobalFilters(new HttpExceptionFilter());
