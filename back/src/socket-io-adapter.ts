@@ -1,12 +1,15 @@
 import { INestApplicationContext } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { ServerOptions, Socket } from 'socket.io';
+import { ServerOptions } from 'socket.io';
+import { SocketWithAuth } from './types';
+const secretJwt = process.env.SECRET_JWT;
 
 export class SocketAdapter extends IoAdapter {
   constructor(private app: INestApplicationContext) {
     super(app);
   }
+
   createIOServer(
     port: number,
     options?: ServerOptions & {
@@ -21,50 +24,27 @@ export class SocketAdapter extends IoAdapter {
         origin: process.env.FRONT_HOST,
       },
     });
-    // const jwtService = this.app.get(JwtService);
-    // server.use(createTokenMiddleware, jwtService);
+    const jwtService = this.app.get(JwtService);
+    console.log('this.app:', this.app);
+    server.of('game').use(this.authMiddleware(jwtService));
     return server;
   }
+
+  authMiddleware =
+    (jwtService: JwtService) => (socket: SocketWithAuth, next) => {
+      let token = socket.request.headers.cookie;
+      console.log('----token :', token);
+      token = token?.replace('accessToken=', '');
+      console.log('----token depois:' + token);
+      try {
+        const payload = jwtService.verify(token, { secret: secretJwt });
+        console.log('payload:', payload);
+        socket.userID = payload.id;
+        socket.username = payload.login;
+        next();
+      } catch (e) {
+        console.log('error:', e);
+        next(new Error('FORBIDDEN'));
+      }
+    };
 }
-
-// export const createTokenMiddleware =
-//   (jwtService: JwtService) =>
-//   (socket: Socket & { id: number; login: string }, next) => {
-//     // for Postman testing support, fallback to token header
-//     const token = socket.request.headers.cookie;
-//     console.log('----token :', token);
-
-//     try {
-//       const payload = jwtService.verify(token);
-//       // socket.id = payload.sub;
-//       socket.login = payload.login;
-//       // socket.name = payload.name;
-//       next();
-//     } catch {
-//       next(new Error('FORBIDDEN'));
-//     }
-//   };
-
-// const request = context.switchToHttp().getRequest<Request>();
-//   const token = this.extractTokenFromCookie(request);
-//   if (!token) {
-//     throw new UnauthorizedException();
-//   }
-//   try {
-//     const payload = await this.jwtService.verifyAsync(token, {
-//       secret: secretJwt, // Certifique-se de que 'secretJwt' é a sua chave secreta real
-//     });
-//     request['user'] = payload;
-//   } catch {
-//     throw new UnauthorizedException();
-//   }
-//   return true;
-// }
-
-// extractTokenFromCookie(request: Request): string | undefined {
-//     const token = request.cookies['accessToken'];
-//     if (token) {
-//       return token;
-//     }
-//     return request.headers.cookie['accessToken'];
-//   }

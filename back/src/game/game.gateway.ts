@@ -27,8 +27,10 @@ export class GameGateway
     this.logger.log(`Websocket Gateway initialized.`);
   }
 
-  handleConnection(client: Socket) {
+  handleConnection(client: any) {
     const sockets = this.io.sockets;
+    console.log('client user:', client.username);
+    console.log('client id:', client.userID);
 
     this.players = this.gameService.populateUserList(client);
 
@@ -50,7 +52,7 @@ export class GameGateway
     this.players = this.gameService.joinQueue(client, body);
     let availablePlayers = this.gameService.findPlayerByStatus('searching');
     availablePlayers = availablePlayers.filter(p => {
-		return p.socketID !== client.id;
+      return p.socketID !== client.id;
     });
 
     if (availablePlayers.length > 0) {
@@ -107,11 +109,11 @@ export class GameGateway
 
   @SubscribeMessage('pause')
   handlePausePlaying(client: Socket) {
-	this.gameService.pauseMatch(client.id, this.io)
+    this.gameService.pauseMatch(client.id, this.io);
   }
 
   @SubscribeMessage('resume')
   handleResumePlaying(client: Socket) {
-	this.gameService.resumeMatch(client.id, this.io)
+    this.gameService.resumeMatch(client.id, this.io);
   }
 }
