@@ -30,8 +30,6 @@ export class GameGateway
 
   handleConnection(client: SocketWithAuth) {
     const sockets = this.io.sockets;
-    console.log('client username:', client.username);
-    console.log('client userID:', client.userID);
 
     this.players = this.gameService.populateUserList(client);
 
@@ -49,10 +47,8 @@ export class GameGateway
   }
 
   @SubscribeMessage('join_queue')
-  handleJoinQueueEvent(client: SocketWithAuth, body: string) {
-    console.log('jclient username:', client.username);
-    console.log('jclient userID:', client.userID);
-    this.players = this.gameService.joinQueue(client, body);
+  handleJoinQueueEvent(client: SocketWithAuth) {
+    this.players = this.gameService.joinQueue(client);
     let availablePlayers = this.gameService.findPlayerByStatus('searching');
     availablePlayers = availablePlayers.filter(p => {
       return p.socketID !== client.id;

@@ -66,7 +66,7 @@ export default function Home() {
 						<h3>Jogo Acabou</h3>
 						<p>
 							Você{' '}
-							{matchResult.winner === userID
+							{matchResult.winnerID === userID
 								? 'venceu'
 								: 'perdeu'}
 						</p>

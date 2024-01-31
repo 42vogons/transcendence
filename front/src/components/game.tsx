@@ -90,10 +90,10 @@ export default function Game() {
 		<CourtContainer css={{ height, width }}>
 			<Score>
 				<p>
-					{match?.player1?.userID} <span>{match?.score?.p1}</span>
+					{match?.player1?.username} <span>{match?.score?.p1}</span>
 				</p>
 				<p>
-					{match?.player2?.userID} <span>{match?.score?.p2}</span>
+					{match?.player2?.username} <span>{match?.score?.p2}</span>
 				</p>
 			</Score>
 			<Paddle

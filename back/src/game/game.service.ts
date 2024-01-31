@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Namespace, Socket } from 'socket.io';
+import { Namespace } from 'socket.io';
 import { Room, UserData, MatchData, Paddle, MatchResult } from './types';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import { SocketWithAuth } from 'src/types';
 
 @Injectable()
 export class GameService {
@@ -46,11 +47,12 @@ export class GameService {
     );
   }
 
-  populateUserList(client: Socket): UserData[] {
+  populateUserList(client: SocketWithAuth): UserData[] {
     if (!this.isPlayerSocketIDOnList(client.id)) {
       const player: UserData = {
         socketID: client.id,
-        userID: '',
+        userID: client.userID,
+		username: client.username,
         roomID: '',
         status: 'idle',
       };
@@ -74,7 +76,7 @@ export class GameService {
     else return undefined;
   }
 
-  findPlayerByUserID(userID: string): UserData {
+  findPlayerByUserID(userID: number): UserData {
     const player = this.players.filter(p => {
       return p.userID === userID;
     });
@@ -137,18 +139,16 @@ export class GameService {
     );
   }
 
-  joinQueue(client: Socket, body: string): UserData[] {
+  joinQueue(client: SocketWithAuth): UserData[] {
     const player: UserData = this.findPlayerBySocketID(client.id);
     if (!player || player.status !== 'idle') return this.players;
 
     player.status = 'searching';
-    const { userID } = JSON.parse(body);
-    player.userID = userID;
     this.updatePlayer(player);
     return this.players;
   }
 
-  joinRoom(client: Socket, roomID: string): UserData[] {
+  joinRoom(client: SocketWithAuth, roomID: string): UserData[] {
     //todo: check for unvailable entities errors
     const room = this.findRoomByRoomID(roomID);
 
@@ -177,7 +177,7 @@ export class GameService {
     return this.players;
   }
 
-  createRoom(client: Socket) {
+  createRoom(client: SocketWithAuth) {
     const player1 = this.findPlayerBySocketID(client.id);
     if (!player1) return;
     player1.roomID = client.id;
@@ -247,9 +247,9 @@ export class GameService {
         p2: 0,
       },
       status: 'play',
-      pausedBy: '',
+      pausedByUserID: undefined,
       pausedAt: undefined,
-      quitterID: '',
+      quitterID: undefined,
       isResumed: false,
     };
     this.matchs.push(matchData);
@@ -399,42 +399,44 @@ export class GameService {
 
   endMatch(match: MatchData): MatchResult {
     const endedAt = new Date();
-    let winner: string;
-    let looser: string;
+    let winnerID: number;
+    let looserID: number;
 
     if (!match.quitterID) {
       if (match.score.p1 === this.maxScore) {
-        winner = match.player1.userID;
-        looser = match.player2.userID;
+        winnerID = match.player1.userID;
+        looserID = match.player2.userID;
       } else {
-        looser = match.player1.userID;
-        winner = match.player2.userID;
+        looserID = match.player1.userID;
+        winnerID = match.player2.userID;
       }
     } else {
       if (match.quitterID === match.player2.userID) {
-        winner = match.player1.userID;
-        looser = match.player2.userID;
+        winnerID = match.player1.userID;
+        looserID = match.player2.userID;
       } else {
-        looser = match.player1.userID;
-        winner = match.player2.userID;
+        looserID = match.player1.userID;
+        winnerID = match.player2.userID;
       }
     }
 
     const player1 = {
       userID: match.player1.userID,
+	  username: match.player1.username,
       score: match.score.p1,
     };
 
     const player2 = {
-      userID: match.player2.userID,
+	  userID: match.player2.userID,
+	  username: match.player2.username,
       score: match.score.p2,
     };
 
     const matchResult: MatchResult = {
       player1,
       player2,
-      winner,
-      looser,
+      winnerID,
+      looserID,
       endedAt,
     };
 
@@ -457,7 +459,7 @@ export class GameService {
     if (match.isResumed) return;
 
     match.status = 'end';
-    match.quitterID = match.pausedBy;
+    match.quitterID = match.pausedByUserID;
     this.updateMatch(match);
     this.gameInProgress(match.roomID, io);
   }
@@ -472,7 +474,7 @@ export class GameService {
     match.isResumed = false;
     match.status = 'pause';
     match.pausedAt = new Date();
-    match.pausedBy = player.userID;
+    match.pausedByUserID = player.userID;
     this.updateMatch(match);
 
     const timer = setTimeout(() => {
@@ -489,19 +491,19 @@ export class GameService {
     const player = this.findPlayerBySocketID(sockerID);
     const match = this.findMatchByRoomID(player.roomID);
 
-    if (match.pausedBy !== player.userID) return;
+    if (match.pausedByUserID !== player.userID) return;
 
     match.isResumed = true;
     match.status = 'play';
     match.pausedAt = undefined;
-    match.pausedBy = '';
+    match.pausedByUserID = undefined;
 
     this.updateMatch(match);
     this.gameInProgress(player.roomID, io);
   }
 
   disconnectPlayer(
-    client: Socket,
+    client: SocketWithAuth,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
     const player = this.findPlayerBySocketID(client.id);

@@ -1,6 +1,7 @@
 export type UserData = {
   socketID: string;
-  userID: string;
+  userID: number;
+  username: string;
   roomID: string;
   status: 'idle' | 'searching' | 'readyToPlay' | 'playing';
 };
@@ -50,22 +51,24 @@ export type MatchData = {
     p2: number;
   };
   status: 'play' | 'pause' | 'end';
-  pausedBy: string;
+  pausedByUserID: number;
   pausedAt: Date;
-  quitterID: string;
+  quitterID: number;
   isResumed: boolean
 };
 
 export type MatchResult = {
   player1: {
-    userID: string;
+    userID: number;
+	username: string;
     score: number;
   };
   player2: {
-    userID: string;
+	userID: number;
+	username: string;
     score: number;
   };
-  winner: string;
-  looser: string;
+  winnerID: number;
+  looserID: number;
   endedAt: Date;
 };
