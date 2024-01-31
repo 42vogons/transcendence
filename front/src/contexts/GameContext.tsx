@@ -8,6 +8,7 @@ import { GameReducer } from '@/reducers/Game/Reducer'
 import { MatchData, MatchResult } from '@/reducers/Game/Types'
 import { useRouter } from 'next/router'
 import { ReactNode, createContext, useEffect, useReducer } from 'react'
+import { toast } from 'react-toastify'
 import socketClient from 'socket.io-client'
 
 interface GameContextType {
@@ -47,6 +48,13 @@ export function GameProvider({ children }: GameProviderProps) {
 
 	const router = useRouter()
 
+	function handleErrors(err: any) {
+		console.log('error:', err)
+		toast(err.toString(), {
+			type: 'error',
+		})
+	}
+
 	useEffect(() => {
 		socket.on('status_changed', (status) => {
 			dispatch(statusChange(status))
@@ -61,6 +69,8 @@ export function GameProvider({ children }: GameProviderProps) {
 			console.log('end_match: ', matchResult)
 			dispatch(endMatch(matchResult))
 		})
+		socket.on('connect_error', (err) => handleErrors(err))
+		socket.on('connect_failed', (err) => handleErrors(err))
 		socket.open()
 	}, [router])
 

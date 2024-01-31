@@ -33,17 +33,13 @@ export class SocketAdapter extends IoAdapter {
   authMiddleware =
     (jwtService: JwtService) => (socket: SocketWithAuth, next) => {
       let token = socket.request.headers.cookie;
-      console.log('----token :', token);
       token = token?.replace('accessToken=', '');
-      console.log('----token depois:' + token);
       try {
         const payload = jwtService.verify(token, { secret: secretJwt });
-        console.log('payload:', payload);
         socket.userID = payload.id;
         socket.username = payload.login;
         next();
       } catch (e) {
-        console.log('error:', e);
         next(new Error('FORBIDDEN'));
       }
     };
