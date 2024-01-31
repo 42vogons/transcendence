@@ -60,25 +60,24 @@ export default function Layout({ children }: iLayoutProps) {
 
 	const ref = useOutsideClick(closeSidePanel)
 
-	function handleResize() {
-		if (window.innerWidth < 1024) {
-			setShowSidePanel(false)
-			setActivePanel('menu')
-		} else {
-			setShowSidePanel(true)
-			if (router.asPath !== '/chat') {
-				setActivePanel('friends')
+	useEffect(() => {
+		function handleResize() {
+			if (window.innerWidth < 1024) {
+				setShowSidePanel(false)
+				setActivePanel('menu')
 			} else {
-				setActivePanel('chat')
+				setShowSidePanel(true)
+				if (router.asPath !== '/chat') {
+					setActivePanel('friends')
+				} else {
+					setActivePanel('chat')
+				}
 			}
 		}
-	}
-
-	useEffect(() => {
 		handleResize()
 		window.addEventListener('resize', handleResize)
 		return () => window.removeEventListener('resize', handleResize)
-	}, [])
+	}, [router.asPath])
 
 	const menuItems: iMenuItemType[] = [
 		{
