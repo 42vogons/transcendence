@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { NextPage } from 'next'
 import { ReactElement, ReactNode } from 'react'
 import { GameProvider } from '@/contexts/GameContext'
+import { UserProvider } from '@/contexts/UserContext'
 
 globalStyles()
 
@@ -22,9 +23,11 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 	const getLayout = Component.getLayout ?? ((page) => page)
 	return (
 		<>
-			<GameProvider>
-				{getLayout(<Component {...pageProps} />)}
-			</GameProvider>
+			<UserProvider>
+				<GameProvider>
+					{getLayout(<Component {...pageProps} />)}
+				</GameProvider>
+			</UserProvider>
 			<ToastContainer theme="colored" />
 		</>
 	)

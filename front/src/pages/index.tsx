@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { ReactElement, useContext, useEffect, useState } from 'react'
+import { ReactElement, useContext, useEffect } from 'react'
 import { FaGamepad } from 'react-icons/fa6'
 
 import {
@@ -11,6 +11,7 @@ import Layout from '@/components/layout'
 import Game from '@/components/game'
 import { GameContext } from '@/contexts/GameContext'
 import Loading from '@/components/loading'
+import { UserContext } from '@/contexts/UserContext'
 
 export default function Home() {
 	const {
@@ -23,24 +24,7 @@ export default function Home() {
 		clearMatchCompleted,
 	} = useContext(GameContext)
 
-	const [userID, setUserID] = useState('')
-
-	function getPlayerInfo() {
-		let user = localStorage.getItem('@42Transcendence:user')
-		if (!user) {
-			user = new Date().toLocaleString()
-			localStorage.setItem('@42Transcendence:user', JSON.stringify(user))
-		}
-		return user
-	}
-
-	useEffect(() => {
-		setUserID(getPlayerInfo())
-	}, [])
-
-	useEffect(() => {
-		console.log('userID:', userID)
-	}, [userID])
+	const { user } = useContext(UserContext)
 
 	useEffect(() => {
 		console.log('GameStatus:', status)
@@ -66,7 +50,7 @@ export default function Home() {
 						<h3>Jogo Acabou</h3>
 						<p>
 							Você{' '}
-							{matchResult.winnerID === userID
+							{matchResult.winnerID === user?.userID
 								? 'venceu'
 								: 'perdeu'}
 						</p>
@@ -78,8 +62,7 @@ export default function Home() {
 				{!isMatchCompleted && status === 'connected' && (
 					<PlayButton
 						onClick={() => {
-							joinQueue(userID)
-							console.log('userID:', userID)
+							joinQueue()
 						}}
 					>
 						<FaGamepad size={40} />
