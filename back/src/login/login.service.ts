@@ -63,7 +63,7 @@ export class LoginService {
     }
   }
 
-  async insertToken(profile: any, @Response() res) {
+  async insertToken(profile: any, expiresAt: Date, @Response() res) {
     const payload = {
       id: profile.user_id,
       login: profile.username,
@@ -71,7 +71,7 @@ export class LoginService {
     const token = await this.generateToken(payload);
     console.log('cookie=' + token);
     res.cookie('accessToken', token, {
-      expires: new Date(new Date().getTime() + 30 * 10000),
+      expires: expiresAt,
       httpOnly: true,
       domain: 'localhost',
     });
@@ -112,18 +112,22 @@ export class LoginService {
     const token = await this.getToken(body.code);
     const profile = await this.getInfo(token);
     const user = await this.checkUser(profile);
-    // const expiresAt = new Date(new Date().getTime() + 30 * 10000);
-    await this.insertToken(user, res);
+    const expiresAt = new Date(new Date().getTime() + 30 * 10000);
+    await this.insertToken(user, expiresAt, res);
     //todo adicionar expire do cookie no retorno res
     console.log('user ', user);
     let action = 'logged';
     const { user_id: userID, username } = user;
     if (user.two_factor_enabled) {
       action = 'authenticate';
-      return res.status(200).send({ action, user: { userID, username } });
+      return res
+        .status(200)
+        .send({ action, user: { userID, username, expiresAt } });
     }
 
-    return res.status(200).send({ action, user: { userID, username } });
+    return res
+      .status(200)
+      .send({ action, user: { userID, username, expiresAt } });
   }
 
   private mapToDto<T>(source: any, dto: new () => T): T {
