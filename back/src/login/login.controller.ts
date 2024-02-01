@@ -44,7 +44,7 @@ export class LoginController {
       request.user.id,
       body.code,
     );
-    if (valid) res.status(200).send('{ "action":"logged"');
+    if (valid) res.status(200).send('{ "action":"logged"}');
     else res.status(401).send('{ "action":"authenticate-fail"}');
   }
 }

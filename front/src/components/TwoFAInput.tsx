@@ -6,7 +6,7 @@ interface TwoFAInputProps {
 }
 
 export default function TwoFAInput({ sendTwoFA }: TwoFAInputProps) {
-	const [value, setValue] = useState<string>()
+	const [value, setValue] = useState('')
 	function handleSubmit(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault()
 		console.log('2fa: ', value)

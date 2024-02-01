@@ -108,20 +108,22 @@ export class LoginService {
   }
 
   async login(@Body() body: any, @Response() res) {
+    console.log('body:', body);
     const token = await this.getToken(body.code);
     const profile = await this.getInfo(token);
     const user = await this.checkUser(profile);
+    // const expiresAt = new Date(new Date().getTime() + 30 * 10000);
     await this.insertToken(user, res);
     //todo adicionar expire do cookie no retorno res
     console.log('user ', user);
     let action = 'logged';
-    const { username } = user;
+    const { user_id: userID, username } = user;
     if (user.two_factor_enabled) {
       action = 'authenticate';
-      return res.status(200).send({ action, username });
+      return res.status(200).send({ action, user: { userID, username } });
     }
 
-    return res.status(200).send({ action, username });
+    return res.status(200).send({ action, user: { userID, username } });
   }
 
   private mapToDto<T>(source: any, dto: new () => T): T {

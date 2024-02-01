@@ -10,7 +10,11 @@ import {
 
 import { FcGoogle } from 'react-icons/fc'
 
-export default function Login() {
+interface LoginProps {
+	clientID: string
+}
+
+export default function Login({ clientID }: LoginProps) {
 	return (
 		<>
 			<Head>
@@ -37,7 +41,7 @@ export default function Login() {
 				</Title>
 				<ConnectButtonContainer>
 					<a
-						href={`https://api.intra.42.fr/oauth/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&response_type=code`}
+						href={`https://api.intra.42.fr/oauth/authorize?client_id=${clientID}&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&response_type=code`}
 					>
 						<ConnectButton>
 							<Image
@@ -57,4 +61,13 @@ export default function Login() {
 			</LoginContainer>
 		</>
 	)
+}
+
+export async function getStaticProps() {
+	const clientID = process.env.CLIENT_ID
+	return {
+		props: {
+			clientID,
+		},
+	}
 }

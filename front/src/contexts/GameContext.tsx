@@ -7,9 +7,16 @@ import {
 import { GameReducer } from '@/reducers/Game/Reducer'
 import { MatchData, MatchResult } from '@/reducers/Game/Types'
 import { useRouter } from 'next/router'
-import { ReactNode, createContext, useEffect, useReducer } from 'react'
+import {
+	ReactNode,
+	createContext,
+	useContext,
+	useEffect,
+	useReducer,
+} from 'react'
 import { toast } from 'react-toastify'
 import socketClient from 'socket.io-client'
+import { UserContext } from './UserContext'
 
 interface GameContextType {
 	status: string
@@ -17,7 +24,7 @@ interface GameContextType {
 	matchResult: MatchResult
 	isMatchCompleted: boolean
 	sendKey: (type: string, key: string) => void
-	joinQueue: (userID: string) => void
+	joinQueue: () => void
 	exitQueue: () => void
 	playing: () => void
 	clearMatchCompleted: () => void
@@ -44,6 +51,8 @@ export function GameProvider({ children }: GameProviderProps) {
 		isMatchCompleted: false,
 	})
 
+	const { user } = useContext(UserContext)
+
 	const { status, match, matchResult, isMatchCompleted } = state
 
 	const router = useRouter()
@@ -56,6 +65,7 @@ export function GameProvider({ children }: GameProviderProps) {
 	}
 
 	useEffect(() => {
+		console.log('user game:', user)
 		socket.on('status_changed', (status) => {
 			dispatch(statusChange(status))
 			if (status === 'readyToPlay') {
@@ -71,8 +81,10 @@ export function GameProvider({ children }: GameProviderProps) {
 		})
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
-		socket.open()
-	}, [router])
+		if (user) {
+			socket.open()
+		}
+	}, [router, user])
 
 	let lastType: string
 
@@ -84,8 +96,8 @@ export function GameProvider({ children }: GameProviderProps) {
 		socket.emit('send_key', { type, key })
 	}
 
-	function joinQueue(userID: string) {
-		socket.emit('join_queue', JSON.stringify({ userID }))
+	function joinQueue() {
+		socket.emit('join_queue', '')
 	}
 
 	function playing() {
