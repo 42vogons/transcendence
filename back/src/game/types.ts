@@ -4,6 +4,8 @@ export type UserData = {
   username: string;
   roomID: string;
   status: 'idle' | 'searching' | 'readyToPlay' | 'playing';
+  waitingReconnect: boolean;
+  isReconnect: boolean;
 };
 
 export type Room = {

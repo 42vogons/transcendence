@@ -31,10 +31,10 @@ export class GameService {
   private paddleSpeed = this.paddle.height * 0.2;
   constructor() {}
 
-  isPlayerSocketIDOnList(socketID: string): boolean {
+  isPlayerUserIDOnList(userID: number): boolean {
     return (
       this.players.filter(p => {
-        return p.socketID === socketID;
+        return p.userID === userID;
       }).length > 0
     );
   }
@@ -47,33 +47,67 @@ export class GameService {
     );
   }
 
-  populateUserList(client: SocketWithAuth): UserData[] {
-    if (!this.isPlayerSocketIDOnList(client.id)) {
+	populateUserList(client: SocketWithAuth, io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>): UserData[] {
+    if (!this.isPlayerUserIDOnList(client.userID)) {
       const player: UserData = {
         socketID: client.id,
         userID: client.userID,
 		username: client.username,
         roomID: '',
         status: 'idle',
+		waitingReconnect: false,
+		isReconnect: false,
       };
       this.players.push(player);
-    }
+		io.to(client.id).emit('status_changed', `connected`);
+    } else {
+		let player = this.findPlayerByUserID(client.userID)
+		player.isReconnect = true;
+		this.updatePlayer(player);
+		if (player.status === 'playing'){
+			const match = this.findMatchByUserID(player.userID)
+			let room = this.findRoomByRoomID(player.roomID)
+			this.removeUserFromRoom(room.ID, player.userID)
+			room.users.push(player)
+			client.join(room.ID)
+			io.to(client.id).emit('status_changed', `playing`);
+			io.to(match.player1.roomID).emit('match_updated', match);
+		} else if (player.status === 'readyToPlay') {
+			const room = this.findRoomByRoomID(player.roomID);
+			let remainingPlayer: UserData;
+			let leavingPlayer: UserData;
+			if (room.users[0].userID === player.userID) {
+			  leavingPlayer = player;
+			  remainingPlayer = this.findPlayerByUserID(room.users[1].userID);
+			} else {
+			  remainingPlayer = this.findPlayerByUserID(room.users[0].userID);
+			  leavingPlayer = player;
+			}
+			this.removeUserFromQueue(leavingPlayer.userID);
+			remainingPlayer.status = 'searching';
+			this.updatePlayer(remainingPlayer);
+			io.to(remainingPlayer.socketID).emit('status_changed', 'searching');
+			this.removeUserFromRoom(player.roomID, leavingPlayer.userID)
+			player.roomID = '',
+        	player.status = 'idle'
+			this.updatePlayer(player);
+			io.to(client.id).emit('status_changed', `connected`);
+		  } else if (player.status === 'searching') {
+			this.deleteRoomByRoomID(player.roomID);
+			player.roomID = '',
+        	player.status = 'idle'
+			this.updatePlayer(player);
+			io.to(client.id).emit('status_changed', `connected`);
+		  }
+	}
     return this.players;
   }
 
-  removePlayerFromList(sockerID: string): UserData[] {
+  removePlayerFromList(userID: number): UserData[] {
     this.players = this.players.filter(obj => {
-      return obj.socketID !== sockerID;
+      return obj.userID !== userID;
     });
     return this.players;
-  }
-
-  findPlayerBySocketID(socketID: string): UserData {
-    const player = this.players.filter(p => {
-      return p.socketID === socketID;
-    });
-    if (player.length == 1) return player[0];
-    else return undefined;
   }
 
   findPlayerByUserID(userID: number): UserData {
@@ -99,10 +133,11 @@ export class GameService {
   }
 
   updatePlayer(player: UserData) {
-    if (!this.isPlayerSocketIDOnList(player.socketID)) return;
+    if (!this.isPlayerUserIDOnList(player.userID)) return;
     this.players = this.players.map(p =>
-      p.socketID === player.socketID ? (p = player) : p,
+      p.userID === player.userID ? (p = player) : p,
     );
+	console.log("entrou2")
   }
 
   updateRoom(room: Room) {
@@ -140,9 +175,9 @@ export class GameService {
   }
 
   joinQueue(client: SocketWithAuth): UserData[] {
-    const player: UserData = this.findPlayerBySocketID(client.id);
+    const player: UserData = this.findPlayerByUserID(client.userID);
     if (!player || player.status !== 'idle') return this.players;
-
+console.log("entrou")
     player.status = 'searching';
     this.updatePlayer(player);
     return this.players;
@@ -156,8 +191,8 @@ export class GameService {
       return this.players;
     }
 
-    const player1 = this.findPlayerBySocketID(client.id);
-    const player2 = this.findPlayerBySocketID(room.users[0].socketID);
+    const player1 = this.findPlayerByUserID(client.userID);
+    const player2 = this.findPlayerByUserID(room.users[0].userID);
     if (!player1 || !player2) {
       return this.players;
     }
@@ -178,7 +213,7 @@ export class GameService {
   }
 
   createRoom(client: SocketWithAuth) {
-    const player1 = this.findPlayerBySocketID(client.id);
+    const player1 = this.findPlayerByUserID(client.userID);
     if (!player1) return;
     player1.roomID = client.id;
     this.updatePlayer(player1);
@@ -191,8 +226,8 @@ export class GameService {
     client.join(client.id);
   }
 
-  removeUserFromQueue(sockerID: string): UserData[] {
-    const player = this.findPlayerBySocketID(sockerID);
+  removeUserFromQueue(userID: number): UserData[] {
+    const player = this.findPlayerByUserID(userID);
     if (!player) return this.players;
 
     const room = this.findRoomByRoomID(player.roomID);
@@ -444,8 +479,8 @@ export class GameService {
     return matchResult;
   }
 
-  findMatchBySocketID(socketID: string): MatchData {
-    const player = this.findPlayerBySocketID(socketID);
+  findMatchByUserID(userID: number): MatchData {
+    const player = this.findPlayerByUserID(userID);
     const match = this.findMatchByRoomID(player.roomID);
     return match;
   }
@@ -465,10 +500,10 @@ export class GameService {
   }
 
   pauseMatch(
-    sockerID: string,
+    userID: number,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const player = this.findPlayerBySocketID(sockerID);
+    const player = this.findPlayerByUserID(userID);
     const match = this.findMatchByRoomID(player.roomID);
 
     match.isResumed = false;
@@ -479,16 +514,16 @@ export class GameService {
 
     const timer = setTimeout(() => {
       this.giveUpMatch(match, io);
-    }, 10000);
+    }, 100000);
 
     this.updateMatch(match);
   }
 
   resumeMatch(
-    sockerID: string,
+    userID: number,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const player = this.findPlayerBySocketID(sockerID);
+    const player = this.findPlayerByUserID(userID);
     const match = this.findMatchByRoomID(player.roomID);
 
     if (match.pausedByUserID !== player.userID) return;
@@ -502,40 +537,73 @@ export class GameService {
     this.gameInProgress(player.roomID, io);
   }
 
+  removeUserFromRoom(roomID: string, userID: number) {
+	let room = this.findRoomByRoomID(roomID)
+	room.users = room.users.filter(u => {
+		if (u.userID !== userID)
+			return u;
+	})
+	this.updateRoom(room)
+  }
+
+  waitReconnect(client: SocketWithAuth, io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
+    let player = this.findPlayerByUserID(client.userID)
+	if (!player) {
+		this.disconnectPlayer(client, io)
+		return
+	}
+	player.waitingReconnect = true;
+	this.updatePlayer(player);
+
+	if (player.status === 'playing') {
+		this.pauseMatch(player.userID, io)
+		client.leave(player.roomID)
+	}
+
+	setTimeout(() => {
+		this.disconnectPlayer(client, io);
+	}, 5000);
+  }
+
   disconnectPlayer(
     client: SocketWithAuth,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const player = this.findPlayerBySocketID(client.id);
-
-    if (player.status === 'playing') {
-      //todo: implementar depois do reconect
+    let player = this.findPlayerByUserID(client.userID);
+	if (player.waitingReconnect && player.isReconnect) {
+		player.waitingReconnect = false;
+		player.isReconnect = false;
+		this.updatePlayer(player)
+		return;
+	} else if (player.status === 'playing') {
+	  const match = this.findMatchByRoomID(player.roomID)
+      this.giveUpMatch(match, io);
       return;
     } else if (player.status === 'readyToPlay') {
       const room = this.findRoomByRoomID(player.roomID);
       let remainingPlayer: UserData;
       let leavingPlayer: UserData;
-      if (room.users[0].socketID === player.socketID) {
+      if (room.users[0].userID === player.userID) {
         leavingPlayer = player;
-        remainingPlayer = this.findPlayerBySocketID(room.users[1].socketID);
+        remainingPlayer = this.findPlayerByUserID(room.users[1].userID);
       } else {
-        remainingPlayer = this.findPlayerBySocketID(room.users[0].socketID);
+        remainingPlayer = this.findPlayerByUserID(room.users[0].userID);
         leavingPlayer = player;
       }
-      this.removeUserFromQueue(leavingPlayer.socketID);
-      this.removePlayerFromList(leavingPlayer.socketID);
+      this.removeUserFromQueue(leavingPlayer.userID);
+      this.removePlayerFromList(leavingPlayer.userID);
       remainingPlayer.status = 'searching';
       this.updatePlayer(remainingPlayer);
       room.users = room.users.filter(user => {
-        if (user.socketID !== leavingPlayer.socketID) return user;
+        if (user.userID !== leavingPlayer.userID) return user;
       });
       this.updateRoom(room);
       io.to(remainingPlayer.socketID).emit('status_changed', 'searching');
     } else if (player.status === 'searching') {
       this.deleteRoomByRoomID(player.roomID);
-      this.removePlayerFromList(player.socketID);
+      this.removePlayerFromList(player.userID);
     } else {
-      this.removePlayerFromList(player.socketID);
+      this.removePlayerFromList(player.userID);
     }
   }
 
