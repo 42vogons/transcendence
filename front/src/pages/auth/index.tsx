@@ -1,14 +1,17 @@
 import TwoFAInput from '@/components/TwoFAInput'
 import Loading from '@/components/loading'
+import { UserContext } from '@/contexts/UserContext'
 import { api } from '@/services/api'
 import { AuthContainer } from '@/styles/pages/auth'
 import Head from 'next/head'
 
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 
 export default function Auth() {
+	const { handleLogin } = useContext(UserContext)
+
 	const router = useRouter()
 
 	const [isLoading, setIsLoading] = useState(false)
@@ -20,11 +23,10 @@ export default function Auth() {
 		async function authUser(code: string) {
 			setIsLoading(true)
 			try {
-				const res = await api.post('/auth/user', { code })
+				const { data } = await api.post('/auth/user', { code })
 				toast('Login was successful', { type: 'success' })
-				console.log('res:', res)
-				const { action, username } = res.data
-				console.log('username:', username)
+				const { action, user } = data
+				handleLogin(user)
 				if (action === 'authenticate') {
 					setRequest2FA(true)
 					setIsLoading(false)
@@ -46,17 +48,19 @@ export default function Auth() {
 		if (code) {
 			authUser(code)
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [router])
 
 	async function sendCode(twoFAcode: string) {
 		setIsLoading(true)
 		setRequest2FA(false)
 		try {
-			const res = await api.post('/checkTwoFactor', { twoFAcode })
+			const res = await api.post('/checkTwoFactor', { code: twoFAcode })
 			toast('Login was successful', { type: 'success' })
 			console.log('res:', res)
 			const { action } = res.data
 			if (action === 'logged') {
+				console.log('action login:', action)
 				router.push('/profile')
 			} else {
 				console.log('erro action:', action)
