@@ -52,9 +52,8 @@ export class GameGateway
     this.players = this.gameService.joinQueue(client);
     let availablePlayers = this.gameService.findPlayerByStatus('searching');
     availablePlayers = availablePlayers.filter(p => {
-      return p.socketID !== client.id;
+      return p.userID !== client.userID;
     });
-	console.log("availablePlayers: ", availablePlayers)
 
     if (availablePlayers.length > 0) {
       const roomID = availablePlayers[0].roomID;

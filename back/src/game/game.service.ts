@@ -75,18 +75,16 @@ export class GameService {
 		} else if (player.status === 'readyToPlay') {
 			const room = this.findRoomByRoomID(player.roomID);
 			let remainingPlayer: UserData;
-			let leavingPlayer: UserData;
+			let leavingPlayer = player;
 			if (room.users[0].userID === player.userID) {
-			  leavingPlayer = player;
 			  remainingPlayer = this.findPlayerByUserID(room.users[1].userID);
 			} else {
 			  remainingPlayer = this.findPlayerByUserID(room.users[0].userID);
-			  leavingPlayer = player;
 			}
 			this.removeUserFromQueue(leavingPlayer.userID);
 			remainingPlayer.status = 'searching';
 			this.updatePlayer(remainingPlayer);
-			io.to(remainingPlayer.socketID).emit('status_changed', 'searching');
+			io.to(room.ID).emit('status_changed', 'searching');
 			this.removeUserFromRoom(player.roomID, leavingPlayer.userID)
 			player.roomID = '',
         	player.status = 'idle'
@@ -137,7 +135,6 @@ export class GameService {
     this.players = this.players.map(p =>
       p.userID === player.userID ? (p = player) : p,
     );
-	console.log("entrou2")
   }
 
   updateRoom(room: Room) {
@@ -177,7 +174,6 @@ export class GameService {
   joinQueue(client: SocketWithAuth): UserData[] {
     const player: UserData = this.findPlayerByUserID(client.userID);
     if (!player || player.status !== 'idle') return this.players;
-console.log("entrou")
     player.status = 'searching';
     this.updatePlayer(player);
     return this.players;
@@ -539,6 +535,8 @@ console.log("entrou")
 
   removeUserFromRoom(roomID: string, userID: number) {
 	let room = this.findRoomByRoomID(roomID)
+	if (!room)
+		return
 	room.users = room.users.filter(u => {
 		if (u.userID !== userID)
 			return u;
