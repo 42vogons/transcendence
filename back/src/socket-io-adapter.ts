@@ -27,6 +27,7 @@ export class SocketAdapter extends IoAdapter {
     const jwtService = this.app.get(JwtService);
     console.log('this.app:', this.app);
     server.of('game').use(this.authMiddleware(jwtService));
+    server.of('chat').use(this.authMiddleware(jwtService));
     return server;
   }
 

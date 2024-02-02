@@ -6,12 +6,13 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
+import { SocketWithAuth } from 'src/types';
 import { Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChatDto } from './dto/chat.dto';
 
-@WebSocketGateway()
+@WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -21,7 +22,7 @@ export class ChatGateway
   constructor(private readonly prisma: PrismaService) {}
 
   @SubscribeMessage('msgToServer')
-  async handleMessage(client: Socket, payload: ChatDto): Promise<void> {
+  async handleMessage(client: SocketWithAuth, payload: ChatDto): Promise<void> {
     try {
       const newMessage = await this.prisma.chat_messages.create({
         data: {
@@ -42,8 +43,9 @@ export class ChatGateway
     this.logger.log(`Init: ${server}`);
   }
 
-  async handleConnection(client: Socket) {
+  async handleConnection(client: SocketWithAuth) {
     this.logger.log(`Client connected: ${client.id}`);
+    this.logger.log(`Client user: ${client.username}`);
     try {
       const messages = await this.prisma.chat_messages.findMany({
         orderBy: {
@@ -56,7 +58,7 @@ export class ChatGateway
     }
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(client: SocketWithAuth) {
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 }
