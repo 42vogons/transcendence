@@ -29,30 +29,16 @@ export class ChannelController {
 
   @Post('/addMember')
   addMember(@Req() request, @Body() member: MemberDto) {
-    return this.channelService.addMember(
-      member.user_id,
-      member.channel_id,
-      member.status,
-      request.user.id,
-    );
+    return this.channelService.addMember(member, request.user.id);
   }
 
   @Delete('/removeMember')
   removeMember(@Req() request, @Body() member: RemoveMemberDto) {
-    return this.channelService.removeMember(
-      member.member_id,
-      member.channel_id,
-      request.user.id,
-    );
+    return this.channelService.removeMember(member, request.user.id);
   }
   @Patch('/changeMemberStatus')
   changeMemberStatus(@Req() request, @Body() member: MemberDto) {
-    return this.channelService.changeMemberStatus(
-      member.user_id,
-      member.channel_id,
-      member.status,
-      request.user.id,
-    );
+    return this.channelService.changeMemberStatus(member, request.user.id);
   }
 
   @Get('/channelsByUser')
@@ -62,10 +48,7 @@ export class ChannelController {
 
   @Post('/leave')
   leaveChannel(@Req() request, @Body() channel: LeaveDto) {
-    return this.channelService.leaveChannel(
-      channel.channel_id,
-      request.user.id,
-    );
+    return this.channelService.leaveChannel(channel, request.user.id);
   }
 
   @Get('/channels')
@@ -75,20 +58,12 @@ export class ChannelController {
 
   @Post('/enterChannel')
   enterChannel(@Req() request, @Body() channel: ChannelDto) {
-    return this.channelService.enterChannel(
-      channel.channel_id,
-      channel.password,
-      request.user.id,
-    );
+    return this.channelService.enterChannel(channel, request.user.id);
   }
 
   @Patch('/changePassword')
   async changePassword(@Req() request, @Body() channel: ChannelDto) {
-    return await this.channelService.changePassword(
-      channel.channel_id,
-      channel.password,
-      request.user.id,
-    );
+    return await this.channelService.changePassword(channel, request.user.id);
   }
 
   /*@Get()
