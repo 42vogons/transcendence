@@ -32,14 +32,14 @@ export default function Auth() {
 					setIsLoading(false)
 				}
 				if (action === 'logged') {
-					router.push('/profile')
+					router.push('/')
 				}
 			} catch (error) {
 				console.log('error:', error)
 				toast('An error occurred during authentication', {
 					type: 'error',
 				})
-				// router.push('/login')
+				router.push('/login')
 				setIsLoading(false)
 			}
 		}
@@ -61,7 +61,7 @@ export default function Auth() {
 			const { action } = res.data
 			if (action === 'logged') {
 				console.log('action login:', action)
-				router.push('/profile')
+				router.push('/')
 			} else {
 				console.log('erro action:', action)
 			}

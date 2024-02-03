@@ -5,6 +5,10 @@ interface UserState {
 	user: iUser
 }
 
+export function isDateExpired(date: Date) {
+	return new Date().getTime() > new Date(date).getTime()
+}
+
 export function UserReducer(state: UserState, action: any) {
 	console.log('action user:', action)
 	console.log('state user:', state)
@@ -24,9 +28,15 @@ export function UserReducer(state: UserState, action: any) {
 		}
 		case ActionTypes.UPDATE_USER: {
 			const userStr = localStorage.getItem('@42Transcendence:user')
-			let newUser
+			let newUser: iUser | undefined
 			if (userStr) {
 				newUser = JSON.parse(userStr)
+				if (newUser) {
+					if (isDateExpired(newUser.expiresAt)) {
+						localStorage.removeItem('@42Transcendence:user')
+						newUser = undefined
+					}
+				}
 			}
 			const newState = {
 				...state,
@@ -35,6 +45,7 @@ export function UserReducer(state: UserState, action: any) {
 			return newState
 		}
 		case ActionTypes.LOGOUT: {
+			localStorage.removeItem('@42Transcendence:user')
 			const newState = {
 				...state,
 				user: undefined,
