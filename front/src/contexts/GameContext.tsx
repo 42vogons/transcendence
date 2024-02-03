@@ -87,6 +87,19 @@ export function GameProvider({ children }: GameProviderProps) {
 		}
 	}, [router, user])
 
+	function emitSocketIfUserIsNotExpired(ev: string, ...args: any[]) {
+		if (user && !isDateExpired(user?.expiresAt as Date)) {
+			socket.emit(ev, ...args)
+		} else {
+			socket.close()
+			localStorage.removeItem('@42Transcendence:user')
+			toast('Your session is expired', {
+				type: 'error',
+			})
+			router.push('/login')
+		}
+	}
+
 	let lastType: string
 
 	function sendKey(type: string, key: string) {
@@ -94,19 +107,19 @@ export function GameProvider({ children }: GameProviderProps) {
 			return
 		}
 		lastType = type
-		socket.emit('send_key', { type, key })
+		emitSocketIfUserIsNotExpired('send_key', { type, key })
 	}
 
 	function joinQueue() {
-		socket.emit('join_queue', '')
+		emitSocketIfUserIsNotExpired('join_queue', '')
 	}
 
 	function playing() {
-		socket.emit('playing', '')
+		emitSocketIfUserIsNotExpired('playing', '')
 	}
 
 	function exitQueue() {
-		socket.emit('exit_queue', '')
+		emitSocketIfUserIsNotExpired('exit_queue', '')
 	}
 
 	function clearMatchCompleted() {
