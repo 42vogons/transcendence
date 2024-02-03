@@ -10,7 +10,7 @@ import {
 	Param,
 } from '@nestjs/common';
 import { GameService } from './game.service';
-import { MatchHistory } from './types';
+import { MatchHistory, MatchResult } from './types';
 
 @Controller('game')
 export class GameController {
@@ -24,12 +24,17 @@ export class GameController {
 	let matchHistoryResponseList: MatchHistory[];
 	matchHistoryResponseList = (await matchHistoryList).map(match => {
 		const matchHistoryResponse: MatchHistory = {
-			player1UserID: match.player1_user_id,
-			player1Username: match.player1_username,
-			player1Score: match.player1_score,
-			player2UserID: match.player2_user_id,
-			player2Username: match.player2_username,
-			player2Score: match.player2_score,
+			id: match.history_id,
+			player1: {
+				userID: match.player1_user_id,
+				username: match.player1_username,
+				score: match.player1_score,
+			},
+			player2: {
+				userID: match.player2_user_id,
+				username: match.player2_username,
+				score: match.player2_score,
+			},
 			winnerID: match.winner_id,
 			looserID: match.looser_id,
 			endedAt: match.ended_at

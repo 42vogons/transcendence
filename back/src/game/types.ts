@@ -75,14 +75,8 @@ export type MatchResult = {
   endedAt: Date;
 };
 
-export type MatchHistory = {
-	player1UserID: number;
-	player1Username: string;
-	player1Score: number;
-	player2UserID: number;
-	player2Username: string;
-	player2Score: number;
-	winnerID: number;
-	looserID: number;
-	endedAt: Date;
+export type Id = {
+	id: number;
 }
+
+export type MatchHistory = Id & MatchResult
