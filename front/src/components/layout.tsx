@@ -304,7 +304,13 @@ export default function Layout({ children }: iLayoutProps) {
 		}
 	}, [user, router])
 
-	return user && !isDateExpired(user?.expiresAt as Date) ? (
+	const [isClient, setIsClient] = useState(false)
+
+	useEffect(() => {
+		setIsClient(true)
+	}, [])
+
+	return isClient && user && !isDateExpired(user?.expiresAt as Date) ? (
 		<LayoutContainer>
 			<ApplicationContainer>
 				<SidebarContainer>
