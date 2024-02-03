@@ -3,12 +3,15 @@ import { Namespace } from 'socket.io';
 import { Room, UserData, MatchData, Paddle, MatchResult } from './types';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { SocketWithAuth } from 'src/types';
+import { MatchHistoryRespository } from './repositories/match-history.repository';
+import { CreateMatchHistoryDto } from './dto/create-match-history';
+import { MatchHistoryEntity } from './entities/match-history';
 
 @Injectable()
 export class GameService {
-  //todo: remover quando implementar conexao com o banco de dados
-  private matchsResults: MatchResult[] = [];
-
+  constructor(
+	private readonly matchRepository: MatchHistoryRespository
+  ) {}
   private readonly logger = new Logger(GameService.name);
   private players: UserData[] = [];
   private rooms: Room[] = [];
@@ -29,7 +32,6 @@ export class GameService {
     y: this.court.height * 0.005,
   };
   private paddleSpeed = this.paddle.height * 0.2;
-  constructor() {}
 
   isPlayerUserIDOnList(userID: number): boolean {
     return (
@@ -425,7 +427,17 @@ export class GameService {
   }
 
   saveMatchResult(matchResult: MatchResult) {
-    this.matchsResults.push(matchResult);
+	const matchHistoryDto: CreateMatchHistoryDto = new CreateMatchHistoryDto();
+	matchHistoryDto.player1_user_id = matchResult.player1.userID
+	matchHistoryDto.player1_username = matchResult.player1.username
+	matchHistoryDto.player1_score = matchResult.player1.score
+	matchHistoryDto.player2_user_id = matchResult.player2.userID
+	matchHistoryDto.player2_username = matchResult.player2.username
+	matchHistoryDto.player2_score = matchResult.player2.score
+	matchHistoryDto.winner_id = matchResult.winnerID
+	matchHistoryDto.looser_id = matchResult.looserID
+	matchHistoryDto.ended_at = matchResult.endedAt
+	this.matchRepository.create(matchHistoryDto)
   }
 
   endMatch(match: MatchData): MatchResult {
@@ -632,5 +644,9 @@ export class GameService {
     this.refreshMatch(match, io);
 
     setTimeout(() => this.gameInProgress(match.roomID, io), 1000 / 60);
+  }
+
+  getAllMatchHistoryByUserID(userID: string): Promise<MatchHistoryEntity[] | null> {
+	return this.matchRepository.getAllMatchHistoryByUserID(Number(userID))
   }
 }
