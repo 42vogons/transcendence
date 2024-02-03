@@ -22,6 +22,7 @@ import { ChatListItem, iChatListItem } from './chatListItem'
 import { UserContext } from '@/contexts/UserContext'
 import { toast } from 'react-toastify'
 import { isDateExpired } from '@/reducers/User/Reducer'
+import { GameContext } from '@/contexts/GameContext'
 
 type activePanelType = 'menu' | 'friends' | 'chat'
 
@@ -292,16 +293,19 @@ export default function Layout({ children }: iLayoutProps) {
 	const activeChatUser = 'rfelipe-'
 
 	const { user } = useContext(UserContext)
+	const { closeSocket } = useContext(GameContext)
 
 	useEffect(() => {
 		const isAuthenticated = user && !isDateExpired(user?.expiresAt as Date)
 		if (!isAuthenticated) {
+			closeSocket()
 			localStorage.removeItem('@42Transcendence:user')
 			toast('Your session is expired', {
 				type: 'error',
 			})
 			router.push('/login')
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [user, router])
 
 	const [isClient, setIsClient] = useState(false)

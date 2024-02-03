@@ -29,6 +29,7 @@ interface GameContextType {
 	exitQueue: () => void
 	playing: () => void
 	clearMatchCompleted: () => void
+	closeSocket: () => void
 }
 
 interface GameProviderProps {
@@ -126,6 +127,10 @@ export function GameProvider({ children }: GameProviderProps) {
 		dispatch(clearMatch())
 	}
 
+	function closeSocket() {
+		socket.close()
+	}
+
 	return (
 		<GameContext.Provider
 			value={{
@@ -138,6 +143,7 @@ export function GameProvider({ children }: GameProviderProps) {
 				exitQueue,
 				playing,
 				clearMatchCompleted,
+				closeSocket,
 			}}
 		>
 			{children}
