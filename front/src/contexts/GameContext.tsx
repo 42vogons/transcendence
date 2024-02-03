@@ -17,6 +17,7 @@ import {
 import { toast } from 'react-toastify'
 import socketClient from 'socket.io-client'
 import { UserContext } from './UserContext'
+import { isDateExpired } from '@/reducers/User/Reducer'
 
 interface GameContextType {
 	status: string
@@ -81,10 +82,23 @@ export function GameProvider({ children }: GameProviderProps) {
 		})
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
-		if (user) {
+		if (user && !isDateExpired(user?.expiresAt as Date)) {
 			socket.open()
 		}
 	}, [router, user])
+
+	function emitSocketIfUserIsNotExpired(ev: string, ...args: any[]) {
+		if (user && !isDateExpired(user?.expiresAt as Date)) {
+			socket.emit(ev, ...args)
+		} else {
+			socket.close()
+			localStorage.removeItem('@42Transcendence:user')
+			toast('Your session is expired', {
+				type: 'error',
+			})
+			router.push('/login')
+		}
+	}
 
 	let lastType: string
 
@@ -93,19 +107,19 @@ export function GameProvider({ children }: GameProviderProps) {
 			return
 		}
 		lastType = type
-		socket.emit('send_key', { type, key })
+		emitSocketIfUserIsNotExpired('send_key', { type, key })
 	}
 
 	function joinQueue() {
-		socket.emit('join_queue', '')
+		emitSocketIfUserIsNotExpired('join_queue', '')
 	}
 
 	function playing() {
-		socket.emit('playing', '')
+		emitSocketIfUserIsNotExpired('playing', '')
 	}
 
 	function exitQueue() {
-		socket.emit('exit_queue', '')
+		emitSocketIfUserIsNotExpired('exit_queue', '')
 	}
 
 	function clearMatchCompleted() {

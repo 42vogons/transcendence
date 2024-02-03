@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { FaGamepad, FaUserAstronaut } from 'react-icons/fa6'
 import { FaUserFriends } from 'react-icons/fa'
@@ -19,6 +19,9 @@ import MenuListItem from './menuListItem'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 import { FriendListItem, iFriendListItem } from './friendListItem'
 import { ChatListItem, iChatListItem } from './chatListItem'
+import { UserContext } from '@/contexts/UserContext'
+import { toast } from 'react-toastify'
+import { isDateExpired } from '@/reducers/User/Reducer'
 
 type activePanelType = 'menu' | 'friends' | 'chat'
 
@@ -288,7 +291,26 @@ export default function Layout({ children }: iLayoutProps) {
 
 	const activeChatUser = 'rfelipe-'
 
-	return (
+	const { user } = useContext(UserContext)
+
+	useEffect(() => {
+		const isAuthenticated = user && !isDateExpired(user?.expiresAt as Date)
+		if (!isAuthenticated) {
+			localStorage.removeItem('@42Transcendence:user')
+			toast('Your session is expired', {
+				type: 'error',
+			})
+			router.push('/login')
+		}
+	}, [user, router])
+
+	const [isClient, setIsClient] = useState(false)
+
+	useEffect(() => {
+		setIsClient(true)
+	}, [])
+
+	return isClient && user && !isDateExpired(user?.expiresAt as Date) ? (
 		<LayoutContainer>
 			<ApplicationContainer>
 				<SidebarContainer>
@@ -388,5 +410,5 @@ export default function Layout({ children }: iLayoutProps) {
 				</PageContainer>
 			</ApplicationContainer>
 		</LayoutContainer>
-	)
+	) : null
 }
