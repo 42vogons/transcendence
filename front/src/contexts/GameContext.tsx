@@ -17,6 +17,7 @@ import {
 import { toast } from 'react-toastify'
 import socketClient from 'socket.io-client'
 import { UserContext } from './UserContext'
+import { isDateExpired } from '@/reducers/User/Reducer'
 
 interface GameContextType {
 	status: string
@@ -81,7 +82,7 @@ export function GameProvider({ children }: GameProviderProps) {
 		})
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
-		if (user) {
+		if (user && !isDateExpired(user?.expiresAt as Date)) {
 			socket.open()
 		}
 	}, [router, user])
