@@ -8,7 +8,7 @@ import { ChannelRepository } from './repository/channel.repository';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UsersRepository } from 'src/users/repositories/users.repository';
 
-import * as argon2 from 'argon2';
+import * as bcrypt from 'bcryptjs';
 import { MemberDto } from './dto/member.dto';
 import { RemoveMemberDto } from './dto/removeMember.dto copy';
 import { LeaveDto } from './dto/leave.dto';
@@ -22,17 +22,18 @@ export class ChannelService {
   ) {}
 
   async hashPassword(password: string): Promise<string> {
-    return await argon2.hash(password);
+    const saltOrRounds = 10;
+    const hash = await bcrypt.hash(password, saltOrRounds);
+    return hash;
   }
 
   async validatePassword(password: string, hash: string): Promise<boolean> {
-    return await argon2.verify(hash, password);
+    return await bcrypt.compare(password, hash);
   }
 
-  async create(createChanneltDto: CreateChannelDto, userId: any) {
-    createChanneltDto.password = await this.hashPassword(
-      createChanneltDto.password,
-    );
+  async create(createChanneltDto: CreateChannelDto, userId: number) {
+    const hashPassword = await this.hashPassword(createChanneltDto.password);
+    createChanneltDto.password = hashPassword;
     const channel = await this.repository.createChannel(
       createChanneltDto,
       userId,
@@ -40,12 +41,12 @@ export class ChannelService {
     const member = new MemberDto();
     member.channel_id = channel.channel_id;
     member.status = 'Admin';
-    member.user_id = userId;
+    member.member_id = userId;
     this.addMember(member, userId);
     return 'Canal criado';
   }
 
-  async addMember(memberDto: MemberDto, userId: any) {
+  async addMember(memberDto: MemberDto, userId: number) {
     const isAdmin = await this.repository.checkUser(
       memberDto.channel_id,
       userId,
@@ -55,19 +56,19 @@ export class ChannelService {
       userId,
     );
     if (isAdmin || isOwner) {
-      const user = await this.userRepository.findOne(memberDto.user_id);
+      const user = await this.userRepository.findOne(memberDto.member_id);
       if (!user) {
         throw new NotFoundException('Membro não encontrado');
       }
       const member = await this.repository.checkMember(
-        memberDto.user_id,
+        memberDto.member_id,
         memberDto.channel_id,
       );
       if (member) {
         throw new ConflictException('O membro já está no canal');
       }
       this.repository.addUserToChannel(
-        memberDto.user_id,
+        memberDto.member_id,
         memberDto.channel_id,
         memberDto.status,
       );
@@ -120,11 +121,7 @@ export class ChannelService {
       userId,
     );
     if (isAdmin || isOwner) {
-      this.repository.changeMemberStatus(
-        memberDto.user_id,
-        memberDto.channel_id,
-        memberDto.status,
-      );
+      this.repository.changeMemberStatus(memberDto);
       return 'Status do membro alterado com sucesso';
     } else {
       throw new UnauthorizedException('Você não é admin ou owner');
@@ -180,7 +177,9 @@ export class ChannelService {
       userId,
     );
     if (isOwner) {
-      this.repository.changePassword(chanelDto.channel_id, chanelDto.password);
+      const hashPassword = await this.hashPassword(chanelDto.password);
+      chanelDto.password = hashPassword;
+      this.repository.changePassword(chanelDto);
       return 'Password alterado';
     } else {
       throw new UnauthorizedException('Você não é owner');

@@ -106,6 +106,7 @@ export class ChatGateway
 
   @SubscribeMessage('createChannel')
   async createChannel(client: SocketWithAuth, chanelDto: CreateChannelDto) {
+    console.log('criando canal');
     await this.channelService.create(chanelDto, client.userID);
   }
 
@@ -125,6 +126,7 @@ export class ChatGateway
   }
   @SubscribeMessage('leaveChannel')
   async leaveChannel(client: SocketWithAuth, leaveDto: LeaveDto) {
+    console.log('vamos deixar o canal');
     await this.channelService.leaveChannel(leaveDto, client.userID);
   }
 
@@ -136,6 +138,4 @@ export class ChatGateway
   async changePassword(client: SocketWithAuth, chanelDto: ChannelDto) {
     await this.channelService.changePassword(chanelDto, client.userID);
   }
-
-
 }
