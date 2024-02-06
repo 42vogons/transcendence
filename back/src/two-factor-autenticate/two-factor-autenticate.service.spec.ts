@@ -9,7 +9,9 @@ describe('TwoFactorAutenticateService', () => {
       providers: [TwoFactorAutenticateService],
     }).compile();
 
-    service = module.get<TwoFactorAutenticateService>(TwoFactorAutenticateService);
+    service = module.get<TwoFactorAutenticateService>(
+      TwoFactorAutenticateService,
+    );
   });
 
   it('should be defined', () => {

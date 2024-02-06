@@ -22,7 +22,7 @@ const secretJwt = process.env.SECRET_JWT;
     UsersModule,
     JwtModule.register({
       secret: secretJwt,
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '48h' },
     }),
     FriendsModule,
     ChatModule,

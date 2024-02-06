@@ -3,7 +3,7 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 export class MemberDto {
   @IsNotEmpty()
   @IsNumber()
-  user_id: number;
+  member_id: number;
 
   @IsNotEmpty()
   @IsNumber()

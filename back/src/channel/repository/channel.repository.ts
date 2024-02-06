@@ -2,6 +2,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { channels } from '@prisma/client';
 import { CreateChannelDto } from '../dto/create-channel.dto';
+import { ChannelDto } from '../dto/channel.dto';
+import { MemberDto } from '../dto/member.dto';
 
 @Injectable()
 export class ChannelRepository {
@@ -11,7 +13,7 @@ export class ChannelRepository {
     creatChannel: CreateChannelDto,
     owner_id: number,
   ): Promise<channels> {
-    return this.prisma.channels.create({
+    return await this.prisma.channels.create({
       data: {
         name: creatChannel.name,
         type: creatChannel.type,
@@ -73,26 +75,22 @@ export class ChannelRepository {
     });
   }
 
-  async changeMemberStatus(
-    member_id: number,
-    channel_id: number,
-    status: string,
-  ) {
+  async changeMemberStatus(memberDto: MemberDto) {
     await this.prisma.channel_members.update({
       where: {
         channel_id_user_id: {
-          channel_id: channel_id,
-          user_id: member_id,
+          channel_id: memberDto.channel_id,
+          user_id: memberDto.member_id,
         },
       },
       data: {
-        status: status,
+        status: memberDto.status,
       },
     });
   }
 
   async listChannelsByUser(user_id: number) {
-    return this.prisma.channel_members.findMany({
+    return await this.prisma.channel_members.findMany({
       where: {
         user_id: user_id,
       },
@@ -103,7 +101,7 @@ export class ChannelRepository {
   }
 
   async leaveChannel(user_id: number, channel_id: number) {
-    return this.prisma.channel_members.delete({
+    return await this.prisma.channel_members.delete({
       where: {
         channel_id_user_id: {
           channel_id: channel_id,
@@ -114,7 +112,7 @@ export class ChannelRepository {
   }
 
   async changeOwner(new_ownder: number, channel_id: number) {
-    return this.prisma.channels.update({
+    return await this.prisma.channels.update({
       where: {
         channel_id: channel_id,
       },
@@ -137,7 +135,7 @@ export class ChannelRepository {
   }
 
   async findAllChannels() {
-    return this.prisma.channels.findMany({
+    return await this.prisma.channels.findMany({
       select: {
         channel_id: true,
         name: true,
@@ -147,20 +145,20 @@ export class ChannelRepository {
   }
 
   async findChannel(channel_id: number) {
-    return this.prisma.channels.findUnique({
+    return await this.prisma.channels.findUnique({
       where: {
         channel_id: channel_id,
       },
     });
   }
 
-  async changePassword(channel_id: number, password: string) {
-    return this.prisma.channels.update({
+  async changePassword(chanelDto: ChannelDto) {
+    return await this.prisma.channels.update({
       where: {
-        channel_id: channel_id,
+        channel_id: chanelDto.channel_id,
       },
       data: {
-        password: password,
+        password: chanelDto.password,
       },
     });
   }
