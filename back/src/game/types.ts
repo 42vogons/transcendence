@@ -4,6 +4,8 @@ export type UserData = {
   username: string;
   roomID: string;
   status: 'idle' | 'searching' | 'readyToPlay' | 'playing';
+  waitingReconnect: boolean;
+  isReconnect: boolean;
 };
 
 export type Room = {
@@ -72,3 +74,9 @@ export type MatchResult = {
   looserID: number;
   endedAt: Date;
 };
+
+export type Id = {
+	id: number;
+}
+
+export type MatchHistory = Id & MatchResult

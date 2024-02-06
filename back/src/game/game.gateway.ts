@@ -31,16 +31,17 @@ export class GameGateway
   handleConnection(client: SocketWithAuth) {
     const sockets = this.io.sockets;
 
-    this.players = this.gameService.populateUserList(client);
+    this.players = this.gameService.populateUserList(client, this.io);
 
     this.logger.log(`WS Client with id: ${client.id} connected!`);
     this.logger.debug(`Number of connected sockets: ${sockets.size}`);
 
-    client.emit('status_changed', `connected`);
+    
   }
 
   handleDisconnect(client: SocketWithAuth) {
-    this.gameService.disconnectPlayer(client, this.io);
+	this.gameService.waitReconnect(client, this.io)
+    // this.gameService.disconnectPlayer(client, this.io);
 
     this.logger.log(`Disconnected socket id: ${client.id}`);
     this.logger.debug(`Number of connected sockets: ${this.io.sockets.size}`);
@@ -51,7 +52,7 @@ export class GameGateway
     this.players = this.gameService.joinQueue(client);
     let availablePlayers = this.gameService.findPlayerByStatus('searching');
     availablePlayers = availablePlayers.filter(p => {
-      return p.socketID !== client.id;
+      return p.userID !== client.userID;
     });
 
     if (availablePlayers.length > 0) {
@@ -66,7 +67,7 @@ export class GameGateway
 
   @SubscribeMessage('exit_queue')
   handleExitQueueEvent(client: SocketWithAuth) {
-    this.players = this.gameService.removeUserFromQueue(client.id);
+    this.players = this.gameService.removeUserFromQueue(client.userID);
     client.emit('status_changed', 'connected');
   }
 
@@ -75,7 +76,7 @@ export class GameGateway
     const { type, key } = data;
     const direction =
       type === 'keyup' ? 'STOP' : key.replace('Arrow', '').toUpperCase();
-    const player = this.gameService.findPlayerBySocketID(client.id);
+    const player = this.gameService.findPlayerByUserID(client.userID);
     const match = this.gameService.findMatchByRoomID(player.roomID);
     if (match.player1.userID === player.userID)
       match.player1.direction = direction;
@@ -86,7 +87,7 @@ export class GameGateway
 
   @SubscribeMessage('playing')
   handlePlayingEvent(client: SocketWithAuth) {
-    const player = this.gameService.findPlayerBySocketID(client.id);
+    const player = this.gameService.findPlayerByUserID(client.userID);
     const room = this.gameService.findRoomByRoomID(player.roomID);
     const users = room.users.map(user => {
       if (user.socketID === player.socketID) user.status = 'playing';
@@ -108,11 +109,11 @@ export class GameGateway
 
   @SubscribeMessage('pause')
   handlePausePlaying(client: SocketWithAuth) {
-    this.gameService.pauseMatch(client.id, this.io);
+    this.gameService.pauseMatch(client.userID, this.io);
   }
 
   @SubscribeMessage('resume')
   handleResumePlaying(client: SocketWithAuth) {
-    this.gameService.resumeMatch(client.id, this.io);
+    this.gameService.resumeMatch(client.userID, this.io);
   }
 }
