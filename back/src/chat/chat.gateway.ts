@@ -21,7 +21,6 @@ import { MemberDto } from 'src/channel/dto/member.dto';
 import { RemoveMemberDto } from 'src/channel/dto/removeMember.dto copy';
 import { LeaveDto } from 'src/channel/dto/leave.dto';
 
-
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -99,6 +98,7 @@ export class ChatGateway
   async addFriend(client: SocketWithAuth, friendDto: FriendDto) {
     await this.friendService.addFriend(client.userID, friendDto.friend_id);
   }
+
   @SubscribeMessage('removeFriend')
   async removeFriend(client: SocketWithAuth, friendDto: FriendDto) {
     await this.friendService.removeFriend(client.userID, friendDto.friend_id);
@@ -124,6 +124,7 @@ export class ChatGateway
   async removeMember(client: SocketWithAuth, removeMemberDto: RemoveMemberDto) {
     await this.channelService.removeMember(removeMemberDto, client.userID);
   }
+
   @SubscribeMessage('leaveChannel')
   async leaveChannel(client: SocketWithAuth, leaveDto: LeaveDto) {
     console.log('vamos deixar o canal');
@@ -134,6 +135,7 @@ export class ChatGateway
   async enterChannel(client: SocketWithAuth, chanelDto: ChannelDto) {
     await this.channelService.enterChannel(chanelDto, client.userID);
   }
+
   @SubscribeMessage('changePassword')
   async changePassword(client: SocketWithAuth, chanelDto: ChannelDto) {
     await this.channelService.changePassword(chanelDto, client.userID);
