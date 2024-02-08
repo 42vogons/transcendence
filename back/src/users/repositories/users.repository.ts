@@ -100,4 +100,11 @@ export class UsersRepository {
     });
     return uniqueFriends;
   }
+
+  async setStatus(userId: number, status: string) {
+    await this.prisma.users.update({
+      where: { user_id: userId },
+      data: { status: status },
+    });
+  }
 }

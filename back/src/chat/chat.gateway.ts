@@ -65,6 +65,7 @@ export class ChatGateway
     this.logger.log(`Client id: ${client.userID}`);
     this.users.set(client.userID, client.id);
     const friends = await this.usersService.findFriends(client.userID);
+    await this.usersService.setStatus(client.userID, 'online');
 
     friends.forEach(friend => {
       console.log('seu amigo ' + friend.user_id);
@@ -89,8 +90,9 @@ export class ChatGateway
     }*/
   }
 
-  handleDisconnect(client: SocketWithAuth) {
+  async handleDisconnect(client: SocketWithAuth) {
     this.logger.log(`Client disconnected: ${client.id}`);
+    await this.usersService.setStatus(client.userID, 'offline');
     this.users.delete(client.userID);
   }
 
