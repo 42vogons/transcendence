@@ -20,6 +20,7 @@ import { CreateChannelDto } from 'src/channel/dto/create-channel.dto';
 import { MemberDto } from 'src/channel/dto/member.dto';
 import { RemoveMemberDto } from 'src/channel/dto/removeMember.dto copy';
 import { LeaveDto } from 'src/channel/dto/leave.dto';
+import { ChannelMemberStatus } from '../channel/constants';
 
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway
@@ -119,13 +120,20 @@ export class ChatGateway
   }
 
   @SubscribeMessage('createChannel')
-  async createChannel(client: SocketWithAuth, chanelDto: CreateChannelDto) {
+  async createChannel(client: SocketWithAuth, channelDto: CreateChannelDto) {
     console.log('criando canal');
-    await this.channelService.create(chanelDto, client.userID);
+    await this.channelService.create(channelDto, client.userID);
   }
 
   @SubscribeMessage('addMember')
   async addMember(client: SocketWithAuth, memberDto: MemberDto) {
+    if (
+      !Object.values(ChannelMemberStatus).includes(
+        memberDto.status as ChannelMemberStatus,
+      )
+    ) {
+      throw new Error('Invalid member status');
+    }
     await this.channelService.addMember(memberDto, client.userID);
   }
 
@@ -145,13 +153,13 @@ export class ChatGateway
     await this.channelService.leaveChannel(leaveDto, client.userID);
   }
 
-  @SubscribeMessage('enterChannel')
-  async enterChannel(client: SocketWithAuth, chanelDto: ChannelDto) {
-    await this.channelService.enterChannel(chanelDto, client.userID);
+  @SubscribeMessage('joinChannel')
+  async joinChannel(client: SocketWithAuth, channelDto: ChannelDto) {
+    await this.channelService.joinChannel(channelDto, client.userID);
   }
 
   @SubscribeMessage('changePassword')
-  async changePassword(client: SocketWithAuth, chanelDto: ChannelDto) {
-    await this.channelService.changePassword(chanelDto, client.userID);
+  async changePassword(client: SocketWithAuth, channelDto: ChannelDto) {
+    await this.channelService.changePassword(channelDto, client.userID);
   }
 }

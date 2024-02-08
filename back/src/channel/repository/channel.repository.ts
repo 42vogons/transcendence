@@ -4,6 +4,7 @@ import { channels } from '@prisma/client';
 import { CreateChannelDto } from '../dto/create-channel.dto';
 import { ChannelDto } from '../dto/channel.dto';
 import { MemberDto } from '../dto/member.dto';
+import { ChannelMemberStatus } from '../constants';
 
 @Injectable()
 export class ChannelRepository {
@@ -47,7 +48,9 @@ export class ChannelRepository {
         status: true,
       },
     });
-    return channelMember ? channelMember.status === 'admin' : false;
+    return channelMember
+      ? channelMember.status === ChannelMemberStatus.ADMIN
+      : false;
   }
 
   async addUserToChannel(
@@ -126,7 +129,7 @@ export class ChannelRepository {
     return await this.prisma.channel_members.findMany({
       where: {
         channel_id: channel_id,
-        status: 'admin',
+        status: ChannelMemberStatus.ADMIN,
         user_id: {
           not: user_id,
         },
@@ -152,13 +155,13 @@ export class ChannelRepository {
     });
   }
 
-  async changePassword(chanelDto: ChannelDto) {
+  async changePassword(channelDto: ChannelDto) {
     return await this.prisma.channels.update({
       where: {
-        channel_id: chanelDto.channel_id,
+        channel_id: channelDto.channel_id,
       },
       data: {
-        password: chanelDto.password,
+        password: channelDto.password,
       },
     });
   }
