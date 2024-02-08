@@ -40,7 +40,7 @@ export class ChannelService {
     );
     const member = new MemberDto();
     member.channel_id = channel.channel_id;
-    member.status = 'Admin';
+    member.status = 'admin';
     member.member_id = userId;
     this.addMember(member, userId);
     return 'Canal criado';
@@ -169,10 +169,10 @@ export class ChannelService {
       channel.password,
     );
     if (
-      (validPassword || channel.type === 'Public') &&
-      channel.type !== 'Restrict'
+      (validPassword || channel.type === 'public') &&
+      channel.type !== 'restrict'
     ) {
-      this.repository.addUserToChannel(userId, chanelDto.channel_id, 'Member');
+      this.repository.addUserToChannel(userId, chanelDto.channel_id, 'member');
       return 'Entrou no canal';
     } else {
       throw new UnauthorizedException('Não é possível entrar no canal.');
