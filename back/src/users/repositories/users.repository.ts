@@ -66,6 +66,7 @@ export class UsersRepository {
               select: {
                 user_id: true,
                 username: true,
+                avatar_url: true,
               },
             },
           },
@@ -76,6 +77,7 @@ export class UsersRepository {
               select: {
                 user_id: true,
                 username: true,
+                avatar_url: true,
               },
             },
           },
@@ -96,8 +98,19 @@ export class UsersRepository {
     const uniqueFriendIds = new Set(friendsList.map(friend => friend.user_id));
     const uniqueFriends = Array.from(uniqueFriendIds).map(id => {
       const friend = friendsList.find(friend => friend.user_id === id);
-      return { user_id: id, username: friend.username };
+      return {
+        user_id: id,
+        username: friend.username,
+        avatar_url: friend.avatar_url,
+      };
     });
     return uniqueFriends;
+  }
+
+  async setStatus(userId: number, status: string) {
+    await this.prisma.users.update({
+      where: { user_id: userId },
+      data: { status: status },
+    });
   }
 }

@@ -66,6 +66,7 @@ export class ChatGateway
     this.logger.log(`Client id: ${client.userID}`);
     this.users.set(client.userID, client.id);
     const friends = await this.usersService.findFriends(client.userID);
+    await this.usersService.setStatus(client.userID, 'online');
 
     friends.forEach(friend => {
       console.log('seu amigo ' + friend.user_id);
@@ -75,9 +76,9 @@ export class ChatGateway
       }
       client
         .to(myFriend)
-        .emit('msgToClient', `Seu amigo ${client.username} está online`);
+        .emit('refreshList', `Seu amigo ${client.username} está online`);
     });
-
+    await this.listFriends(client);
     /*try {
       const messages = await this.prisma.chat_messages.findMany({
         orderBy: {
@@ -90,8 +91,21 @@ export class ChatGateway
     }*/
   }
 
-  handleDisconnect(client: SocketWithAuth) {
+  @SubscribeMessage('getFriends')
+  async listFriends(client: SocketWithAuth): Promise<void> {
+    const friends = await this.usersService.findFriends(client.userID);
+    const friendsList = friends.map(friend => ({
+      userID: friend.user_id,
+      userAvatarSrc: friend.avatar_url,
+      username: friend.username,
+      userStatus: this.users.has(friend.user_id) ? 'online' : 'offline',
+    }));
+    client.emit('update_friend_list', friendsList);
+  }
+
+  async handleDisconnect(client: SocketWithAuth) {
     this.logger.log(`Client disconnected: ${client.id}`);
+    await this.usersService.setStatus(client.userID, 'offline');
     this.users.delete(client.userID);
   }
 
