@@ -156,6 +156,14 @@ export class ChannelService {
 
   async enterChannel(chanelDto: ChannelDto, userId: any) {
     const channel = await this.repository.findChannel(chanelDto.channel_id);
+
+    const member = await this.repository.checkMember(
+      userId,
+      chanelDto.channel_id,
+    );
+    if (member) {
+      throw new ConflictException('Você já é membro do canal');
+    }
     const validPassword = await this.validatePassword(
       chanelDto.password,
       channel.password,
