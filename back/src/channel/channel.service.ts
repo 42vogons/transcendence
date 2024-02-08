@@ -13,6 +13,7 @@ import { MemberDto } from './dto/member.dto';
 import { RemoveMemberDto } from './dto/removeMember.dto copy';
 import { LeaveDto } from './dto/leave.dto';
 import { ChannelDto } from './dto/channel.dto';
+import { ChannelType, ChannelMemberStatus } from './constants';
 
 @Injectable()
 export class ChannelService {
@@ -40,7 +41,7 @@ export class ChannelService {
     );
     const member = new MemberDto();
     member.channel_id = channel.channel_id;
-    member.status = 'admin';
+    member.status = ChannelMemberStatus.ADMIN;
     member.member_id = userId;
     this.addMember(member, userId);
     return 'Canal criado';
@@ -169,10 +170,14 @@ export class ChannelService {
       channel.password,
     );
     if (
-      (validPassword || channel.type === 'public') &&
-      channel.type !== 'restrict'
+      (validPassword || channel.type === ChannelType.PUBLIC) &&
+      channel.type !== ChannelType.PRIVATE
     ) {
-      this.repository.addUserToChannel(userId, chanelDto.channel_id, 'member');
+      this.repository.addUserToChannel(
+        userId,
+        chanelDto.channel_id,
+        ChannelMemberStatus.MEMBER,
+      );
       return 'Entrou no canal';
     } else {
       throw new UnauthorizedException('Não é possível entrar no canal.');
