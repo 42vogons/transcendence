@@ -155,13 +155,13 @@ export class ChannelRepository {
     });
   }
 
-  async changePassword(chanelDto: ChannelDto) {
+  async changePassword(channelDto: ChannelDto) {
     return await this.prisma.channels.update({
       where: {
-        channel_id: chanelDto.channel_id,
+        channel_id: channelDto.channel_id,
       },
       data: {
-        password: chanelDto.password,
+        password: channelDto.password,
       },
     });
   }

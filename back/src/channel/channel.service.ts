@@ -33,6 +33,13 @@ export class ChannelService {
   }
 
   async create(createChanneltDto: CreateChannelDto, userId: number) {
+    if (
+      !Object.values(ChannelType).includes(
+        createChanneltDto.type as ChannelType,
+      )
+    ) {
+      throw new Error('Invalid channel type');
+    }
     const hashPassword = await this.hashPassword(createChanneltDto.password);
     createChanneltDto.password = hashPassword;
     const channel = await this.repository.createChannel(
@@ -155,18 +162,18 @@ export class ChannelService {
     return await this.repository.findAllChannels();
   }
 
-  async enterChannel(chanelDto: ChannelDto, userId: any) {
-    const channel = await this.repository.findChannel(chanelDto.channel_id);
+  async joinChannel(channelDto: ChannelDto, userId: any) {
+    const channel = await this.repository.findChannel(channelDto.channel_id);
 
     const member = await this.repository.checkMember(
       userId,
-      chanelDto.channel_id,
+      channelDto.channel_id,
     );
     if (member) {
       throw new ConflictException('Você já é membro do canal');
     }
     const validPassword = await this.validatePassword(
-      chanelDto.password,
+      channelDto.password,
       channel.password,
     );
     if (
@@ -175,7 +182,7 @@ export class ChannelService {
     ) {
       this.repository.addUserToChannel(
         userId,
-        chanelDto.channel_id,
+        channelDto.channel_id,
         ChannelMemberStatus.MEMBER,
       );
       return 'Entrou no canal';
@@ -184,15 +191,15 @@ export class ChannelService {
     }
   }
 
-  async changePassword(chanelDto: ChannelDto, userId: any) {
+  async changePassword(channelDto: ChannelDto, userId: any) {
     const isOwner = await this.repository.checkOwner(
-      chanelDto.channel_id,
+      channelDto.channel_id,
       userId,
     );
     if (isOwner) {
-      const hashPassword = await this.hashPassword(chanelDto.password);
-      chanelDto.password = hashPassword;
-      this.repository.changePassword(chanelDto);
+      const hashPassword = await this.hashPassword(channelDto.password);
+      channelDto.password = hashPassword;
+      this.repository.changePassword(channelDto);
       return 'Password alterado';
     } else {
       throw new UnauthorizedException('Você não é owner');

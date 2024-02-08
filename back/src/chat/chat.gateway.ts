@@ -105,9 +105,9 @@ export class ChatGateway
   }
 
   @SubscribeMessage('createChannel')
-  async createChannel(client: SocketWithAuth, chanelDto: CreateChannelDto) {
+  async createChannel(client: SocketWithAuth, channelDto: CreateChannelDto) {
     console.log('criando canal');
-    await this.channelService.create(chanelDto, client.userID);
+    await this.channelService.create(channelDto, client.userID);
   }
 
   @SubscribeMessage('addMember')
@@ -131,13 +131,13 @@ export class ChatGateway
     await this.channelService.leaveChannel(leaveDto, client.userID);
   }
 
-  @SubscribeMessage('enterChannel')
-  async enterChannel(client: SocketWithAuth, chanelDto: ChannelDto) {
-    await this.channelService.enterChannel(chanelDto, client.userID);
+  @SubscribeMessage('joinChannel')
+  async joinChannel(client: SocketWithAuth, channelDto: ChannelDto) {
+    await this.channelService.joinChannel(channelDto, client.userID);
   }
 
   @SubscribeMessage('changePassword')
-  async changePassword(client: SocketWithAuth, chanelDto: ChannelDto) {
-    await this.channelService.changePassword(chanelDto, client.userID);
+  async changePassword(client: SocketWithAuth, channelDto: ChannelDto) {
+    await this.channelService.changePassword(channelDto, client.userID);
   }
 }

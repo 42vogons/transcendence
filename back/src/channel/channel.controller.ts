@@ -56,9 +56,9 @@ export class ChannelController {
     return this.channelService.listAllChannels();
   }
 
-  @Post('/enterChannel')
-  enterChannel(@Req() request, @Body() channel: ChannelDto) {
-    return this.channelService.enterChannel(channel, request.user.id);
+  @Post('/joinChannel')
+  joinChannel(@Req() request, @Body() channel: ChannelDto) {
+    return this.channelService.joinChannel(channel, request.user.id);
   }
 
   @Patch('/changePassword')
