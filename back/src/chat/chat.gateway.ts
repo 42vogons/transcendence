@@ -20,6 +20,7 @@ import { CreateChannelDto } from 'src/channel/dto/create-channel.dto';
 import { MemberDto } from 'src/channel/dto/member.dto';
 import { RemoveMemberDto } from 'src/channel/dto/removeMember.dto copy';
 import { LeaveDto } from 'src/channel/dto/leave.dto';
+import { ChannelMemberStatus } from '../channel/constants';
 
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway
@@ -112,6 +113,13 @@ export class ChatGateway
 
   @SubscribeMessage('addMember')
   async addMember(client: SocketWithAuth, memberDto: MemberDto) {
+    if (
+      !Object.values(ChannelMemberStatus).includes(
+        memberDto.status as ChannelMemberStatus,
+      )
+    ) {
+      throw new Error('Invalid member status');
+    }
     await this.channelService.addMember(memberDto, client.userID);
   }
 
