@@ -64,4 +64,8 @@ export class UsersService {
   findFriends(userId: any): Promise<Friends[] | null> {
     return this.repository.findFriends(userId);
   }
+
+  setStatus(userId: any, status: string) {
+    return this.repository.setStatus(userId, status);
+  }
 }
