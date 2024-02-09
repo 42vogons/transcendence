@@ -1,7 +1,7 @@
 import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class ChatDto {
-  user_id: number;
+  //user_id: number;
 
   @IsInt()
   @IsNotEmpty()

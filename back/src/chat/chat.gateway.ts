@@ -21,6 +21,8 @@ import { MemberDto } from 'src/channel/dto/member.dto';
 import { RemoveMemberDto } from 'src/channel/dto/removeMember.dto copy';
 import { LeaveDto } from 'src/channel/dto/leave.dto';
 import { ChannelMemberStatus } from '../channel/constants';
+import { ChatService } from './chat.service';
+import { ChannelMessageDto } from 'src/channel/dto/channelMessage.dto.';
 
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway
@@ -36,24 +38,26 @@ export class ChatGateway
     private readonly usersService: UsersService,
     private readonly friendService: FriendsService,
     private readonly channelService: ChannelService,
+    private readonly chatService: ChatService,
   ) {}
 
   @SubscribeMessage('msgToServer')
-  async handleMessage(client: SocketWithAuth, payload: ChatDto): Promise<void> {
+  async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
-      const newMessage = await this.prisma.chat_messages.create({
-        data: {
-          sender_id: payload.sender_id,
-          receiver_id: payload.receiver_id,
-          channel_id: payload.channel_id,
-          content: payload.content,
-        },
-      });
-      this.logger.log(`Received ${JSON.stringify(payload)}`);
+      const newMessage = await this.chatService.saveMessage(chatDto);
+      this.logger.log(`Received ${JSON.stringify(newMessage)}`);
       this.server.emit('msgToClient', newMessage, client.id);
     } catch (error) {
       console.error('Error creating message:', error);
     }
+  }
+
+  @SubscribeMessage('getChannelMsg')
+  async listChannelMsg(
+    client: SocketWithAuth,
+    channelMessageDto: ChannelMessageDto,
+  ): Promise<void> {
+    return await this.chatService.getChatMessage(channelMessageDto.channel_id);
   }
 
   afterInit(server: Server) {
