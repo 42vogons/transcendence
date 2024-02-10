@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { NotFoundError } from '../common/errors/types/NotFoundError';
 import { UserEntity } from './entities/user.entity';
+import { BlockUserDto } from './dto/blockUser.dto';
 
 @Injectable()
 export class UsersService {
@@ -25,16 +26,16 @@ export class UsersService {
     console.log(newUser);
   }
 
-  create(createUserDto: CreateUserDto) {
-    return this.repository.create(createUserDto);
+  async create(createUserDto: CreateUserDto) {
+    return await this.repository.create(createUserDto);
   }
 
-  findAll() {
-    return this.repository.findAll();
+  async findAll() {
+    return await this.repository.findAll();
   }
 
-  findByToken(userId: any) {
-    return this.findOne(userId);
+  async findByToken(userId: any) {
+    return await this.findOne(userId);
   }
 
   async findOne(user_id: number): Promise<UserEntity> {
@@ -53,19 +54,27 @@ export class UsersService {
     return user;
   }
 
-  update(user_id: number, updateUserDto: UpdateUserDto) {
-    return this.repository.update(user_id, updateUserDto);
+  async update(user_id: number, updateUserDto: UpdateUserDto) {
+    return await this.repository.update(user_id, updateUserDto);
   }
 
-  remove(user_id: number) {
-    return this.repository.remove(user_id);
+  async remove(user_id: number) {
+    return await this.repository.remove(user_id);
   }
 
-  findFriends(userId: any): Promise<Friends[] | null> {
-    return this.repository.findFriends(userId);
+  async findFriends(userId: any): Promise<Friends[] | null> {
+    return await this.repository.findFriends(userId);
   }
 
-  setStatus(userId: any, status: string) {
-    return this.repository.setStatus(userId, status);
+  async setStatus(userId: any, status: string) {
+    return await this.repository.setStatus(userId, status);
+  }
+
+  async blockUser(blockUser: BlockUserDto) {
+    return await this.repository.blockUser(blockUser);
+  }
+
+  async unBlockUser(blockUser: BlockUserDto) {
+    return await this.repository.unBlockUser(blockUser);
   }
 }

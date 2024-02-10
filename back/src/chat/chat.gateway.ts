@@ -23,6 +23,7 @@ import { LeaveDto } from 'src/channel/dto/leave.dto';
 import { ChannelMemberStatus } from '../channel/constants';
 import { ChatService } from './chat.service';
 import { ChannelMessageDto } from 'src/channel/dto/channelMessage.dto.';
+import { BlockUserDto } from 'src/users/dto/blockUser.dto';
 
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway
@@ -165,5 +166,17 @@ export class ChatGateway
   @SubscribeMessage('changePassword')
   async changePassword(client: SocketWithAuth, channelDto: ChannelDto) {
     await this.channelService.changePassword(channelDto, client.userID);
+  }
+
+  @SubscribeMessage('blockUser')
+  async blockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
+    blockUser.user_id = client.userID;
+    await this.usersService.blockUser(blockUser);
+  }
+
+  @SubscribeMessage('UnBlockUser')
+  async unBlockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
+    blockUser.user_id = client.userID;
+    await this.usersService.unBlockUser(blockUser);
   }
 }
