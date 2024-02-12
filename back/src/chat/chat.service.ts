@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ChatRepository } from './repository/chat.repository';
 import { ChatDto } from './dto/chat.dto';
-import { ChannelService } from 'src/channel/channel.service';
 import { ChannelRepository } from 'src/channel/repository/channel.repository';
 import { UsersService } from 'src/users/users.service';
 import { BlockUserDto } from 'src/users/dto/blockUser.dto';
@@ -37,7 +36,7 @@ export class ChatService {
     }
 
     const channel = await this.channelRepository.findChannel(channel_id);
-    if (channel.type !== 'DM') {
+    if (channel.type !== 'direct') {
       return await this.repository.getChatMessage(channel_id);
     }
 

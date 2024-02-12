@@ -58,7 +58,10 @@ export class ChatGateway
     client: SocketWithAuth,
     channelMessageDto: ChannelMessageDto,
   ): Promise<void> {
-    return await this.chatService.getChatMessage(channelMessageDto.channel_id);
+    return await this.chatService.getChatMessage(
+      channelMessageDto.channel_id,
+      client.userID,
+    );
   }
 
   afterInit(server: Server) {
@@ -129,6 +132,13 @@ export class ChatGateway
     console.log('criando canal');
     await this.channelService.create(channelDto, client.userID);
   }
+  @SubscribeMessage('createDirect')
+  async createDirect(client: SocketWithAuth, channelDto: CreateChannelDto) {
+    console.log('criando canal');
+    await this.channelService.createDirect(channelDto, client.userID);
+  }
+
+
 
   @SubscribeMessage('addMember')
   async addMember(client: SocketWithAuth, memberDto: MemberDto) {
@@ -179,4 +189,6 @@ export class ChatGateway
     blockUser.user_id = client.userID;
     await this.usersService.unBlockUser(blockUser);
   }
+
+
 }
