@@ -77,4 +77,8 @@ export class UsersService {
   async unBlockUser(blockUser: BlockUserDto) {
     return await this.repository.unBlockUser(blockUser);
   }
+
+  async checkBlockedStatus(blockUser: BlockUserDto) {
+    return await this.repository.checkBlockStatus(blockUser);
+  }
 }

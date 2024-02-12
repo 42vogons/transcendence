@@ -176,4 +176,15 @@ export class ChannelRepository {
       },
     });
   }
+
+  async listMembers(channel_id: number) {
+    return await this.prisma.channel_members.findMany({
+      where: {
+        channel_id: channel_id,
+      },
+      include: {
+        users: true,
+      },
+    });
+  }
 }

@@ -22,7 +22,19 @@ export class ChatRepository {
         channel_id: channel_id,
       },
       orderBy: {
-        timestamp: 'asc',
+        timestamp: 'desc',
+      },
+    });
+  }
+
+  async getChatMessageBefore(channel_id: number, blockEntry: Date) {
+    return this.prisma.chat_messages.findMany({
+      where: {
+        channel_id: channel_id,
+        timestamp: { lt: blockEntry },
+      },
+      orderBy: {
+        timestamp: 'desc',
       },
     });
   }

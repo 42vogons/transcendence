@@ -1,20 +1,58 @@
 import { Injectable } from '@nestjs/common';
 import { ChatRepository } from './repository/chat.repository';
 import { ChatDto } from './dto/chat.dto';
+import { ChannelService } from 'src/channel/channel.service';
+import { ChannelRepository } from 'src/channel/repository/channel.repository';
+import { UsersService } from 'src/users/users.service';
+import { BlockUserDto } from 'src/users/dto/blockUser.dto';
 
 @Injectable()
 export class ChatService {
-  constructor(private readonly repository: ChatRepository) {}
+  constructor(
+    private readonly repository: ChatRepository,
+    private readonly channelRepository: ChannelRepository,
+    private readonly usersService: UsersService,
+  ) {}
 
   async saveMessage(chatDto: ChatDto): Promise<ChatDto> {
+    const isMember = await this.channelRepository.checkMember(
+      chatDto.sender_id,
+      chatDto.channel_id,
+    );
+    if (!isMember) {
+      //lançar uma excpetion que nao é membro do canal
+    }
     // primeiro verifica se o user pode mandar msg no canal
-    // primeiro verifica se usuário faz parte desse canal
+    
     return await this.repository.saveMessage(chatDto);
     // vai me devolver uma lista com os usuários desse canal
+    // caso o tipo de chat seja DM, ira devolver o usuário caso não esteja bloqueado
   }
 
-  async getChatMessage(chanel_id: number): Promise<any> {
-    // primeiro verifica se usuário faz parte desse canal
-    return this.repository.getChatMessage(chanel_id);
+  async getChatMessage(channel_id: number, user_id: number): Promise<any> {
+    const members = await this.channelRepository.listMembers(channel_id);
+    const isMember = members.some(member => member.users.user_id === user_id);
+    if (!isMember) {
+      return 'Você não é membro deste canal';
+    }
+
+    const channel = await this.channelRepository.findChannel(channel_id);
+    if (channel.type !== 'DM') {
+      return await this.repository.getChatMessage(channel_id);
+    }
+
+    const blockUserDto = new BlockUserDto();
+    blockUserDto.member_id = members.find(
+      member => member.user_id !== user_id,
+    ).user_id;
+    blockUserDto.user_id = user_id;
+    const blocked = await this.usersService.checkBlockedStatus(blockUserDto);
+
+    if (blocked) {
+      return await this.repository.getChatMessageBefore(channel_id, blocked);
+    }
+
+    return await this.repository.getChatMessage(channel_id);
   }
+  
 }

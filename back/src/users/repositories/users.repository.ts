@@ -109,13 +109,13 @@ export class UsersRepository {
   }
 
   async setStatus(userId: number, status: string) {
-    await this.prisma.users.update({
+    return await this.prisma.users.update({
       where: { user_id: userId },
       data: { status: status },
     });
   }
   async blockUser(blockUser: BlockUserDto) {
-    await this.prisma.blocklist.create({
+    return await this.prisma.blocklist.create({
       data: {
         userId: blockUser.user_id,
         memberId: blockUser.member_id,
@@ -125,11 +125,22 @@ export class UsersRepository {
   }
 
   async unBlockUser(blockUser: BlockUserDto) {
-    await this.prisma.blocklist.deleteMany({
+    return await this.prisma.blocklist.deleteMany({
       where: {
         userId: blockUser.user_id,
         memberId: blockUser.member_id,
       },
     });
+  }
+
+  async checkBlockStatus(blockUser: BlockUserDto): Promise<Date | null> {
+    const blockEntry = await this.prisma.blocklist.findFirst({
+      where: {
+        userId: blockUser.user_id,
+        memberId: blockUser.member_id,
+      },
+    });
+
+    return blockEntry ? blockEntry.blockedAt : null;
   }
 }
