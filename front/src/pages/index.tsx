@@ -1,8 +1,9 @@
 import Head from 'next/head'
 import { ReactElement, useContext, useEffect } from 'react'
-import { FaGamepad } from 'react-icons/fa6'
+import { FaGamepad, FaUserAstronaut } from 'react-icons/fa6'
 
 import {
+	Header,
 	HomeContainer,
 	LoadingContainer,
 	PlayButton,
@@ -44,6 +45,14 @@ export default function Home() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<HomeContainer>
+				<Header>
+					<button>
+						<FaUserAstronaut size={32} />
+						<p>
+							<b>{user?.username}</b>
+						</p>
+					</button>
+				</Header>
 				{isMatchCompleted && (
 					<LoadingContainer>
 						{/* <Loading size={200} /> */}

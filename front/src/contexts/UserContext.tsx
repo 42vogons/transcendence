@@ -24,16 +24,14 @@ export function UserProvider({ children }: UserProviderProps) {
 		},
 		(initialState) => {
 			if (typeof window !== 'undefined') {
-				console.log('reducer rodou')
 				const storedStateAsJSON = localStorage.getItem(
 					'@42Transcendence:user',
 				)
+				console.log('storedStateAsJSON:', storedStateAsJSON)
 				if (storedStateAsJSON) {
 					const newUser = JSON.parse(storedStateAsJSON)
-					// console.log('reducer newUser:', newUser)
 					if (newUser) {
 						if (!isDateExpired(newUser.expiresAt)) {
-							// console.log('retorna newUser:', newUser)
 							return { user: newUser }
 						}
 					}

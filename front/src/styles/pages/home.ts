@@ -2,6 +2,7 @@ import { keyframes } from '@stitches/react'
 import { styled } from '..'
 
 export const HomeContainer = styled('main', {
+	position: 'relative',
 	minHeight: '100%',
 	maxHeight: '100%',
 	height: '100%',
@@ -31,6 +32,42 @@ export const HomeContainer = styled('main', {
 	},
 	// background: 'rgba(0,167,255,0.15)',
 	backgroundColor: '$blue800',
+})
+
+export const Header = styled('header', {
+	position: 'absolute',
+	top: 0,
+	left: 0,
+	width: '100%',
+	height: 78,
+	padding: '0 1rem',
+	backgroundColor: '$blue300',
+	borderTopRightRadius: 30,
+	borderBottom: '1px solid $blue100',
+	display: 'flex',
+	justifyContent: 'end',
+	alignItems: 'center',
+
+	button: {
+		backgroundColor: 'transparent',
+		border: 'none',
+		display: 'flex',
+		color: '$white',
+		// cursor: 'pointer',
+		height: '100%',
+		alignItems: 'center',
+
+		p: {
+			marginLeft: '1rem',
+			fontSize: '$2xl',
+			fontFamily: 'monospace',
+			fontVariantNnumeric: 'slashed-zero',
+		},
+	},
+
+	'@bp3': {
+		borderTopRightRadius: 26,
+	},
 })
 
 const pulse = keyframes({
