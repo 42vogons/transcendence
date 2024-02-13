@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ChatRepository } from './repository/chat.repository';
 import { ChatDto } from './dto/chat.dto';
 import { ChannelRepository } from 'src/channel/repository/channel.repository';
@@ -19,6 +19,7 @@ export class ChatService {
       chatDto.channel_id,
     );
     if (!isMember) {
+      throw new NotFoundException('Você não é membro deste canal');
       //lançar uma excpetion que nao é membro do canal
     }
     // primeiro verifica se o user pode mandar msg no canal
@@ -32,7 +33,7 @@ export class ChatService {
     const members = await this.channelRepository.listMembers(channel_id);
     const isMember = members.some(member => member.users.user_id === user_id);
     if (!isMember) {
-      return 'Você não é membro deste canal';
+      throw new NotFoundException('Você não é membro deste canal');
     }
 
     const channel = await this.channelRepository.findChannel(channel_id);

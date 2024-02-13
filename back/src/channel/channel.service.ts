@@ -45,8 +45,7 @@ export class ChannelService {
       createChanneltDto.member_id,
     );
     if (existChannel) {
-      console.log('canal já existe');
-      return 'canal já existe';
+      throw new ConflictException('canal já existe');
     }
     const channel = await this.repository.createChannel(
       createChanneltDto,

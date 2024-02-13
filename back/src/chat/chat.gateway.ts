@@ -79,7 +79,6 @@ export class ChatGateway
     await this.usersService.setStatus(client.userID, 'online');
 
     friends.forEach(friend => {
-      console.log('seu amigo ' + friend.user_id);
       const myFriend = this.users.get(friend.user_id);
       if (myFriend == null) {
         return;
