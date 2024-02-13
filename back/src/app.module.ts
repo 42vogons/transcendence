@@ -11,8 +11,10 @@ import { GameModule } from './game/game.module';
 import { FriendsModule } from './friends/friends.module';
 import { ChannelService } from './channel/channel.service';
 import { ChannelController } from './channel/channel.controller';
-import { ChatModule } from './channel/channel.module';
+import { ChannelModule } from './channel/channel.module';
 import { ChatGateway } from './chat/chat.gateway';
+import { ChatModule } from './chat/chat.module';
+import { ChatService } from './chat/chat.service';
 
 const secretJwt = process.env.SECRET_JWT;
 
@@ -25,8 +27,9 @@ const secretJwt = process.env.SECRET_JWT;
       signOptions: { expiresIn: '48h' },
     }),
     FriendsModule,
-    ChatModule,
+    ChannelModule,
     GameModule,
+    ChatModule,
   ],
   controllers: [LoginController, FriendsController, ChannelController],
   providers: [
@@ -35,6 +38,7 @@ const secretJwt = process.env.SECRET_JWT;
     FriendsService,
     ChannelService,
     ChatGateway,
+    ChatService,
   ],
 })
 export class AppModule {}
