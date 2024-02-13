@@ -80,10 +80,11 @@ const pulse = keyframes({
 })
 
 export const PlayButton = styled('button', {
-	width: 180,
+	minWidth: 180,
 	display: 'flex',
 	justifyContent: 'space-between',
 	alignItems: 'center',
+	gap: 32,
 	fontSize: '$2xl',
 	fontWeight: 'bold',
 	padding: '0.5rem 1rem',
@@ -116,19 +117,21 @@ export const LoadingContainer = styled('div', {
 
 	button: {
 		margin: '2rem 0 1rem',
-		backgroundColor: '$red',
-		color: '$white',
-		fontSize: '$2xl',
-		padding: '0.5rem 1rem',
-		borderRadius: 32,
-		border: '4px solid transparent',
-		cursor: 'pointer',
-		transition: '0.2s',
+	},
+})
 
-		'&:hover': {
-			backgroundColor: '$white',
-			color: '$red',
-			border: '4px solid $red',
-		},
+export const PauseModal = styled('div', {
+	height: '100%',
+	width: '100%',
+	// backgroundColor: 'red',
+	display: 'flex',
+	flexDirection: 'column',
+	justifyContent: 'center',
+	alignItems: 'center',
+	gap: 64,
+	h2: {
+		fontSize: 80,
+		color: '$red',
+		textAlign: 'center',
 	},
 })
