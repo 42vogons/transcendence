@@ -23,7 +23,6 @@ export class ChatService {
       //lançar uma excpetion que nao é membro do canal
     }
     // primeiro verifica se o user pode mandar msg no canal
-    
     return await this.repository.saveMessage(chatDto);
     // vai me devolver uma lista com os usuários desse canal
     // caso o tipo de chat seja DM, ira devolver o usuário caso não esteja bloqueado

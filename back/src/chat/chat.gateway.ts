@@ -24,6 +24,7 @@ import { ChannelMemberStatus } from '../channel/constants';
 import { ChatService } from './chat.service';
 import { ChannelMessageDto } from 'src/channel/dto/channelMessage.dto.';
 import { BlockUserDto } from 'src/users/dto/blockUser.dto';
+import { AdminActionDto } from 'src/channel/dto/adminAction.dto';
 
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway
@@ -148,9 +149,9 @@ export class ChatGateway
     await this.channelService.changeMemberStatus(memberDto, client.userID);
   }
 
-  @SubscribeMessage('removeMember')
-  async removeMember(client: SocketWithAuth, removeMemberDto: RemoveMemberDto) {
-    await this.channelService.removeMember(removeMemberDto, client.userID);
+  @SubscribeMessage('adminAction')
+  async adminAction(client: SocketWithAuth, adminActionDto: AdminActionDto) {
+    await this.channelService.adminAction(adminActionDto, client.userID);
   }
 
   @SubscribeMessage('leaveChannel')
@@ -175,11 +176,9 @@ export class ChatGateway
     await this.usersService.blockUser(blockUser);
   }
 
-  @SubscribeMessage('UnBlockUser')
+  @SubscribeMessage('unBlockUser')
   async unBlockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
     blockUser.user_id = client.userID;
     await this.usersService.unBlockUser(blockUser);
   }
-
-
 }

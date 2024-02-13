@@ -13,7 +13,7 @@ import { MemberDto } from './dto/member.dto';
 import { ChannelDto } from './dto/channel.dto';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { LeaveDto } from './dto/leave.dto';
-import { RemoveMemberDto } from './dto/removeMember.dto copy';
+import { RemoveMemberDto } from './dto/adminAction.dto';
 import { AuthGuard } from 'src/login/auth.guard';
 
 @UseGuards(AuthGuard)
