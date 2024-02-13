@@ -34,7 +34,7 @@ export class ChannelController {
 
   @Delete('/removeMember')
   removeMember(@Req() request, @Body() member: RemoveMemberDto) {
-    return this.channelService.removeMember(member, request.user.id);
+    return this.channelService.adminAction(member, request.user.id);
   }
   @Patch('/changeMemberStatus')
   changeMemberStatus(@Req() request, @Body() member: MemberDto) {

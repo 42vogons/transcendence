@@ -116,7 +116,7 @@ export class ChannelService {
     }
   }
 
-  async adminAction(adminActionDto: AdminActionDto, userId: any) {
+  async adminAction(adminActionDto: AdminActionDto, userId: number) {
     const isAdmin = await this.repository.checkUser(
       adminActionDto.channel_id,
       userId,
@@ -137,6 +137,7 @@ export class ChannelService {
       if (!member) {
         throw new NotFoundException('O membro não está no canal');
       }
+      this.repository.adminAction(adminActionDto, userId);
 
       if (adminActionDto.action === 'remove') {
         this.repository.removeMemberChannel(
@@ -146,11 +147,13 @@ export class ChannelService {
         return 'Membro removido';
       }
       if (adminActionDto.action === 'mute') {
-        // colocar função que mute usuário
         return 'Membro mutado';
       }
       if (adminActionDto.action === 'baned') {
-        // colocar função que bane usuário
+        this.repository.removeMemberChannel(
+          adminActionDto.member_id,
+          adminActionDto.channel_id,
+        );
         return 'Membro banido';
       }
     } else {

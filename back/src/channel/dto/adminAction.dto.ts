@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class AdminActionDto {
   @IsNotEmpty()
@@ -12,4 +12,8 @@ export class AdminActionDto {
   @IsNotEmpty()
   @IsString()
   action: string;
+
+  @IsOptional()
+  @IsNumber()
+  end_date: number;
 }
