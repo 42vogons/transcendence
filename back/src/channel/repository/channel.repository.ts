@@ -187,4 +187,39 @@ export class ChannelRepository {
       },
     });
   }
+
+  async directChannelExists(
+    user_id: number,
+    member_id: number,
+  ): Promise<boolean> {
+    const channels = await this.prisma.channels.findMany({
+      where: {
+        type: 'direct',
+        AND: [
+          {
+            channel_members: {
+              some: {
+                user_id: user_id,
+              },
+            },
+          },
+          {
+            channel_members: {
+              some: {
+                user_id: member_id,
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        channel_members: true,
+      },
+    });
+
+    const directChannels = channels.filter(
+      channel => channel.channel_members.length === 2,
+    );
+    return directChannels.length > 0;
+  }
 }

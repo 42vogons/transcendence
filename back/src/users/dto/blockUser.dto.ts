@@ -1,4 +1,11 @@
+import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+
 export class BlockUserDto {
-  user_id: number;
+  @IsNumber()
+  @IsOptional()
+  user_id?: number;
+
+  @IsNotEmpty()
+  @IsNumber()
   member_id: number;
 }

@@ -58,10 +58,11 @@ export class ChatGateway
     client: SocketWithAuth,
     channelMessageDto: ChannelMessageDto,
   ): Promise<void> {
-    return await this.chatService.getChatMessage(
+    const msgs = await this.chatService.getChatMessage(
       channelMessageDto.channel_id,
       client.userID,
     );
+    client.emit('update_channel', msgs);
   }
 
   afterInit(server: Server) {
@@ -74,6 +75,7 @@ export class ChatGateway
     this.logger.log(`Client id: ${client.userID}`);
     this.users.set(client.userID, client.id);
     const friends = await this.usersService.findFriends(client.userID);
+
     await this.usersService.setStatus(client.userID, 'online');
 
     friends.forEach(friend => {
@@ -87,16 +89,6 @@ export class ChatGateway
         .emit('refreshList', `Seu amigo ${client.username} está online`);
     });
     await this.listFriends(client);
-    /*try {
-      const messages = await this.prisma.chat_messages.findMany({
-        orderBy: {
-          timestamp: 'asc',
-        },
-      });
-      client.emit('initialMessages', messages);
-    } catch (error) {
-      console.error('Error retrieving initial messages:', error);
-    }*/
   }
 
   @SubscribeMessage('getFriends')
@@ -119,12 +111,12 @@ export class ChatGateway
 
   @SubscribeMessage('addFriend')
   async addFriend(client: SocketWithAuth, friendDto: FriendDto) {
-    await this.friendService.addFriend(client.userID, friendDto.friend_id);
+    await this.friendService.addFriend(client.userID, friendDto.member_id);
   }
 
   @SubscribeMessage('removeFriend')
   async removeFriend(client: SocketWithAuth, friendDto: FriendDto) {
-    await this.friendService.removeFriend(client.userID, friendDto.friend_id);
+    await this.friendService.removeFriend(client.userID, friendDto.member_id);
   }
 
   @SubscribeMessage('createChannel')

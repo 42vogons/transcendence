@@ -53,5 +53,4 @@ export class ChatService {
 
     return await this.repository.getChatMessage(channel_id);
   }
-  
 }
