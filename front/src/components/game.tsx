@@ -38,6 +38,14 @@ export default function Game() {
 					sendKey(type, key)
 					e.preventDefault()
 					break
+				case 'p':
+					sendKey(type, key)
+					e.preventDefault()
+					break
+				case 'P':
+					sendKey(type, key)
+					e.preventDefault()
+					break
 				default:
 					break
 			}

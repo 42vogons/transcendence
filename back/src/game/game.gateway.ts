@@ -7,7 +7,7 @@ import {
   WebSocketServer,
   SubscribeMessage,
 } from '@nestjs/websockets';
-import { Namespace, Socket } from 'socket.io';
+import { Namespace } from 'socket.io';
 import { GameService } from './game.service';
 import { UserData } from './types';
 import { SocketWithAuth } from 'src/types';
@@ -35,12 +35,10 @@ export class GameGateway
 
     this.logger.log(`WS Client with id: ${client.id} connected!`);
     this.logger.debug(`Number of connected sockets: ${sockets.size}`);
-
-    
   }
 
   handleDisconnect(client: SocketWithAuth) {
-	this.gameService.waitReconnect(client, this.io)
+    this.gameService.waitReconnect(client, this.io);
     // this.gameService.disconnectPlayer(client, this.io);
 
     this.logger.log(`Disconnected socket id: ${client.id}`);
@@ -108,8 +106,11 @@ export class GameGateway
   }
 
   @SubscribeMessage('pause')
-  handlePausePlaying(client: SocketWithAuth) {
-    this.gameService.pauseMatch(client.userID, this.io);
+  handlePausePlaying(client: SocketWithAuth, data) {
+    const { type } = data;
+    if (type === 'keydown') {
+      this.gameService.pauseMatch(client.userID, this.io);
+    }
   }
 
   @SubscribeMessage('resume')
