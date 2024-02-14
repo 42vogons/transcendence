@@ -5,6 +5,9 @@ export const useOutsideClick = (callback: () => void) => {
 
 	useEffect(() => {
 		const handleClick = (event: Event) => {
+			// todo: resolver bug do click outside quando o menu ta mobile e no friends
+			console.log('ref:', ref)
+			console.log('event.target:', event.target)
 			if (ref.current && !ref.current.contains(event.target)) {
 				callback()
 			}
