@@ -9,7 +9,6 @@ import {
 import { Server } from 'socket.io';
 import { SocketWithAuth } from 'src/types';
 import { Logger } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { ChatDto } from './dto/chat.dto';
 import { UsersService } from 'src/users/users.service';
 import { FriendsService } from 'src/friends/friends.service';
@@ -18,7 +17,6 @@ import { ChannelService } from 'src/channel/channel.service';
 import { ChannelDto } from 'src/channel/dto/channel.dto';
 import { CreateChannelDto } from 'src/channel/dto/create-channel.dto';
 import { MemberDto } from 'src/channel/dto/member.dto';
-import { RemoveMemberDto } from 'src/channel/dto/removeMember.dto copy';
 import { LeaveDto } from 'src/channel/dto/leave.dto';
 import { ChannelMemberStatus } from '../channel/constants';
 import { ChatService } from './chat.service';
@@ -36,7 +34,6 @@ export class ChatGateway
   private logger: Logger = new Logger('AppGateway');
 
   constructor(
-    private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
     private readonly friendService: FriendsService,
     private readonly channelService: ChannelService,
@@ -46,9 +43,13 @@ export class ChatGateway
   @SubscribeMessage('msgToServer')
   async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
-      const newMessage = await this.chatService.saveMessage(chatDto);
-      this.logger.log(`Received ${JSON.stringify(newMessage)}`);
-      this.server.emit('msgToClient', newMessage, client.id);
+      const members = await this.chatService.saveMessage(chatDto);
+      members.forEach(member => {
+        const memberId = this.users.get(member);
+        client
+          .to(memberId)
+          .emit('refreshChat', `atualize o canal ${chatDto.channel_id}`);
+      });
     } catch (error) {
       console.error('Error creating message:', error);
     }
@@ -129,8 +130,6 @@ export class ChatGateway
     console.log('criando canal');
     await this.channelService.createDirect(channelDto, client.userID);
   }
-
-
 
   @SubscribeMessage('addMember')
   async addMember(client: SocketWithAuth, memberDto: MemberDto) {

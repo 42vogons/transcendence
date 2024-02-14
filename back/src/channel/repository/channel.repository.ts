@@ -204,6 +204,18 @@ export class ChannelRepository {
     });
   }
 
+  async getLastAdminActionByUser(member_id: number, channel_id: number) {
+    return await this.prisma.admin_actions.findFirst({
+      where: {
+        target_user_id: member_id,
+        channel_id: channel_id,
+      },
+      orderBy: {
+        action_id: 'desc',
+      },
+    });
+  }
+
   async directChannelExists(
     user_id: number,
     member_id: number,

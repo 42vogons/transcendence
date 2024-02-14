@@ -4,6 +4,7 @@ import { ChatDto } from './dto/chat.dto';
 import { ChannelRepository } from 'src/channel/repository/channel.repository';
 import { UsersService } from 'src/users/users.service';
 import { BlockUserDto } from 'src/users/dto/blockUser.dto';
+import { ChannelService } from 'src/channel/channel.service';
 
 @Injectable()
 export class ChatService {
@@ -11,21 +12,27 @@ export class ChatService {
     private readonly repository: ChatRepository,
     private readonly channelRepository: ChannelRepository,
     private readonly usersService: UsersService,
+    private readonly channelService: ChannelService,
   ) {}
 
-  async saveMessage(chatDto: ChatDto): Promise<ChatDto> {
+  async saveMessage(chatDto: ChatDto): Promise<number[]> {
     const isMember = await this.channelRepository.checkMember(
       chatDto.sender_id,
       chatDto.channel_id,
     );
     if (!isMember) {
       throw new NotFoundException('Você não é membro deste canal');
-      //lançar uma excpetion que nao é membro do canal
     }
-    // primeiro verifica se o user pode mandar msg no canal
-    return await this.repository.saveMessage(chatDto);
-    // vai me devolver uma lista com os usuários desse canal
-    // caso o tipo de chat seja DM, ira devolver o usuário caso não esteja bloqueado
+    await this.channelService.checkAdminActions(
+      chatDto.sender_id,
+      chatDto.channel_id,
+    );
+    await this.repository.saveMessage(chatDto);
+    const members = await this.channelRepository.listMembers(
+      chatDto.channel_id,
+    );
+    // se for DM precisa verificar se a msg não está bloqueada para não notificar o user.
+    return members.map(member => member.user_id);
   }
 
   async getChatMessage(channel_id: number, user_id: number): Promise<any> {
