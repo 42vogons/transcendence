@@ -564,7 +564,7 @@ export class GameService {
   ) {
     const match = this.findMatchByRoomID(matchData.roomID);
 
-    if (match.isResumed) return;
+    if (!match || match.isResumed) return;
 
     match.status = 'end';
     match.quitterID = match.pausedByUserID;
@@ -579,17 +579,19 @@ export class GameService {
     const player = this.findPlayerByUserID(userID);
     const match = this.findMatchByRoomID(player.roomID);
 
-    match.isResumed = false;
-    match.status = 'pause';
-    match.pausedAt = new Date();
-    match.pausedByUserID = player.userID;
-    this.updateMatch(match);
+    if (match.status === 'play') {
+      match.isResumed = false;
+      match.status = 'pause';
+      match.pausedAt = new Date();
+      match.pausedByUserID = player.userID;
+      this.updateMatch(match);
 
     setTimeout(() => {
       this.giveUpMatch(match, io);
-    }, 100000);
+    }, 100 * 1000);
 
-    this.updateMatch(match);
+      this.updateMatch(match);
+    }
   }
 
   resumeMatch(

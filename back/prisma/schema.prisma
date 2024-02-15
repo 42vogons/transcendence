@@ -135,8 +135,23 @@ model users {
   chat_messages_chat_messages_sender_idTousers      chat_messages[]     @relation("chat_messages_sender_idTousers")
   friends_friends_friend_idTousers                  friends[]           @relation("friends_friend_idTousers")
   friends_friends_user_idTousers                    friends[]           @relation("friends_user_idTousers")
+  
+  blockListBlocker   blocklist[] @relation("block_list_blocker")
+  blockListBlocked   blocklist[] @relation("block_list_blocked")
   game_queue                                        game_queue[]
   games_games_player1_idTousers                     games[]             @relation("games_player1_idTousers")
   games_games_player2_idTousers                     games[]             @relation("games_player2_idTousers")
   user_achievements                                 user_achievements[]
+}
+
+model blocklist {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  memberId  Int
+  blockedAt DateTime @default(now())
+
+  user_blocker users @relation("block_list_blocker", fields: [userId], references: [user_id], onDelete: Cascade)
+  user_blocked users @relation("block_list_blocked", fields: [memberId], references: [user_id], onDelete: Cascade)
+
+  @@unique([userId, memberId])
 }

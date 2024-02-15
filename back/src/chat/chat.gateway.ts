@@ -21,6 +21,9 @@ import { MemberDto } from 'src/channel/dto/member.dto';
 import { RemoveMemberDto } from 'src/channel/dto/removeMember.dto copy';
 import { LeaveDto } from 'src/channel/dto/leave.dto';
 import { ChannelMemberStatus } from '../channel/constants';
+import { ChatService } from './chat.service';
+import { ChannelMessageDto } from 'src/channel/dto/channelMessage.dto.';
+import { BlockUserDto } from 'src/users/dto/blockUser.dto';
 
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway
@@ -36,24 +39,30 @@ export class ChatGateway
     private readonly usersService: UsersService,
     private readonly friendService: FriendsService,
     private readonly channelService: ChannelService,
+    private readonly chatService: ChatService,
   ) {}
 
   @SubscribeMessage('msgToServer')
-  async handleMessage(client: SocketWithAuth, payload: ChatDto): Promise<void> {
+  async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
-      const newMessage = await this.prisma.chat_messages.create({
-        data: {
-          sender_id: payload.sender_id,
-          receiver_id: payload.receiver_id,
-          channel_id: payload.channel_id,
-          content: payload.content,
-        },
-      });
-      this.logger.log(`Received ${JSON.stringify(payload)}`);
+      const newMessage = await this.chatService.saveMessage(chatDto);
+      this.logger.log(`Received ${JSON.stringify(newMessage)}`);
       this.server.emit('msgToClient', newMessage, client.id);
     } catch (error) {
       console.error('Error creating message:', error);
     }
+  }
+
+  @SubscribeMessage('getChannelMsg')
+  async listChannelMsg(
+    client: SocketWithAuth,
+    channelMessageDto: ChannelMessageDto,
+  ): Promise<void> {
+    const msgs = await this.chatService.getChatMessage(
+      channelMessageDto.channel_id,
+      client.userID,
+    );
+    client.emit('update_channel', msgs);
   }
 
   afterInit(server: Server) {
@@ -66,10 +75,10 @@ export class ChatGateway
     this.logger.log(`Client id: ${client.userID}`);
     this.users.set(client.userID, client.id);
     const friends = await this.usersService.findFriends(client.userID);
+
     await this.usersService.setStatus(client.userID, 'online');
 
     friends.forEach(friend => {
-      console.log('seu amigo ' + friend.user_id);
       const myFriend = this.users.get(friend.user_id);
       if (myFriend == null) {
         return;
@@ -79,16 +88,6 @@ export class ChatGateway
         .emit('refreshList', `Seu amigo ${client.username} está online`);
     });
     await this.listFriends(client);
-    /*try {
-      const messages = await this.prisma.chat_messages.findMany({
-        orderBy: {
-          timestamp: 'asc',
-        },
-      });
-      client.emit('initialMessages', messages);
-    } catch (error) {
-      console.error('Error retrieving initial messages:', error);
-    }*/
   }
 
   @SubscribeMessage('getFriends')
@@ -111,12 +110,12 @@ export class ChatGateway
 
   @SubscribeMessage('addFriend')
   async addFriend(client: SocketWithAuth, friendDto: FriendDto) {
-    await this.friendService.addFriend(client.userID, friendDto.friend_id);
+    await this.friendService.addFriend(client.userID, friendDto.member_id);
   }
 
   @SubscribeMessage('removeFriend')
   async removeFriend(client: SocketWithAuth, friendDto: FriendDto) {
-    await this.friendService.removeFriend(client.userID, friendDto.friend_id);
+    await this.friendService.removeFriend(client.userID, friendDto.member_id);
   }
 
   @SubscribeMessage('createChannel')
@@ -124,6 +123,13 @@ export class ChatGateway
     console.log('criando canal');
     await this.channelService.create(channelDto, client.userID);
   }
+  @SubscribeMessage('createDirect')
+  async createDirect(client: SocketWithAuth, channelDto: CreateChannelDto) {
+    console.log('criando canal');
+    await this.channelService.createDirect(channelDto, client.userID);
+  }
+
+
 
   @SubscribeMessage('addMember')
   async addMember(client: SocketWithAuth, memberDto: MemberDto) {
@@ -162,4 +168,18 @@ export class ChatGateway
   async changePassword(client: SocketWithAuth, channelDto: ChannelDto) {
     await this.channelService.changePassword(channelDto, client.userID);
   }
+
+  @SubscribeMessage('blockUser')
+  async blockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
+    blockUser.user_id = client.userID;
+    await this.usersService.blockUser(blockUser);
+  }
+
+  @SubscribeMessage('UnBlockUser')
+  async unBlockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
+    blockUser.user_id = client.userID;
+    await this.usersService.unBlockUser(blockUser);
+  }
+
+
 }

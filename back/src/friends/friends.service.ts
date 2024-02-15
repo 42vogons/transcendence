@@ -1,14 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { FriendsRepository } from './repositories/friends.repository';
 import { friends } from '@prisma/client';
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class FriendsService {
-  constructor(
-    private readonly repository: FriendsRepository,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly repository: FriendsRepository) {}
 
   async addFriend(userId: any, friendId: number): Promise<friends> {
     return this.repository.addFriend(userId, friendId);

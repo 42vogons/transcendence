@@ -1,10 +1,12 @@
 import Head from 'next/head'
 import { ReactElement, useContext, useEffect } from 'react'
-import { FaGamepad } from 'react-icons/fa6'
+import { FaCheck, FaGamepad, FaUserAstronaut } from 'react-icons/fa6'
 
 import {
+	Header,
 	HomeContainer,
 	LoadingContainer,
+	PauseModal,
 	PlayButton,
 } from '@/styles/pages/home'
 import Layout from '@/components/layout'
@@ -12,13 +14,18 @@ import Game from '@/components/game'
 import { GameContext } from '@/contexts/GameContext'
 import Loading from '@/components/loading'
 import { UserContext } from '@/contexts/UserContext'
+import Modal from '@/components/modal'
+import Button from '@/components/button'
+import { MdClose } from 'react-icons/md'
 
 export default function Home() {
 	const {
 		status,
+		match,
 		joinQueue,
 		exitQueue,
 		playing,
+		resume,
 		matchResult,
 		isMatchCompleted,
 		clearMatchCompleted,
@@ -44,19 +51,34 @@ export default function Home() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<HomeContainer>
+				<Header>
+					<button>
+						<FaUserAstronaut size={32} />
+						<p>
+							<b>{user?.username}</b>
+						</p>
+					</button>
+				</Header>
 				{isMatchCompleted && (
 					<LoadingContainer>
 						{/* <Loading size={200} /> */}
-						<h3>Jogo Acabou</h3>
+						<h3>Game Over</h3>
 						<p>
-							Você{' '}
+							You{' '}
 							{matchResult.winnerID === user?.userID
-								? 'venceu'
-								: 'perdeu'}
+								? 'won'
+								: 'lost'}
 						</p>
-						<button onMouseUp={() => clearMatchCompleted()}>
-							OK
-						</button>
+						<Button
+							buttonType={
+								matchResult.winnerID === user?.userID
+									? 'default'
+									: 'cancel'
+							}
+							onMouseUp={() => clearMatchCompleted()}
+						>
+							<FaCheck /> OK
+						</Button>
 					</LoadingContainer>
 				)}
 				{!isMatchCompleted && status === 'connected' && (
@@ -73,7 +95,13 @@ export default function Home() {
 					<LoadingContainer>
 						<Loading size={200} />
 						<h3>Looking for a match...</h3>
-						<button onMouseUp={() => exitQueue()}>Cancel</button>
+						<Button
+							buttonType="cancel"
+							onMouseUp={() => exitQueue()}
+						>
+							<MdClose size={40} />
+							Cancel
+						</Button>
 					</LoadingContainer>
 				)}
 
@@ -81,11 +109,48 @@ export default function Home() {
 					<LoadingContainer>
 						{/* <Loading size={200} /> */}
 						<h3>Ready?</h3>
-						<button onMouseUp={() => playing()}>Ready</button>
+						<Button onMouseUp={() => playing()}>
+							<FaCheck /> Ready
+						</Button>
 					</LoadingContainer>
 				)}
 				{!isMatchCompleted && status === 'playing' && <Game />}
 			</HomeContainer>
+			<Modal
+				isOpen={
+					!isMatchCompleted &&
+					status === 'playing' &&
+					match.status === 'pause'
+				}
+			>
+				<PauseModal>
+					{match.pausedByUserID === user?.userID ? (
+						<h2>Paused</h2>
+					) : (
+						<h2>
+							Paused by{' '}
+							{match?.pausedByUserID === match?.player1?.userID
+								? match?.player1?.username
+								: match?.player2?.username}
+						</h2>
+					)}
+
+					{match.pausedByUserID === user?.userID && (
+						<PlayButton
+							onMouseUp={() => {
+								resume()
+							}}
+						>
+							<FaGamepad size={40} />
+							Resume
+						</PlayButton>
+					)}
+
+					<Button buttonType="cancel">
+						<MdClose size={40} /> Give up
+					</Button>
+				</PauseModal>
+			</Modal>
 		</>
 	)
 }

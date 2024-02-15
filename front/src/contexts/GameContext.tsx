@@ -28,6 +28,7 @@ interface GameContextType {
 	joinQueue: () => void
 	exitQueue: () => void
 	playing: () => void
+	resume: () => void
 	clearMatchCompleted: () => void
 	closeSocket: () => void
 }
@@ -38,8 +39,8 @@ interface GameProviderProps {
 
 const socket = socketClient('http://localhost:3001/game', {
 	autoConnect: false,
-	// reconnectionAttempts: 2,
-	reconnectionDelay: 2000,
+	reconnectionAttempts: 2,
+	reconnectionDelay: 5000,
 	withCredentials: true,
 })
 
@@ -109,6 +110,10 @@ export function GameProvider({ children }: GameProviderProps) {
 			return
 		}
 		lastType = type
+		if (key === 'p' || key === 'P') {
+			emitSocketIfUserIsNotExpired('pause', { type })
+			return
+		}
 		emitSocketIfUserIsNotExpired('send_key', { type, key })
 	}
 
@@ -118,6 +123,10 @@ export function GameProvider({ children }: GameProviderProps) {
 
 	function playing() {
 		emitSocketIfUserIsNotExpired('playing', '')
+	}
+
+	function resume() {
+		emitSocketIfUserIsNotExpired('resume', '')
 	}
 
 	function exitQueue() {
@@ -143,6 +152,7 @@ export function GameProvider({ children }: GameProviderProps) {
 				joinQueue,
 				exitQueue,
 				playing,
+				resume,
 				clearMatchCompleted,
 				closeSocket,
 			}}

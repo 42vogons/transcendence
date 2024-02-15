@@ -4,6 +4,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserEntity } from '../entities/user.entity';
 import { UpdateUserGameStatisticDto } from '../dto/update-user-game-statistic';
+import { BlockUserDto } from '../dto/blockUser.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -109,7 +110,7 @@ export class UsersRepository {
   }
 
   async setStatus(userId: number, status: string) {
-    await this.prisma.users.update({
+    return await this.prisma.users.update({
       where: { user_id: userId },
       data: { status: status },
     });
@@ -125,5 +126,35 @@ export class UsersRepository {
       },
       data: updateUserGameStatisticDto,
     });
+  }
+
+  async blockUser(blockUser: BlockUserDto) {
+    return await this.prisma.blocklist.create({
+      data: {
+        userId: blockUser.user_id,
+        memberId: blockUser.member_id,
+        blockedAt: new Date(), // Prisma preenche automaticamente com o valor padrão, mas você pode especificar explicitamente se necessário
+      },
+    });
+  }
+
+  async unBlockUser(blockUser: BlockUserDto) {
+    return await this.prisma.blocklist.deleteMany({
+      where: {
+        userId: blockUser.user_id,
+        memberId: blockUser.member_id,
+      },
+    });
+  }
+
+  async checkBlockStatus(blockUser: BlockUserDto): Promise<Date | null> {
+    const blockEntry = await this.prisma.blocklist.findFirst({
+      where: {
+        userId: blockUser.user_id,
+        memberId: blockUser.member_id,
+      },
+    });
+
+    return blockEntry ? blockEntry.blockedAt : null;
   }
 }

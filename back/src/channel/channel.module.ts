@@ -17,4 +17,4 @@ import { UsersRepository } from 'src/users/repositories/users.repository';
   ],
   exports: [ChannelService, PrismaService, ChannelRepository, UsersRepository], // Exporte o UsersService, se necessário
 })
-export class ChatModule {}
+export class ChannelModule {}

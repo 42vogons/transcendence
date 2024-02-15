@@ -112,9 +112,8 @@ export class LoginService {
     const token = await this.getToken(body.code);
     const profile = await this.getInfo(token);
     const user = await this.checkUser(profile);
-    const expiresAt = new Date(new Date().getTime() + 30 * 60 * 1000);
+    const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
     await this.insertToken(user, expiresAt, res);
-    //todo adicionar expire do cookie no retorno res
     console.log('user ', user);
     let action = 'logged';
     const { user_id: userID, username } = user;

@@ -32,6 +32,34 @@ export class ChannelService {
     return await bcrypt.compare(password, hash);
   }
 
+  async createDirect(createChanneltDto: CreateChannelDto, user_id: number) {
+    if (
+      !Object.values(ChannelType).includes(
+        createChanneltDto.type as ChannelType,
+      )
+    ) {
+      throw new Error('Invalid channel type');
+    }
+    const existChannel = await this.repository.directChannelExists(
+      user_id,
+      createChanneltDto.member_id,
+    );
+    if (existChannel) {
+      throw new ConflictException('canal já existe');
+    }
+    const channel = await this.repository.createChannel(
+      createChanneltDto,
+      user_id,
+    );
+    const member = new MemberDto();
+    member.channel_id = channel.channel_id;
+    member.status = ChannelMemberStatus.ADMIN;
+    member.member_id = user_id;
+    await this.addMember(member, user_id);
+    member.member_id = createChanneltDto.member_id;
+    await this.addMember(member, user_id);
+  }
+
   async create(createChanneltDto: CreateChannelDto, userId: number) {
     if (
       !Object.values(ChannelType).includes(
@@ -40,8 +68,10 @@ export class ChannelService {
     ) {
       throw new Error('Invalid channel type');
     }
-    const hashPassword = await this.hashPassword(createChanneltDto.password);
-    createChanneltDto.password = hashPassword;
+    if (createChanneltDto.type === 'protected') {
+      const hashPassword = await this.hashPassword(createChanneltDto.password);
+      createChanneltDto.password = hashPassword;
+    }
     const channel = await this.repository.createChannel(
       createChanneltDto,
       userId,
