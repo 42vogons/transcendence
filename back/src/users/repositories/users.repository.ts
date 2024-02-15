@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserEntity } from '../entities/user.entity';
+import { UpdateUserGameStatisticDto } from '../dto/update-user-game-statistic';
 
 @Injectable()
 export class UsersRepository {
@@ -111,6 +112,18 @@ export class UsersRepository {
     await this.prisma.users.update({
       where: { user_id: userId },
       data: { status: status },
+    });
+  }
+
+  async updateUserGameStatistic(
+    user_id: number,
+    updateUserGameStatisticDto: UpdateUserGameStatisticDto,
+  ): Promise<UserEntity> {
+    return this.prisma.users.update({
+      where: {
+        user_id: user_id,
+      },
+      data: updateUserGameStatisticDto,
     });
   }
 }

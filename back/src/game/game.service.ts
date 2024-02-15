@@ -7,11 +7,14 @@ import { MatchHistoryRespository } from './repositories/match-history.repository
 import { CreateMatchHistoryDto } from './dto/create-match-history';
 import { MatchHistoryEntity } from './entities/match-history';
 import { WsException } from '@nestjs/websockets';
+import { UsersRepository } from 'src/users/repositories/users.repository';
+import { UpdateUserGameStatisticDto } from 'src/users/dto/update-user-game-statistic';
 
 @Injectable()
 export class GameService {
   constructor(
-    private readonly matchRepository: MatchHistoryRespository
+    private readonly matchRepository: MatchHistoryRespository,
+    private readonly usersRespository: UsersRepository
   ) { }
   private readonly logger = new Logger(GameService.name);
   private players: UserData[] = [];
@@ -468,6 +471,25 @@ export class GameService {
     return this.matchs;
   }
 
+  async updateUser(matchResult: MatchResult) {
+    let winner = await this.usersRespository.findOne(matchResult.winnerID)
+    let looser = await this.usersRespository.findOne(matchResult.looserID)
+    winner.total_games++;
+    looser.total_games++;
+    winner.total_wins++;
+    looser.total_losses++;
+    const winnerDto: UpdateUserGameStatisticDto = new UpdateUserGameStatisticDto();
+    winnerDto.total_games = winner.total_games;
+    winnerDto.total_wins = winner.total_wins;
+    winnerDto.total_losses = winner.total_losses;
+    this.usersRespository.updateUserGameStatistic(winner.user_id, winnerDto)
+    const looserDto: UpdateUserGameStatisticDto = new UpdateUserGameStatisticDto();
+    looserDto.total_games = looser.total_games;
+    looserDto.total_wins = looser.total_wins;
+    looserDto.total_losses = looser.total_losses;
+    this.usersRespository.updateUserGameStatistic(looser.user_id, looserDto)
+  }
+
   saveMatchResult(matchResult: MatchResult) {
     const matchHistoryDto: CreateMatchHistoryDto = new CreateMatchHistoryDto();
     matchHistoryDto.player1_user_id = matchResult.player1.userID
@@ -480,6 +502,7 @@ export class GameService {
     matchHistoryDto.looser_id = matchResult.looserID
     matchHistoryDto.ended_at = matchResult.endedAt
     this.matchRepository.create(matchHistoryDto)
+    this.updateUser(matchResult)
   }
 
   endMatch(match: MatchData): MatchResult {
