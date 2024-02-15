@@ -1,8 +1,7 @@
 import { styled } from '..'
 
 export const MenuListItemContainer = styled('button', {
-	margin: '1.5rem 1rem 0',
-	width: '224px',
+	width: '200px',
 	display: 'flex',
 	flexDirection: 'row',
 	justifyContent: 'space-between',
@@ -28,6 +27,10 @@ export const MenuListItemContainer = styled('button', {
 		'.title': {
 			color: '$white',
 		},
+	},
+
+	'&:first-of-type': {
+		marginTop: '1.5rem',
 	},
 
 	'&:last-of-type': {

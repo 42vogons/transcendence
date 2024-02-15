@@ -86,7 +86,7 @@ export function GameProvider({ children }: GameProviderProps) {
 		socket.on('connect_failed', (err) => handleErrors(err))
 		socket.on('exception', () => handleErrors("Something went wrong"))
 		if (user && !isDateExpired(user?.expiresAt as Date)) {
-			socket.open()
+			// socket.open()
 		}
 	}, [router, user])
 

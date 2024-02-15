@@ -1,11 +1,16 @@
 import { useEffect, useRef } from 'react'
 
-export const useOutsideClick = (callback: () => void) => {
+export const useOutsideMenuClick = (callback: () => void) => {
 	const ref = useRef<any>()
 
 	useEffect(() => {
 		const handleClick = (event: Event) => {
-			if (ref.current && !ref.current.contains(event.target)) {
+			if (
+				ref.current &&
+				!ref.current.contains(event.target) &&
+				(event.target as HTMLElement).closest('.pageContainer')
+			) {
+				// console.log('click outside with ignore')
 				callback()
 			}
 		}
