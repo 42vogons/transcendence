@@ -16,7 +16,7 @@ import {
 import IconButton from './iconButton'
 import MenuListItem from './menuListItem'
 
-import { useOutsideClick } from '@/hooks/useOutsideClick'
+import { useOutsideMenuClick } from '@/hooks/useOutsideMenuClick'
 import { FriendListItem, iFriendListItem } from './friendListItem'
 import { ChatListItem, iChatListItem } from './chatListItem'
 import { UserContext } from '@/contexts/UserContext'
@@ -62,7 +62,7 @@ export default function Layout({ children }: iLayoutProps) {
 		}
 	}
 
-	const ref = useOutsideClick(closeSidePanel)
+	const ref = useOutsideMenuClick(closeSidePanel)
 
 	useEffect(() => {
 		function handleResize() {
@@ -339,7 +339,11 @@ export default function Layout({ children }: iLayoutProps) {
 					</IconButton>
 				</SidebarContainer>
 				{showSidePanel === true && (
-					<SidePanelContainer isActive={showSidePanel} ref={ref}>
+					<SidePanelContainer
+						hasGap={activePanel === 'menu'}
+						isActive={showSidePanel}
+						ref={ref}
+					>
 						<div className="menuOptions">
 							{activePanel !== 'menu' && (
 								<IconButton
@@ -409,7 +413,10 @@ export default function Layout({ children }: iLayoutProps) {
 						</div>
 					</SidePanelContainer>
 				)}
-				<PageContainer isSidePanelActive={showSidePanel}>
+				<PageContainer
+					className="pageContainer"
+					isSidePanelActive={showSidePanel}
+				>
 					{children}
 				</PageContainer>
 			</ApplicationContainer>

@@ -118,7 +118,6 @@ export const SidePanelContainer = styled('div', {
 		flexDirection: 'column',
 		justifyContent: 'center',
 		alignItems: 'center',
-		// gap: 16,
 		padding: '0',
 	},
 
@@ -134,6 +133,18 @@ export const SidePanelContainer = styled('div', {
 			},
 			false: {
 				zIndex: 0,
+			},
+		},
+		hasGap: {
+			true: {
+				'.content': {
+					gap: 24,
+				},
+			},
+			false: {
+				'.content': {
+					gap: 0,
+				},
 			},
 		},
 	},
