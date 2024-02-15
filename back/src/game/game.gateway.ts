@@ -47,6 +47,7 @@ export class GameGateway
 
   @SubscribeMessage('join_queue')
   handleJoinQueueEvent(client: SocketWithAuth) {
+    this.gameService.throwError(client, "test")
     this.players = this.gameService.joinQueue(client);
     let availablePlayers = this.gameService.findPlayerByStatus('searching');
     availablePlayers = availablePlayers.filter(p => {

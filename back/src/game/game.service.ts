@@ -52,6 +52,7 @@ export class GameService {
     }
     player = this.createNewPlayer(player.socketID, player.userID, player.username)
     this.updatePlayer(player)
+    client.emit('status_changed', `connected`);
     throw new WsException(msg)
   }
 
