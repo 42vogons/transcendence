@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsString,
   IsUrl,
+  IsInt,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -36,7 +37,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   two_factor_enabled: boolean = false;
 
-  /*@IsInt()
+  @IsInt()
   total_games: number;
 
   @IsInt()
@@ -45,6 +46,6 @@ export class CreateUserDto {
   @IsInt()
   total_losses: number;
 
-  @IsInt()
+  /*@IsInt()
   ladder_level: number;*/
 }

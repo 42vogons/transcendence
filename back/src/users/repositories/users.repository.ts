@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserEntity } from '../entities/user.entity';
+import { UpdateUserGameStatisticDto } from '../dto/update-user-game-statistic';
 import { BlockUserDto } from '../dto/blockUser.dto';
 
 @Injectable()
@@ -114,6 +115,19 @@ export class UsersRepository {
       data: { status: status },
     });
   }
+
+  async updateUserGameStatistic(
+    user_id: number,
+    updateUserGameStatisticDto: UpdateUserGameStatisticDto,
+  ): Promise<UserEntity> {
+    return this.prisma.users.update({
+      where: {
+        user_id: user_id,
+      },
+      data: updateUserGameStatisticDto,
+    });
+  }
+
   async blockUser(blockUser: BlockUserDto) {
     return await this.prisma.blocklist.create({
       data: {

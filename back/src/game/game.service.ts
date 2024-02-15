@@ -6,10 +6,16 @@ import { SocketWithAuth } from 'src/types';
 import { MatchHistoryRespository } from './repositories/match-history.repository';
 import { CreateMatchHistoryDto } from './dto/create-match-history';
 import { MatchHistoryEntity } from './entities/match-history';
+import { WsException } from '@nestjs/websockets';
+import { UsersRepository } from 'src/users/repositories/users.repository';
+import { UpdateUserGameStatisticDto } from 'src/users/dto/update-user-game-statistic';
 
 @Injectable()
 export class GameService {
-  constructor(private readonly matchRepository: MatchHistoryRespository) {}
+  constructor(
+    private readonly matchRepository: MatchHistoryRespository,
+    private readonly usersRespository: UsersRepository
+  ) { }
   private readonly logger = new Logger(GameService.name);
   private players: UserData[] = [];
   private rooms: Room[] = [];
@@ -31,6 +37,28 @@ export class GameService {
   };
   private paddleSpeed = this.paddle.height * 0.2;
 
+  throwError(client: SocketWithAuth, msg: string) {
+    let player = this.findPlayerByUserID(client.userID)
+    if (player.roomID)
+      client.leave(player.roomID)
+    if (player.status === 'playing') {
+      let match = this.findMatchByUserID(player.userID)
+      match.quitterID = player.userID
+      match.status = 'end'
+      this.endMatch(match)
+      this.removeMatchFromList(match);
+    } else if (player.status === 'readyToPlay') {
+      this.disconnectPlayerWhenStatusIsReadyToPlay(player)
+    } else if (player.status === 'searching') {
+      this.deleteRoomByRoomID(player.roomID);
+      this.removePlayerFromList(player.userID);
+    }
+    player = this.createNewPlayer(player.socketID, player.userID, player.username)
+    this.updatePlayer(player)
+    client.emit('status_changed', `connected`);
+    throw new WsException(msg)
+  }
+
   isPlayerUserIDOnList(userID: number): boolean {
     return (
       this.players.filter(p => {
@@ -47,56 +75,84 @@ export class GameService {
     );
   }
 
-  populateUserList(
+  createNewPlayer(socketID: string, userID: number, username: string): UserData {
+    const player: UserData = {
+      socketID,
+      userID,
+      username,
+      roomID: '',
+      status: 'idle',
+      waitingReconnect: false,
+      isReconnect: false,
+    };
+    return player;
+  }
+
+  reconnectUserWhenStatusIsPlaying(
+    player: UserData,
     client: SocketWithAuth,
-    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
-  ): UserData[] {
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
+  ) {
+    const match = this.findMatchByUserID(player.userID)
+    let room = this.findRoomByRoomID(player.roomID)
+    this.removeUserFromRoom(room.ID, player.userID)
+    room.users.push(player)
+    client.join(room.ID)
+    io.to(client.id).emit('status_changed', `playing`);
+    io.to(match.player1.roomID).emit('match_updated', match);
+  }
+
+  reconnectUserWhenStatusIsReadyToPlay(
+    player: UserData,
+    client: SocketWithAuth,
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
+  ) {
+    const room = this.findRoomByRoomID(player.roomID);
+    let remainingPlayer: UserData;
+    let leavingPlayer = player;
+    if (room.users[0].userID === player.userID) {
+      remainingPlayer = this.findPlayerByUserID(room.users[1].userID);
+    } else {
+      remainingPlayer = this.findPlayerByUserID(room.users[0].userID);
+    }
+    this.removeUserFromQueue(leavingPlayer.userID);
+    remainingPlayer.status = 'searching';
+    this.updatePlayer(remainingPlayer);
+    io.to(room.ID).emit('status_changed', 'searching');
+    this.removeUserFromRoom(player.roomID, leavingPlayer.userID)
+    player.roomID = '',
+      player.status = 'idle'
+    this.updatePlayer(player);
+    io.to(client.id).emit('status_changed', `connected`);
+  }
+
+  reconnectUserWhenStatusIsSearching(
+    player: UserData,
+    client: SocketWithAuth,
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
+  ) {
+    this.deleteRoomByRoomID(player.roomID);
+    player.roomID = '';
+    player.status = 'idle';
+    this.updatePlayer(player);
+    io.to(client.id).emit('status_changed', `connected`);
+  }
+
+  populateUserList(client: SocketWithAuth, io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>): UserData[] {
     if (!this.isPlayerUserIDOnList(client.userID)) {
-      const player: UserData = {
-        socketID: client.id,
-        userID: client.userID,
-        username: client.username,
-        roomID: '',
-        status: 'idle',
-        waitingReconnect: false,
-        isReconnect: false,
-      };
+      const player = this.createNewPlayer(client.id, client.userID, client.username)
       this.players.push(player);
       io.to(client.id).emit('status_changed', `connected`);
     } else {
-      const player = this.findPlayerByUserID(client.userID);
+      let player = this.findPlayerByUserID(client.userID)
       player.isReconnect = true;
       this.updatePlayer(player);
       if (player.status === 'playing') {
-        const match = this.findMatchByUserID(player.userID);
-        const room = this.findRoomByRoomID(player.roomID);
-        this.removeUserFromRoom(room.ID, player.userID);
-        room.users.push(player);
-        client.join(room.ID);
-        io.to(client.id).emit('status_changed', `playing`);
-        io.to(match.player1.roomID).emit('match_updated', match);
+        this.reconnectUserWhenStatusIsPlaying(player, client, io)
       } else if (player.status === 'readyToPlay') {
-        const room = this.findRoomByRoomID(player.roomID);
-        let remainingPlayer: UserData;
-        const leavingPlayer = player;
-        if (room.users[0].userID === player.userID) {
-          remainingPlayer = this.findPlayerByUserID(room.users[1].userID);
-        } else {
-          remainingPlayer = this.findPlayerByUserID(room.users[0].userID);
-        }
-        this.removeUserFromQueue(leavingPlayer.userID);
-        remainingPlayer.status = 'searching';
-        this.updatePlayer(remainingPlayer);
-        io.to(room.ID).emit('status_changed', 'searching');
-        this.removeUserFromRoom(player.roomID, leavingPlayer.userID);
-        (player.roomID = ''), (player.status = 'idle');
-        this.updatePlayer(player);
-        io.to(client.id).emit('status_changed', `connected`);
+        this.reconnectUserWhenStatusIsReadyToPlay(player, client, io)
       } else if (player.status === 'searching') {
-        this.deleteRoomByRoomID(player.roomID);
-        (player.roomID = ''), (player.status = 'idle');
-        this.updatePlayer(player);
-        io.to(client.id).emit('status_changed', `connected`);
+        this.reconnectUserWhenStatusIsSearching(player, client, io)
       }
     }
     return this.players;
@@ -174,23 +230,26 @@ export class GameService {
 
   joinQueue(client: SocketWithAuth): UserData[] {
     const player: UserData = this.findPlayerByUserID(client.userID);
-    if (!player || player.status !== 'idle') return this.players;
+    if (!player || player.status !== 'idle') {
+      this.throwError(client, "error on join queue")
+      return this.players;
+    }
     player.status = 'searching';
     this.updatePlayer(player);
     return this.players;
   }
 
   joinRoom(client: SocketWithAuth, roomID: string): UserData[] {
-    //todo: check for unvailable entities errors
     const room = this.findRoomByRoomID(roomID);
-
     if (!room) {
+      this.throwError(client, "error on join room")
       return this.players;
     }
 
     const player1 = this.findPlayerByUserID(client.userID);
     const player2 = this.findPlayerByUserID(room.users[0].userID);
     if (!player1 || !player2) {
+      this.throwError(client, "error on join room")
       return this.players;
     }
 
@@ -211,7 +270,10 @@ export class GameService {
 
   createRoom(client: SocketWithAuth) {
     const player1 = this.findPlayerByUserID(client.userID);
-    if (!player1) return;
+    if (!player1) {
+      this.throwError(client, "error on create room")
+      return;
+    }
     player1.roomID = client.id;
     this.updatePlayer(player1);
 
@@ -225,7 +287,9 @@ export class GameService {
 
   removeUserFromQueue(userID: number): UserData[] {
     const player = this.findPlayerByUserID(userID);
-    if (!player) return this.players;
+    if (!player) {
+      return this.players;
+    }
 
     const room = this.findRoomByRoomID(player.roomID);
     if (room && room.users.length === 1) this.deleteRoomByRoomID(room.ID);
@@ -323,6 +387,7 @@ export class GameService {
     match.ball.position.x = this.court.width / 2 - this.ballRadius;
     match.ball.position.y = this.court.height / 2 - this.ballRadius;
     match.ball.direction.x *= -1;
+    match.ball.direction.y = Math.floor(Math.random() * 100) % 2 == 0 ? 1 : -1;
 
     if (match.score.p1 === this.maxScore || match.score.p2 == this.maxScore) {
       match.status = 'end';
@@ -351,25 +416,6 @@ export class GameService {
     const player = `player${playerNumber}`;
     const { x: px, y: py } = matchData[player].position;
     const { width: pw, height: ph } = matchData[player];
-
-    let testX = bx;
-    let testY = by;
-
-    if (bx < px) {
-      testX = px;
-    } else if (bx > px + pw) {
-      testX = px + pw;
-    }
-
-    if (by < py) {
-      testY = py;
-    } else if (by > py + ph) {
-      testY = py + ph;
-    }
-
-    const distX = bx - testX;
-    const distY = by - testY;
-    const distance = Math.sqrt(distX * distX + distY * distY);
 
     if (
       by >= py &&
@@ -425,18 +471,38 @@ export class GameService {
     return this.matchs;
   }
 
+  async updateUser(matchResult: MatchResult) {
+    let winner = await this.usersRespository.findOne(matchResult.winnerID)
+    let looser = await this.usersRespository.findOne(matchResult.looserID)
+    winner.total_games++;
+    looser.total_games++;
+    winner.total_wins++;
+    looser.total_losses++;
+    const winnerDto: UpdateUserGameStatisticDto = new UpdateUserGameStatisticDto();
+    winnerDto.total_games = winner.total_games;
+    winnerDto.total_wins = winner.total_wins;
+    winnerDto.total_losses = winner.total_losses;
+    this.usersRespository.updateUserGameStatistic(winner.user_id, winnerDto)
+    const looserDto: UpdateUserGameStatisticDto = new UpdateUserGameStatisticDto();
+    looserDto.total_games = looser.total_games;
+    looserDto.total_wins = looser.total_wins;
+    looserDto.total_losses = looser.total_losses;
+    this.usersRespository.updateUserGameStatistic(looser.user_id, looserDto)
+  }
+
   saveMatchResult(matchResult: MatchResult) {
     const matchHistoryDto: CreateMatchHistoryDto = new CreateMatchHistoryDto();
-    matchHistoryDto.player1_user_id = matchResult.player1.userID;
-    matchHistoryDto.player1_username = matchResult.player1.username;
-    matchHistoryDto.player1_score = matchResult.player1.score;
-    matchHistoryDto.player2_user_id = matchResult.player2.userID;
-    matchHistoryDto.player2_username = matchResult.player2.username;
-    matchHistoryDto.player2_score = matchResult.player2.score;
-    matchHistoryDto.winner_id = matchResult.winnerID;
-    matchHistoryDto.looser_id = matchResult.looserID;
-    matchHistoryDto.ended_at = matchResult.endedAt;
-    this.matchRepository.create(matchHistoryDto);
+    matchHistoryDto.player1_user_id = matchResult.player1.userID
+    matchHistoryDto.player1_username = matchResult.player1.username
+    matchHistoryDto.player1_score = matchResult.player1.score
+    matchHistoryDto.player2_user_id = matchResult.player2.userID
+    matchHistoryDto.player2_username = matchResult.player2.username
+    matchHistoryDto.player2_score = matchResult.player2.score
+    matchHistoryDto.winner_id = matchResult.winnerID
+    matchHistoryDto.looser_id = matchResult.looserID
+    matchHistoryDto.ended_at = matchResult.endedAt
+    this.matchRepository.create(matchHistoryDto)
+    this.updateUser(matchResult)
   }
 
   endMatch(match: MatchData): MatchResult {
@@ -520,9 +586,9 @@ export class GameService {
       match.pausedByUserID = player.userID;
       this.updateMatch(match);
 
-      const timer = setTimeout(() => {
-        this.giveUpMatch(match, io);
-      }, 10 * 1000);
+    setTimeout(() => {
+      this.giveUpMatch(match, io);
+    }, 100 * 1000);
 
       this.updateMatch(match);
     }
@@ -547,29 +613,26 @@ export class GameService {
   }
 
   removeUserFromRoom(roomID: string, userID: number) {
-    const room = this.findRoomByRoomID(roomID);
-    if (!room) return;
+    let room = this.findRoomByRoomID(roomID)
+    if (!room)
+      return
     room.users = room.users.filter(u => {
-      if (u.userID !== userID) return u;
-    });
-    this.updateRoom(room);
+      if (u.userID !== userID)
+        return u;
+    })
+    this.updateRoom(room)
   }
 
-  waitReconnect(
-    client: SocketWithAuth,
-    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
-  ) {
-    const player = this.findPlayerByUserID(client.userID);
-    if (!player) {
-      this.disconnectPlayer(client, io);
+  waitReconnect(client: SocketWithAuth, io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
+    let player = this.findPlayerByUserID(client.userID)
+    if (!player)
       return;
-    }
     player.waitingReconnect = true;
     this.updatePlayer(player);
 
     if (player.status === 'playing') {
-      this.pauseMatch(player.userID, io);
-      client.leave(player.roomID);
+      this.pauseMatch(player.userID, io)
+      client.leave(player.roomID)
     }
 
     setTimeout(() => {
@@ -577,39 +640,44 @@ export class GameService {
     }, 5000);
   }
 
+  disconnectPlayerWhenStatusIsReadyToPlay(player: UserData): UserData {
+    const room = this.findRoomByRoomID(player.roomID);
+    let remainingPlayer: UserData;
+    let leavingPlayer: UserData;
+    if (room.users[0].userID === player.userID) {
+      leavingPlayer = player;
+      remainingPlayer = this.findPlayerByUserID(room.users[1].userID);
+    } else {
+      remainingPlayer = this.findPlayerByUserID(room.users[0].userID);
+      leavingPlayer = player;
+    }
+    this.removeUserFromQueue(leavingPlayer.userID);
+    this.removePlayerFromList(leavingPlayer.userID);
+    remainingPlayer.status = 'searching';
+    this.updatePlayer(remainingPlayer);
+    room.users = room.users.filter(user => {
+      if (user.userID !== leavingPlayer.userID) return user;
+    });
+    this.updateRoom(room);
+    return remainingPlayer;
+  }
+
   disconnectPlayer(
     client: SocketWithAuth,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const player = this.findPlayerByUserID(client.userID);
+    let player = this.findPlayerByUserID(client.userID);
     if (player.waitingReconnect && player.isReconnect) {
       player.waitingReconnect = false;
       player.isReconnect = false;
-      this.updatePlayer(player);
+      this.updatePlayer(player)
       return;
     } else if (player.status === 'playing') {
-      const match = this.findMatchByRoomID(player.roomID);
+      const match = this.findMatchByRoomID(player.roomID)
       this.giveUpMatch(match, io);
       return;
     } else if (player.status === 'readyToPlay') {
-      const room = this.findRoomByRoomID(player.roomID);
-      let remainingPlayer: UserData;
-      let leavingPlayer: UserData;
-      if (room.users[0].userID === player.userID) {
-        leavingPlayer = player;
-        remainingPlayer = this.findPlayerByUserID(room.users[1].userID);
-      } else {
-        remainingPlayer = this.findPlayerByUserID(room.users[0].userID);
-        leavingPlayer = player;
-      }
-      this.removeUserFromQueue(leavingPlayer.userID);
-      this.removePlayerFromList(leavingPlayer.userID);
-      remainingPlayer.status = 'searching';
-      this.updatePlayer(remainingPlayer);
-      room.users = room.users.filter(user => {
-        if (user.userID !== leavingPlayer.userID) return user;
-      });
-      this.updateRoom(room);
+      let remainingPlayer = this.disconnectPlayerWhenStatusIsReadyToPlay(player)
       io.to(remainingPlayer.socketID).emit('status_changed', 'searching');
     } else if (player.status === 'searching') {
       this.deleteRoomByRoomID(player.roomID);
@@ -648,9 +716,7 @@ export class GameService {
     setTimeout(() => this.gameInProgress(match.roomID, io), 1000 / 60);
   }
 
-  getAllMatchHistoryByUserID(
-    userID: string,
-  ): Promise<MatchHistoryEntity[] | null> {
-    return this.matchRepository.getAllMatchHistoryByUserID(Number(userID));
+  getAllMatchHistoryByUserID(userID: string): Promise<MatchHistoryEntity[] | null> {
+    return this.matchRepository.getAllMatchHistoryByUserID(Number(userID))
   }
 }

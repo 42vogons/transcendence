@@ -16,11 +16,10 @@ import { SocketWithAuth } from 'src/types';
   namespace: 'game',
 })
 export class GameGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(GameGateway.name);
   private players: UserData[] = [];
-  constructor(private readonly gameService: GameService) {}
+  constructor(private readonly gameService: GameService) { }
 
   @WebSocketServer() io: Namespace;
 
@@ -38,8 +37,7 @@ export class GameGateway
   }
 
   handleDisconnect(client: SocketWithAuth) {
-    this.gameService.waitReconnect(client, this.io);
-    // this.gameService.disconnectPlayer(client, this.io);
+    this.gameService.waitReconnect(client, this.io)
 
     this.logger.log(`Disconnected socket id: ${client.id}`);
     this.logger.debug(`Number of connected sockets: ${this.io.sockets.size}`);
