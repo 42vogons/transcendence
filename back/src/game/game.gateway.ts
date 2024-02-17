@@ -115,4 +115,10 @@ export class GameGateway
   handleResumePlaying(client: SocketWithAuth) {
     this.gameService.resumeMatch(client.userID, this.io);
   }
+
+  @SubscribeMessage('give_up')
+  handleGiveUpMatch(client: SocketWithAuth) {
+    const match = this.gameService.findMatchByUserID(client.userID)
+    this.gameService.giveUpMatch(match, this.io, client)
+  }
 }
