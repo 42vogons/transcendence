@@ -6,6 +6,7 @@ import { ChannelRepository } from 'src/channel/repository/channel.repository';
 import { UsersService } from 'src/users/users.service';
 import { UsersRepository } from 'src/users/repositories/users.repository';
 import { JwtService } from '@nestjs/jwt';
+import { ChannelService } from 'src/channel/channel.service';
 
 @Module({
   providers: [
@@ -15,6 +16,7 @@ import { JwtService } from '@nestjs/jwt';
     ChannelRepository,
     UsersService,
     UsersRepository,
+    ChannelService,
     JwtService,
   ],
   exports: [
@@ -24,6 +26,7 @@ import { JwtService } from '@nestjs/jwt';
     ChannelRepository,
     UsersService,
     UsersRepository,
+    ChannelService,
     JwtService,
   ], // Exporte o UsersService, se necessário
 })

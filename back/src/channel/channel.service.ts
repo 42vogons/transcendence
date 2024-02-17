@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -10,10 +11,10 @@ import { UsersRepository } from 'src/users/repositories/users.repository';
 
 import * as bcrypt from 'bcryptjs';
 import { MemberDto } from './dto/member.dto';
-import { RemoveMemberDto } from './dto/removeMember.dto copy';
+import { AdminActionDto } from './dto/adminAction.dto';
 import { LeaveDto } from './dto/leave.dto';
 import { ChannelDto } from './dto/channel.dto';
-import { ChannelType, ChannelMemberStatus } from './constants';
+import { ChannelType, ChannelMemberStatus, AdminActionType } from './constants';
 
 @Injectable()
 export class ChannelService {
@@ -93,6 +94,9 @@ export class ChannelService {
       memberDto.channel_id,
       userId,
     );
+
+    await this.checkAdminActions(memberDto.member_id, memberDto.channel_id);
+
     if (isAdmin || isOwner) {
       const user = await this.userRepository.findOne(memberDto.member_id);
       if (!user) {
@@ -116,36 +120,48 @@ export class ChannelService {
     }
   }
 
-  async removeMember(memberDto: RemoveMemberDto, userId: any) {
+  async adminAction(adminActionDto: AdminActionDto, userId: number) {
     const isAdmin = await this.repository.checkUser(
-      memberDto.channel_id,
+      adminActionDto.channel_id,
       userId,
     );
     const isOwner = await this.repository.checkOwner(
-      memberDto.channel_id,
+      adminActionDto.channel_id,
       userId,
     );
     const memberIsOwner = await this.repository.checkOwner(
-      memberDto.channel_id,
-      memberDto.member_id,
+      adminActionDto.channel_id,
+      adminActionDto.member_id,
     );
     if ((isAdmin || isOwner) && memberIsOwner == false) {
       const member = await this.repository.checkMember(
-        memberDto.member_id,
-        memberDto.channel_id,
+        adminActionDto.member_id,
+        adminActionDto.channel_id,
       );
       if (!member) {
         throw new NotFoundException('O membro não está no canal');
       }
-      this.repository.removeMemberChannel(
-        memberDto.member_id,
-        memberDto.channel_id,
-      );
-      return 'Membro removido';
+      await this.repository.adminAction(adminActionDto, userId);
+
+      if (adminActionDto.action === 'remove') {
+        await this.repository.removeMemberChannel(
+          adminActionDto.member_id,
+          adminActionDto.channel_id,
+        );
+        return 'Membro removido';
+      }
+      if (adminActionDto.action === 'mute') {
+        return 'Membro mutado';
+      }
+      if (adminActionDto.action === 'baned') {
+        await this.repository.removeMemberChannel(
+          adminActionDto.member_id,
+          adminActionDto.channel_id,
+        );
+        return 'Membro banido';
+      }
     } else {
-      throw new UnauthorizedException(
-        'Você não é admin ou owner, ou não pode excluir o owner',
-      );
+      throw new UnauthorizedException('Você não é admin ou owner');
     }
   }
 
@@ -159,7 +175,7 @@ export class ChannelService {
       userId,
     );
     if (isAdmin || isOwner) {
-      this.repository.changeMemberStatus(memberDto);
+      await this.repository.changeMemberStatus(memberDto);
       return 'Status do membro alterado com sucesso';
     } else {
       throw new UnauthorizedException('Você não é admin ou owner');
@@ -167,7 +183,7 @@ export class ChannelService {
   }
 
   async listChannelsByUser(userId: any) {
-    return this.repository.listChannelsByUser(userId);
+    return await this.repository.listChannelsByUser(userId);
   }
 
   async leaveChannel(leaveDto: LeaveDto, userId: any) {
@@ -182,10 +198,10 @@ export class ChannelService {
     }
     const owner = await this.repository.checkOwner(leaveDto.channel_id, userId);
     if (owner === true) {
-      this.repository.changeOwner(admins[0].user_id, leaveDto.channel_id);
+      await this.repository.changeOwner(admins[0].user_id, leaveDto.channel_id);
       return 'Deixou o canal';
     }
-    return this.repository.leaveChannel(userId, leaveDto.channel_id);
+    return await this.repository.leaveChannel(userId, leaveDto.channel_id);
   }
 
   async listAllChannels() {
@@ -199,6 +215,7 @@ export class ChannelService {
       userId,
       channelDto.channel_id,
     );
+    await this.checkAdminActions(userId, channelDto.channel_id);
     if (member) {
       throw new ConflictException('Você já é membro do canal');
     }
@@ -210,7 +227,7 @@ export class ChannelService {
       (validPassword || channel.type === ChannelType.PUBLIC) &&
       channel.type !== ChannelType.PRIVATE
     ) {
-      this.repository.addUserToChannel(
+      await this.repository.addUserToChannel(
         userId,
         channelDto.channel_id,
         ChannelMemberStatus.MEMBER,
@@ -229,10 +246,28 @@ export class ChannelService {
     if (isOwner) {
       const hashPassword = await this.hashPassword(channelDto.password);
       channelDto.password = hashPassword;
-      this.repository.changePassword(channelDto);
+      await this.repository.changePassword(channelDto);
       return 'Password alterado';
     } else {
       throw new UnauthorizedException('Você não é owner');
+    }
+  }
+
+  async checkAdminActions(member_id: number, channel_id: number) {
+    const adminAction = await this.repository.getLastAdminActionByUser(
+      member_id,
+      channel_id,
+    );
+    if (adminAction == null) {
+      return;
+    }
+    if (adminAction.action_type === AdminActionType.BANNED) {
+      throw new ForbiddenException('Membro está banido');
+    }
+    if (adminAction.action_type === AdminActionType.MUTED) {
+      if (adminAction.end_time < new Date()) {
+        throw new ForbiddenException('Membro está mutado');
+      }
     }
   }
 }

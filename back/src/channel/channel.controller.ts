@@ -4,7 +4,7 @@ import {
   Body,
   Req,
   Get,
-  Delete,
+  //Delete,
   Patch,
   UseGuards,
 } from '@nestjs/common';
@@ -13,7 +13,6 @@ import { MemberDto } from './dto/member.dto';
 import { ChannelDto } from './dto/channel.dto';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { LeaveDto } from './dto/leave.dto';
-import { RemoveMemberDto } from './dto/removeMember.dto copy';
 import { AuthGuard } from 'src/login/auth.guard';
 
 @UseGuards(AuthGuard)
@@ -32,10 +31,10 @@ export class ChannelController {
     return this.channelService.addMember(member, request.user.id);
   }
 
-  @Delete('/removeMember')
+  /*@Delete('/removeMember')
   removeMember(@Req() request, @Body() member: RemoveMemberDto) {
-    return this.channelService.removeMember(member, request.user.id);
-  }
+    return this.channelService.adminAction(member, request.user.id);
+  }*/
   @Patch('/changeMemberStatus')
   changeMemberStatus(@Req() request, @Body() member: MemberDto) {
     return this.channelService.changeMemberStatus(member, request.user.id);
