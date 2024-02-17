@@ -50,8 +50,11 @@ export class ChatGateway
           .to(memberId)
           .emit('refreshChat', `atualize o canal ${chatDto.channel_id}`);
       });
+      this.logger.log(
+        `User ${client.userID} sent message on channel ${chatDto.channel_id}`,
+      );
     } catch (error) {
-      console.error('Error creating message:', error);
+      this.logger.error(error);
     }
   }
 
@@ -60,11 +63,15 @@ export class ChatGateway
     client: SocketWithAuth,
     channelMessageDto: ChannelMessageDto,
   ): Promise<void> {
-    const msgs = await this.chatService.getChatMessage(
-      channelMessageDto.channel_id,
-      client.userID,
-    );
-    client.emit('update_channel', msgs);
+    try {
+      const msgs = await this.chatService.getChatMessage(
+        channelMessageDto.channel_id,
+        client.userID,
+      );
+      client.emit('update_channel', msgs);
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   afterInit(server: Server) {
@@ -112,23 +119,51 @@ export class ChatGateway
 
   @SubscribeMessage('addFriend')
   async addFriend(client: SocketWithAuth, friendDto: FriendDto) {
-    await this.friendService.addFriend(client.userID, friendDto.member_id);
+    try {
+      await this.friendService.addFriend(client.userID, friendDto.member_id);
+      this.logger.log(
+        `User ${client.userID} added ${friendDto.member_id} in listFriends`,
+      );
+    } catch (error) {
+      this.logger.error(`${friendDto.member_id} does not exist`);
+    }
   }
 
   @SubscribeMessage('removeFriend')
   async removeFriend(client: SocketWithAuth, friendDto: FriendDto) {
-    await this.friendService.removeFriend(client.userID, friendDto.member_id);
+    try {
+      await this.friendService.removeFriend(client.userID, friendDto.member_id);
+      this.logger.log(
+        `User ${client.userID} removed ${friendDto.member_id} in listFriends`,
+      );
+    } catch (error) {
+      this.logger.error(`${friendDto.member_id} is not your friend`);
+    }
   }
 
   @SubscribeMessage('createChannel')
   async createChannel(client: SocketWithAuth, channelDto: CreateChannelDto) {
-    console.log('criando canal');
-    await this.channelService.create(channelDto, client.userID);
+    try {
+      const channel = await this.channelService.create(
+        channelDto,
+        client.userID,
+      );
+      this.logger.log(`User ${client.userID} created Channel ${channel}`);
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
   @SubscribeMessage('createDirect')
   async createDirect(client: SocketWithAuth, channelDto: CreateChannelDto) {
-    console.log('criando canal');
-    await this.channelService.createDirect(channelDto, client.userID);
+    try {
+      const channel = await this.channelService.createDirect(
+        channelDto,
+        client.userID,
+      );
+      this.logger.log(`User ${client.userID} created Channel ${channel}`);
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   @SubscribeMessage('addMember')
@@ -140,44 +175,92 @@ export class ChatGateway
     ) {
       throw new Error('Invalid member status');
     }
-    await this.channelService.addMember(memberDto, client.userID);
+    try {
+      await this.channelService.addMember(memberDto, client.userID);
+      this.logger.log(
+        `Member ${memberDto.member_id} added by ${client.userID} in channel ${memberDto.channel_id}`,
+      );
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   @SubscribeMessage('changeMemberStatus')
   async changeMemberStatus(client: SocketWithAuth, memberDto: MemberDto) {
-    await this.channelService.changeMemberStatus(memberDto, client.userID);
+    try {
+      await this.channelService.changeMemberStatus(memberDto, client.userID);
+      this.logger.log(
+        `Member ${memberDto.member_id} have changed status to ${memberDto.status} by ${client.userID} in channel ${memberDto.channel_id}`,
+      );
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   @SubscribeMessage('adminAction')
   async adminAction(client: SocketWithAuth, adminActionDto: AdminActionDto) {
-    await this.channelService.adminAction(adminActionDto, client.userID);
+    try {
+      await this.channelService.adminAction(adminActionDto, client.userID);
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   @SubscribeMessage('leaveChannel')
   async leaveChannel(client: SocketWithAuth, leaveDto: LeaveDto) {
-    console.log('vamos deixar o canal');
-    await this.channelService.leaveChannel(leaveDto, client.userID);
+    try {
+      await this.channelService.leaveChannel(leaveDto, client.userID);
+      this.logger.log(
+        `User ${client.userID} leave channel ${leaveDto.channel_id}`,
+      );
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   @SubscribeMessage('joinChannel')
   async joinChannel(client: SocketWithAuth, channelDto: ChannelDto) {
-    await this.channelService.joinChannel(channelDto, client.userID);
+    try {
+      await this.channelService.joinChannel(channelDto, client.userID);
+      this.logger.log(
+        `User ${client.userID} joined in channel ${channelDto.channel_id}`,
+      );
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   @SubscribeMessage('changePassword')
   async changePassword(client: SocketWithAuth, channelDto: ChannelDto) {
-    await this.channelService.changePassword(channelDto, client.userID);
+    try {
+      await this.channelService.changePassword(channelDto, client.userID);
+      this.logger.log(
+        `User ${client.userID} changed password in channel ${channelDto.channel_id}`,
+      );
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   @SubscribeMessage('blockUser')
   async blockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
-    blockUser.user_id = client.userID;
-    await this.usersService.blockUser(blockUser);
+    try {
+      blockUser.user_id = client.userID;
+      await this.usersService.blockUser(blockUser);
+      this.logger.log(`User ${client.userID} Blocked ${blockUser.member_id}`);
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   @SubscribeMessage('unBlockUser')
   async unBlockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
-    blockUser.user_id = client.userID;
-    await this.usersService.unBlockUser(blockUser);
+    try {
+      blockUser.user_id = client.userID;
+      await this.usersService.unBlockUser(blockUser);
+      this.logger.log(`User ${client.userID} UnBlocked ${blockUser.member_id}`);
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 }
