@@ -53,7 +53,7 @@ export class GameGateway
 
     if (availablePlayers.length > 0) {
       const roomID = availablePlayers[0].roomID;
-      this.players = this.gameService.joinRoom(client, roomID);
+      this.players = this.gameService.joinRoom(client, roomID, this.io);
       this.io.to(roomID).emit('status_changed', 'readyToPlay');
     } else {
       this.gameService.createRoom(client);
@@ -85,6 +85,7 @@ export class GameGateway
   handlePlayingEvent(client: SocketWithAuth) {
     const player = this.gameService.findPlayerByUserID(client.userID);
     const room = this.gameService.findRoomByRoomID(player.roomID);
+    room.IsReady = true;
     const users = room.users.map(user => {
       if (user.socketID === player.socketID) user.status = 'playing';
       return user;

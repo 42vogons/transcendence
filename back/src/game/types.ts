@@ -11,6 +11,7 @@ export type UserData = {
 export type Room = {
   ID: string;
   users: UserData[];
+  IsReady: boolean;
 };
 
 export type Ball = {

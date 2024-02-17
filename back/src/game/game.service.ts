@@ -239,7 +239,32 @@ export class GameService {
     return this.players;
   }
 
-  joinRoom(client: SocketWithAuth, roomID: string): UserData[] {
+  notReadyInTime(
+    roomID: string, 
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  ) {
+    const room = this.findRoomByRoomID(roomID);
+    if (!room || room.IsReady)
+      return;
+
+    let player1 = this.createNewPlayer(
+      room.users[0].socketID, room.users[0].userID, room.users[0].username)
+    let player2 = this.createNewPlayer(
+      room.users[1].socketID, room.users[1].userID, room.users[1].username)
+    this.updatePlayer(player1)
+    this.updatePlayer(player2)
+
+    io.to(room.ID).emit("not_ready_in_time", "true")
+    io.to(room.ID).emit("status_changed", "connected");
+    io.in(room.ID).socketsLeave(room.ID);
+    this.deleteRoomByRoomID(room.ID)
+  }
+
+  joinRoom(
+    client: SocketWithAuth,
+    roomID: string,
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  ): UserData[] {
     const room = this.findRoomByRoomID(roomID);
     if (!room) {
       this.throwError(client, "error on join room")
@@ -265,6 +290,10 @@ export class GameService {
     room.users.push(player1);
     this.updateRoom(room);
 
+    setTimeout(() => {
+      this.notReadyInTime(room.ID, io);
+    }, 60 * 1000);
+
     return this.players;
   }
 
@@ -280,6 +309,7 @@ export class GameService {
     const room: Room = {
       ID: client.id,
       users: [player1],
+      IsReady: false,
     };
     this.rooms.push(room);
     client.join(client.id);
