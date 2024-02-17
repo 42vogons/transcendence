@@ -258,6 +258,9 @@ export class ChannelService {
       member_id,
       channel_id,
     );
+    if (adminAction == null) {
+      return;
+    }
     if (adminAction.action_type === AdminActionType.BANNED) {
       throw new ForbiddenException('Membro está banido');
     }
@@ -267,6 +270,7 @@ export class ChannelService {
       }
     }
   }
+
   async listMembers(channel_id: number) {
     return await this.repository
   }
