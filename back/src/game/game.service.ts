@@ -561,13 +561,13 @@ export class GameService {
   giveUpMatch(
     matchData: MatchData,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+    client?: SocketWithAuth,
   ) {
     const match = this.findMatchByRoomID(matchData.roomID);
-
     if (!match || match.isResumed) return;
 
     match.status = 'end';
-    match.quitterID = match.pausedByUserID;
+    match.quitterID = client ? client.userID : match.pausedByUserID;
     this.updateMatch(match);
     this.gameInProgress(match.roomID, io);
   }
