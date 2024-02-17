@@ -270,10 +270,4 @@ export class ChannelService {
       }
     }
   }
-
-  async listMembers(channel_id: number) {
-    return await this.repository
-  }
-
-  
 }
