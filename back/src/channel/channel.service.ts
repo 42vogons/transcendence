@@ -33,7 +33,10 @@ export class ChannelService {
     return await bcrypt.compare(password, hash);
   }
 
-  async createDirect(createChanneltDto: CreateChannelDto, user_id: number) {
+  async createDirect(
+    createChanneltDto: CreateChannelDto,
+    user_id: number,
+  ): Promise<any> {
     if (
       !Object.values(ChannelType).includes(
         createChanneltDto.type as ChannelType,
@@ -46,7 +49,7 @@ export class ChannelService {
       createChanneltDto.member_id,
     );
     if (existChannel) {
-      throw new ConflictException('canal já existe');
+      throw new ConflictException('Channel already exists');
     }
     const channel = await this.repository.createChannel(
       createChanneltDto,
@@ -59,9 +62,13 @@ export class ChannelService {
     await this.addMember(member, user_id);
     member.member_id = createChanneltDto.member_id;
     await this.addMember(member, user_id);
+    return channel.channel_id;
   }
 
-  async create(createChanneltDto: CreateChannelDto, userId: number) {
+  async create(
+    createChanneltDto: CreateChannelDto,
+    userId: number,
+  ): Promise<any> {
     if (
       !Object.values(ChannelType).includes(
         createChanneltDto.type as ChannelType,
@@ -82,7 +89,7 @@ export class ChannelService {
     member.status = ChannelMemberStatus.ADMIN;
     member.member_id = userId;
     this.addMember(member, userId);
-    return 'Canal criado';
+    return channel.channel_id;
   }
 
   async addMember(memberDto: MemberDto, userId: number) {
@@ -116,7 +123,7 @@ export class ChannelService {
       );
       return 'Adicionado com sucesso';
     } else {
-      throw new UnauthorizedException('Você não é admin ou owner');
+      throw new UnauthorizedException('Você não é admin ou owner deste canal');
     }
   }
 
