@@ -40,7 +40,7 @@ export class ChatGateway
     private readonly chatService: ChatService,
   ) {}
 
-  @SubscribeMessage('msgToServer')
+  @SubscribeMessage('msg_to_server')
   async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
       const members = await this.chatService.saveMessage(chatDto);
@@ -58,7 +58,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('getChannelMsg')
+  @SubscribeMessage('get_channel_msg')
   async listChannelMsg(
     client: SocketWithAuth,
     channelMessageDto: ChannelMessageDto,
