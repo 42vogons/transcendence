@@ -130,6 +130,7 @@ export class ChatGateway
     this.logger.log(`Client disconnected: ${client.id}`);
     await this.usersService.setStatus(client.userID, 'offline');
     this.users.delete(client.userID);
+    this.notifyFriends(client);
   }
 
   @SubscribeMessage('add_friend')
