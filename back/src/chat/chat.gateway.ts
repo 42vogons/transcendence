@@ -48,7 +48,7 @@ export class ChatGateway
         const memberId = this.users.get(member);
         client
           .to(memberId)
-          .emit('refreshChat', `atualize o canal ${chatDto.channel_id}`);
+          .emit('refreshChat', `update the channel ${chatDto.channel_id}`);
       });
       this.logger.log(
         `User ${client.userID} sent message on channel ${chatDto.channel_id}`,
@@ -109,7 +109,7 @@ export class ChatGateway
       }
       client
         .to(myFriend)
-        .emit('refreshList', `Seu amigo ${client.username} está online`);
+        .emit('refreshList', `Your friend ${client.username} is online.`);
     });
     await this.listFriends(client);*/
   }
@@ -138,10 +138,10 @@ export class ChatGateway
     try {
       await this.friendService.addFriend(client.userID, friendDto.member_id);
       this.logger.log(
-        `User ${client.userID} added ${friendDto.member_id} in listFriends`,
+        `User ${client.userID} added ${friendDto.member_id} in listFriends.`,
       );
     } catch (error) {
-      this.logger.error(`${friendDto.member_id} does not exist`);
+      this.logger.error(`${friendDto.member_id} does not exist.`);
     }
   }
 
@@ -150,10 +150,10 @@ export class ChatGateway
     try {
       await this.friendService.removeFriend(client.userID, friendDto.member_id);
       this.logger.log(
-        `User ${client.userID} removed ${friendDto.member_id} in listFriends`,
+        `User ${client.userID} removed ${friendDto.member_id} in listFriends.`,
       );
     } catch (error) {
-      this.logger.error(`${friendDto.member_id} is not your friend`);
+      this.logger.error(`${friendDto.member_id} is not your friend.`);
     }
   }
 
@@ -164,7 +164,7 @@ export class ChatGateway
         channelDto,
         client.userID,
       );
-      this.logger.log(`User ${client.userID} created Channel ${channel}`);
+      this.logger.log(`User ${client.userID} created Channel ${channel}.`);
     } catch (error) {
       this.logger.error(error);
     }
@@ -176,7 +176,7 @@ export class ChatGateway
         channelDto,
         client.userID,
       );
-      this.logger.log(`User ${client.userID} created Channel ${channel}`);
+      this.logger.log(`User ${client.userID} created Channel ${channel}.`);
     } catch (error) {
       this.logger.error(error);
     }
@@ -189,12 +189,12 @@ export class ChatGateway
         memberDto.status as ChannelMemberStatus,
       )
     ) {
-      throw new Error('Invalid member status');
+      throw new Error('Invalid member status.');
     }
     try {
       await this.channelService.addMember(memberDto, client.userID);
       this.logger.log(
-        `Member ${memberDto.member_id} added by ${client.userID} in channel ${memberDto.channel_id}`,
+        `Member ${memberDto.member_id} added by ${client.userID} in channel ${memberDto.channel_id}.`,
       );
     } catch (error) {
       this.logger.error(error);
@@ -206,7 +206,7 @@ export class ChatGateway
     try {
       await this.channelService.changeMemberStatus(memberDto, client.userID);
       this.logger.log(
-        `Member ${memberDto.member_id} have changed status to ${memberDto.status} by ${client.userID} in channel ${memberDto.channel_id}`,
+        `Member ${memberDto.member_id} have changed status to ${memberDto.status} by ${client.userID} in channel ${memberDto.channel_id}.`,
       );
     } catch (error) {
       this.logger.error(error);
@@ -227,7 +227,7 @@ export class ChatGateway
     try {
       await this.channelService.leaveChannel(leaveDto, client.userID);
       this.logger.log(
-        `User ${client.userID} leave channel ${leaveDto.channel_id}`,
+        `User ${client.userID} leave channel ${leaveDto.channel_id}.`,
       );
     } catch (error) {
       this.logger.error(error);
@@ -239,7 +239,7 @@ export class ChatGateway
     try {
       await this.channelService.joinChannel(channelDto, client.userID);
       this.logger.log(
-        `User ${client.userID} joined in channel ${channelDto.channel_id}`,
+        `User ${client.userID} joined the channel ${channelDto.channel_id}.`,
       );
     } catch (error) {
       this.logger.error(error);
@@ -251,7 +251,7 @@ export class ChatGateway
     try {
       await this.channelService.changePassword(channelDto, client.userID);
       this.logger.log(
-        `User ${client.userID} changed password in channel ${channelDto.channel_id}`,
+        `User ${client.userID} changed password in channel ${channelDto.channel_id}.`,
       );
     } catch (error) {
       this.logger.error(error);
@@ -263,7 +263,7 @@ export class ChatGateway
     try {
       blockUser.user_id = client.userID;
       await this.usersService.blockUser(blockUser);
-      this.logger.log(`User ${client.userID} Blocked ${blockUser.member_id}`);
+      this.logger.log(`User ${client.userID} Blocked ${blockUser.member_id}.`);
     } catch (error) {
       this.logger.error(error);
     }
@@ -274,7 +274,9 @@ export class ChatGateway
     try {
       blockUser.user_id = client.userID;
       await this.usersService.unBlockUser(blockUser);
-      this.logger.log(`User ${client.userID} UnBlocked ${blockUser.member_id}`);
+      this.logger.log(
+        `User ${client.userID} UnBlocked ${blockUser.member_id}.`,
+      );
     } catch (error) {
       this.logger.error(error);
     }

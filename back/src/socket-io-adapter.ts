@@ -1,4 +1,4 @@
-import { INestApplicationContext } from '@nestjs/common';
+import { INestApplicationContext, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ServerOptions } from 'socket.io';
@@ -6,7 +6,11 @@ import { SocketWithAuth } from './types';
 const secretJwt = process.env.SECRET_JWT;
 
 export class SocketAdapter extends IoAdapter {
-  constructor(private app: INestApplicationContext) {
+  constructor(
+    private app: INestApplicationContext,
+    private logger: Logger = new Logger('UsersService'),
+    {},
+  ) {
     super(app);
   }
 
@@ -25,7 +29,7 @@ export class SocketAdapter extends IoAdapter {
       },
     });
     const jwtService = this.app.get(JwtService);
-    console.log('this.app:', this.app);
+    this.logger.log('this.app:', this.app);
     server.of('game').use(this.authMiddleware(jwtService));
     server.of('chat').use(this.authMiddleware(jwtService));
     return server;

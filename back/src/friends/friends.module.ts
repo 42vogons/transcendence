@@ -30,6 +30,6 @@ import { UsersRepository } from 'src/users/repositories/users.repository';
     FriendsRepository,
     UsersService,
     UsersRepository,
-  ], // Exporte o UsersService, se necessário
+  ],
 })
 export class FriendsModule {}

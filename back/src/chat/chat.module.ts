@@ -28,6 +28,6 @@ import { ChannelService } from 'src/channel/channel.service';
     UsersRepository,
     ChannelService,
     JwtService,
-  ], // Exporte o UsersService, se necessário
+  ],
 })
 export class ChatModule {}
