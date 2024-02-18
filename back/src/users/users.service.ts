@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './repositories/users.repository';
@@ -22,8 +22,7 @@ export class UsersService {
     newUser.two_factor_enabled = false;
     newUser.user_id_42 = profile.id;
     this.repository.create(newUser);
-    console.log('Novo usuário criado');
-    console.log(newUser);
+    Logger.log(`New user created: ${newUser}.`);
   }
 
   async create(createUserDto: CreateUserDto) {
@@ -41,7 +40,7 @@ export class UsersService {
   async findOne(user_id: number): Promise<UserEntity> {
     const user = await this.repository.findOne(user_id);
     if (!user) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError('User not found.');
     }
     return user;
   }
@@ -49,7 +48,7 @@ export class UsersService {
   async findEmail(user_email: string): Promise<UserEntity> {
     const user = await this.repository.findEmail(user_email);
     if (!user) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError('User not found.');
     }
     return user;
   }

@@ -8,6 +8,7 @@ import { NextPage } from 'next'
 import { ReactElement, ReactNode } from 'react'
 import { GameProvider } from '@/contexts/GameContext'
 import { UserProvider } from '@/contexts/UserContext'
+import { ChatProvider } from '@/contexts/ChatContext'
 
 globalStyles()
 
@@ -24,9 +25,11 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 	return (
 		<>
 			<UserProvider>
-				<GameProvider>
-					{getLayout(<Component {...pageProps} />)}
-				</GameProvider>
+				<ChatProvider>
+					<GameProvider>
+						{getLayout(<Component {...pageProps} />)}
+					</GameProvider>
+				</ChatProvider>
 			</UserProvider>
 			<ToastContainer theme="colored" />
 		</>

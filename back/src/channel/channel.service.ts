@@ -42,14 +42,14 @@ export class ChannelService {
         createChanneltDto.type as ChannelType,
       )
     ) {
-      throw new Error('Invalid channel type');
+      throw new Error('Invalid channel type.');
     }
     const existChannel = await this.repository.directChannelExists(
       user_id,
       createChanneltDto.member_id,
     );
     if (existChannel) {
-      throw new ConflictException('Channel already exists');
+      throw new ConflictException('Channel already exists.');
     }
     const channel = await this.repository.createChannel(
       createChanneltDto,
@@ -74,7 +74,7 @@ export class ChannelService {
         createChanneltDto.type as ChannelType,
       )
     ) {
-      throw new Error('Invalid channel type');
+      throw new Error('Invalid channel type.');
     }
     if (createChanneltDto.type === 'protected') {
       const hashPassword = await this.hashPassword(createChanneltDto.password);
@@ -107,23 +107,25 @@ export class ChannelService {
     if (isAdmin || isOwner) {
       const user = await this.userRepository.findOne(memberDto.member_id);
       if (!user) {
-        throw new NotFoundException('Membro não encontrado');
+        throw new NotFoundException('Member not found.');
       }
       const member = await this.repository.checkMember(
         memberDto.member_id,
         memberDto.channel_id,
       );
       if (member) {
-        throw new ConflictException('O membro já está no canal');
+        throw new ConflictException('The member is already in the channel.');
       }
       this.repository.addUserToChannel(
         memberDto.member_id,
         memberDto.channel_id,
         memberDto.status,
       );
-      return 'Adicionado com sucesso';
+      return 'Successfully added.';
     } else {
-      throw new UnauthorizedException('Você não é admin ou owner deste canal');
+      throw new UnauthorizedException(
+        'You are not an admin or owner of this channel.',
+      );
     }
   }
 
@@ -146,7 +148,7 @@ export class ChannelService {
         adminActionDto.channel_id,
       );
       if (!member) {
-        throw new NotFoundException('O membro não está no canal');
+        throw new NotFoundException('The member is not in the channel.');
       }
       await this.repository.adminAction(adminActionDto, userId);
 
@@ -155,20 +157,22 @@ export class ChannelService {
           adminActionDto.member_id,
           adminActionDto.channel_id,
         );
-        return 'Membro removido';
+        return 'Member removed.';
       }
       if (adminActionDto.action === 'mute') {
-        return 'Membro mutado';
+        return 'Member muted.';
       }
-      if (adminActionDto.action === 'baned') {
+      if (adminActionDto.action === 'banned') {
         await this.repository.removeMemberChannel(
           adminActionDto.member_id,
           adminActionDto.channel_id,
         );
-        return 'Membro banido';
+        return 'Member banned.';
       }
     } else {
-      throw new UnauthorizedException('Você não é admin ou owner');
+      throw new UnauthorizedException(
+        'You are not an admin or owner of this channel.',
+      );
     }
   }
 
@@ -183,9 +187,11 @@ export class ChannelService {
     );
     if (isAdmin || isOwner) {
       await this.repository.changeMemberStatus(memberDto);
-      return 'Status do membro alterado com sucesso';
+      return 'Member status changed successfully.';
     } else {
-      throw new UnauthorizedException('Você não é admin ou owner');
+      throw new UnauthorizedException(
+        'You are not an admin or owner of this channel.',
+      );
     }
   }
 
@@ -200,13 +206,13 @@ export class ChannelService {
     );
     if (admins.length === 0) {
       throw new ConflictException(
-        'Não é possível sair do canal sem outros administradores.',
+        'Cannot leave the channel without other administrators.',
       );
     }
     const owner = await this.repository.checkOwner(leaveDto.channel_id, userId);
     if (owner === true) {
       await this.repository.changeOwner(admins[0].user_id, leaveDto.channel_id);
-      return 'Deixou o canal';
+      return 'Left the channel.';
     }
     return await this.repository.leaveChannel(userId, leaveDto.channel_id);
   }
@@ -224,7 +230,7 @@ export class ChannelService {
     );
     await this.checkAdminActions(userId, channelDto.channel_id);
     if (member) {
-      throw new ConflictException('Você já é membro do canal');
+      throw new ConflictException('You are already a member of the channel.');
     }
     const validPassword = await this.validatePassword(
       channelDto.password,
@@ -239,9 +245,9 @@ export class ChannelService {
         channelDto.channel_id,
         ChannelMemberStatus.MEMBER,
       );
-      return 'Entrou no canal';
+      return 'Joined the channel.';
     } else {
-      throw new UnauthorizedException('Não é possível entrar no canal.');
+      throw new UnauthorizedException('Unable to join the channel.');
     }
   }
 
@@ -254,9 +260,9 @@ export class ChannelService {
       const hashPassword = await this.hashPassword(channelDto.password);
       channelDto.password = hashPassword;
       await this.repository.changePassword(channelDto);
-      return 'Password alterado';
+      return 'Password changed.';
     } else {
-      throw new UnauthorizedException('Você não é owner');
+      throw new UnauthorizedException('You are not an owner of this channel.');
     }
   }
 
@@ -269,11 +275,11 @@ export class ChannelService {
       return;
     }
     if (adminAction.action_type === AdminActionType.BANNED) {
-      throw new ForbiddenException('Membro está banido');
+      throw new ForbiddenException('Member is banned.');
     }
     if (adminAction.action_type === AdminActionType.MUTED) {
       if (adminAction.end_time < new Date()) {
-        throw new ForbiddenException('Membro está mutado');
+        throw new ForbiddenException('Member is muted.');
       }
     }
   }

@@ -1,4 +1,4 @@
-import { Injectable, Response, Body } from '@nestjs/common';
+import { Injectable, Response, Body, Logger } from '@nestjs/common';
 import axios from 'axios';
 import * as FormData from 'form-data';
 import { UsersService } from 'src/users/users.service';
@@ -19,7 +19,7 @@ export class LoginService {
     const clientId = process.env.CLIENT_ID;
     const clientSecret = process.env.CLIENT_SECRET;
     const redirectUri = process.env.REDIRECT_URI;
-    console.log('Client' + clientId);
+    Logger.log('Client' + clientId);
 
     try {
       const formData = new FormData();
@@ -40,26 +40,26 @@ export class LoginService {
       if (response.data && response.data.access_token) {
         return response.data.access_token;
       } else {
-        throw new Error('Token de acesso não encontrado na resposta');
+        throw new Error('Access token not found in the response.');
       }
     } catch (error) {
       throw new Error(
-        `Erro ao obter token ${authorizationCode} de acesso: ${error.message}`,
+        `Error retrieving access token ${authorizationCode}: ${error.message}`,
       );
     }
   }
 
   async getInfo(token: string): Promise<any> {
     try {
-      console.log('token ' + token);
+      Logger.log('token ' + token);
       return await axios.get('https://api.intra.42.fr/v2/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
     } catch (error) {
-      console.error('Erro ao fazer a requisição:', error.message);
-      throw error; // ou trate o erro de acordo com suas necessidades
+      Logger.error('Error making the request:', error.message);
+      throw error;
     }
   }
 
@@ -69,7 +69,7 @@ export class LoginService {
       login: profile.username,
     };
     const token = await this.generateToken(payload);
-    console.log('cookie=' + token);
+    Logger.log('cookie=' + token);
     res.cookie('accessToken', token, {
       expires: expiresAt,
       httpOnly: true,
@@ -80,7 +80,7 @@ export class LoginService {
   async checkUser(profile: any): Promise<UserEntity | null> {
     try {
       const user = await this.usersService.findEmail(profile.data.email);
-      console.info('Usuário encontrado');
+      Logger.log('User found.');
       return user;
     } catch (error) {
       return this.createNewUser(profile);
@@ -88,7 +88,7 @@ export class LoginService {
   }
 
   private createNewUser(profile: any) {
-    console.info('Criando novo usuário');
+    Logger.log('Creating new user.');
     const newUser: CreateUserDto = new CreateUserDto();
     newUser.username = profile.data.login;
     newUser.email = profile.data.email;
@@ -108,13 +108,13 @@ export class LoginService {
   }
 
   async login(@Body() body: any, @Response() res) {
-    console.log('body:', body);
+    Logger.log('body:', body);
     const token = await this.getToken(body.code);
     const profile = await this.getInfo(token);
     const user = await this.checkUser(profile);
     const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
     await this.insertToken(user, expiresAt, res);
-    console.log('user ', user);
+    Logger.log('user ', user);
     let action = 'logged';
     const { user_id: userID, username } = user;
     if (user.two_factor_enabled) {

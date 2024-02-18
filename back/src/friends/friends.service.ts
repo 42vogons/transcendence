@@ -14,7 +14,7 @@ export class FriendsService {
     if (friendExists) {
       return this.repository.addFriend(userId, friendId);
     }
-    throw new NotFoundException('User not found');
+    throw new NotFoundException('User not found.');
   }
 
   async removeFriend(userId: any, friendId: number): Promise<any> {
