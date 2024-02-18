@@ -305,13 +305,14 @@ export default function Layout({ children }: iLayoutProps) {
 	const activeChatUser = 'rfelipe-'
 
 	const { user } = useContext(UserContext)
-	const { friendList } = useContext(ChatContext)
-	const { closeSocket } = useContext(GameContext)
+	const { friendList, closeChatSocket } = useContext(ChatContext)
+	const { closeGameSocket } = useContext(GameContext)
 
 	useEffect(() => {
 		const isAuthenticated = user && !isDateExpired(user?.expiresAt as Date)
 		if (!isAuthenticated) {
-			closeSocket()
+			closeGameSocket()
+			closeChatSocket()
 			localStorage.removeItem('@42Transcendence:user')
 			toast('Your session is expired', {
 				type: 'error',

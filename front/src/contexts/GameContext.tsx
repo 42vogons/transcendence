@@ -30,7 +30,7 @@ interface GameContextType {
 	playing: () => void
 	resume: () => void
 	clearMatchCompleted: () => void
-	closeSocket: () => void
+	closeGameSocket: () => void
 }
 
 interface GameProviderProps {
@@ -137,7 +137,7 @@ export function GameProvider({ children }: GameProviderProps) {
 		dispatch(clearMatch())
 	}
 
-	function closeSocket() {
+	function closeGameSocket() {
 		socket.close()
 	}
 
@@ -154,7 +154,7 @@ export function GameProvider({ children }: GameProviderProps) {
 				playing,
 				resume,
 				clearMatchCompleted,
-				closeSocket,
+				closeGameSocket,
 			}}
 		>
 			{children}

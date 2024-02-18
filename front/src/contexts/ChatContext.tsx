@@ -17,6 +17,7 @@ interface ChatContextType {
 	friendList: FriendListItem[]
 	addFriend: (userID: number) => void
 	removeFriend: (userID: number) => void
+	closeChatSocket: () => void
 }
 
 interface ChatProviderProps {
@@ -93,7 +94,11 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		emitSocketIfUserIsNotExpired('remove_friend', { member_id: userID })
 	}
 
-	function closeSocket() {
+	function createDirectChat(userID: number) {
+		emitSocketIfUserIsNotExpired('add_friend', { member_id: userID })
+	}
+
+	function closeChatSocket() {
 		socket.close()
 	}
 
@@ -103,6 +108,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				friendList,
 				addFriend,
 				removeFriend,
+				closeChatSocket,
 			}}
 		>
 			{children}
