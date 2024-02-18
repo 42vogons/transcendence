@@ -16,6 +16,7 @@ import { updateFriendList } from '@/reducers/Chat/Action'
 interface ChatContextType {
 	friendList: FriendListItem[]
 	addFriend: (userID: number) => void
+	removeFriend: (userID: number) => void
 }
 
 interface ChatProviderProps {
@@ -59,7 +60,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		})
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
-		socket.on('exception', () => handleErrors('Something went wrong'))
+		socket.on('exception', (error) => handleErrors(error.message))
 		if (user && !isDateExpired(user?.expiresAt as Date)) {
 			socket.open()
 		}
@@ -88,6 +89,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	}
 
 	function removeFriend(userID: number) {
+		console.log('removeFriend:', userID)
 		emitSocketIfUserIsNotExpired('remove_friend', { member_id: userID })
 	}
 
@@ -100,6 +102,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			value={{
 				friendList,
 				addFriend,
+				removeFriend,
 			}}
 		>
 			{children}

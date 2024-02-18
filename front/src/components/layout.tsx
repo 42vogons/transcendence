@@ -416,7 +416,8 @@ export default function Layout({ children }: iLayoutProps) {
 											friendList.map(
 												(item: iFriendListItem) => (
 													<FriendListItem
-														key={item.username}
+														key={item.userID}
+														userID={item.userID}
 														userAvatarSrc={
 															item.userAvatarSrc
 														}

@@ -11,12 +11,18 @@ interface iNewFriendModal {
 	showNewFriendModal: boolean
 	setShowNewFriendModal: (state: boolean) => void
 }
+
 export default function NewFriendModal({
 	showNewFriendModal,
 	setShowNewFriendModal,
 }: iNewFriendModal) {
 	const { addFriend } = useContext(ChatContext)
 	const [userInput, setUserInput] = useState('')
+	function handleAddNewFriend() {
+		console.log('new Friend', userInput)
+		addFriend(Number(userInput))
+		setShowNewFriendModal(false)
+	}
 	return (
 		<Modal isOpen={showNewFriendModal}>
 			<NewFriendModalContainer>
@@ -33,13 +39,7 @@ export default function NewFriendModal({
 						<MdClose size={40} />
 						Cancel
 					</Button>
-					<Button
-						buttonType="accept"
-						onClick={() => {
-							console.log('new Friend', userInput)
-							addFriend(Number(userInput))
-						}}
-					>
+					<Button buttonType="accept" onClick={handleAddNewFriend}>
 						<FaUserPlus size={40} />
 						Add
 					</Button>

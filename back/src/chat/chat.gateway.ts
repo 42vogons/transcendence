@@ -5,6 +5,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { SocketWithAuth } from 'src/types';
@@ -85,7 +86,6 @@ export class ChatGateway
       if (myFriend == null) {
         return;
       }
-      //await this.listFriends(client);
       client
         .to(myFriend)
         .emit('refresh_list', `Seu amigo ${client.username} está online`);
@@ -101,6 +101,7 @@ export class ChatGateway
     this.notifyFriends(client);
 
     await this.usersService.setStatus(client.userID, 'online');
+    await this.listFriends(client);
 
     /*friends.forEach(friend => {
       const myFriend = this.users.get(friend.user_id);
@@ -140,8 +141,11 @@ export class ChatGateway
       this.logger.log(
         `User ${client.userID} added ${friendDto.member_id} in listFriends`,
       );
+      this.notifyFriends(client);
+      client.emit('refresh_list', ``);
     } catch (error) {
       this.logger.error(`${friendDto.member_id} does not exist`);
+      throw new WsException(`${friendDto.member_id} does not exist`);
     }
   }
 
@@ -152,8 +156,12 @@ export class ChatGateway
       this.logger.log(
         `User ${client.userID} removed ${friendDto.member_id} in listFriends`,
       );
+      const friendClientId = this.users.get(friendDto.member_id);
+      client.to(friendClientId).emit('refresh_list', ``);
+      client.emit('refresh_list', ``);
     } catch (error) {
       this.logger.error(`${friendDto.member_id} is not your friend`);
+      throw new WsException(`${friendDto.member_id} is not your friend`);
     }
   }
 

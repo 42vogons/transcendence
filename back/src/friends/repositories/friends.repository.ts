@@ -9,8 +9,8 @@ export class FriendsRepository {
   async addFriend(userId: number, friendId: number): Promise<FriendsEntity> {
     return this.prisma.friends.create({
       data: {
-        user_id: userId,
-        friend_id: friendId,
+        user_id: userId > friendId ? userId : friendId,
+        friend_id: userId < friendId ? userId : friendId,
       },
     });
   }
@@ -19,8 +19,8 @@ export class FriendsRepository {
     return await this.prisma.friends.delete({
       where: {
         user_id_friend_id: {
-          user_id: userId,
-          friend_id: friendId,
+          user_id: userId > friendId ? userId : friendId,
+          friend_id: userId < friendId ? userId : friendId,
         },
       },
     });
