@@ -40,7 +40,7 @@ export class ChatGateway
     private readonly chatService: ChatService,
   ) {}
 
-  @SubscribeMessage('msgToServer')
+  @SubscribeMessage('msg_to_server')
   async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
       const members = await this.chatService.saveMessage(chatDto);
@@ -58,7 +58,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('getChannelMsg')
+  @SubscribeMessage('get_channel_msg')
   async listChannelMsg(
     client: SocketWithAuth,
     channelMessageDto: ChannelMessageDto,
@@ -130,9 +130,10 @@ export class ChatGateway
     this.logger.log(`Client disconnected: ${client.id}`);
     await this.usersService.setStatus(client.userID, 'offline');
     this.users.delete(client.userID);
+    this.notifyFriends(client);
   }
 
-  @SubscribeMessage('addFriend')
+  @SubscribeMessage('add_friend')
   async addFriend(client: SocketWithAuth, friendDto: FriendDto) {
     try {
       await this.friendService.addFriend(client.userID, friendDto.member_id);
@@ -144,7 +145,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('removeFriend')
+  @SubscribeMessage('remove_friend')
   async removeFriend(client: SocketWithAuth, friendDto: FriendDto) {
     try {
       await this.friendService.removeFriend(client.userID, friendDto.member_id);
@@ -156,7 +157,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('createChannel')
+  @SubscribeMessage('create_channel')
   async createChannel(client: SocketWithAuth, channelDto: CreateChannelDto) {
     try {
       const channel = await this.channelService.create(
@@ -168,7 +169,7 @@ export class ChatGateway
       this.logger.error(error);
     }
   }
-  @SubscribeMessage('createDirect')
+  @SubscribeMessage('create_direct')
   async createDirect(client: SocketWithAuth, channelDto: CreateChannelDto) {
     try {
       const channel = await this.channelService.createDirect(
@@ -181,7 +182,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('addMember')
+  @SubscribeMessage('add_member')
   async addMember(client: SocketWithAuth, memberDto: MemberDto) {
     if (
       !Object.values(ChannelMemberStatus).includes(
@@ -200,7 +201,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('changeMemberStatus')
+  @SubscribeMessage('change_member_status')
   async changeMemberStatus(client: SocketWithAuth, memberDto: MemberDto) {
     try {
       await this.channelService.changeMemberStatus(memberDto, client.userID);
@@ -212,7 +213,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('adminAction')
+  @SubscribeMessage('admin_action')
   async adminAction(client: SocketWithAuth, adminActionDto: AdminActionDto) {
     try {
       await this.channelService.adminAction(adminActionDto, client.userID);
@@ -221,7 +222,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('leaveChannel')
+  @SubscribeMessage('leave_channel')
   async leaveChannel(client: SocketWithAuth, leaveDto: LeaveDto) {
     try {
       await this.channelService.leaveChannel(leaveDto, client.userID);
@@ -233,7 +234,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('joinChannel')
+  @SubscribeMessage('join_channel')
   async joinChannel(client: SocketWithAuth, channelDto: ChannelDto) {
     try {
       await this.channelService.joinChannel(channelDto, client.userID);
@@ -245,7 +246,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('changePassword')
+  @SubscribeMessage('change_password')
   async changePassword(client: SocketWithAuth, channelDto: ChannelDto) {
     try {
       await this.channelService.changePassword(channelDto, client.userID);
@@ -257,7 +258,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('blockUser')
+  @SubscribeMessage('block_user')
   async blockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
     try {
       blockUser.user_id = client.userID;
@@ -268,7 +269,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('unBlockUser')
+  @SubscribeMessage('un_block_user')
   async unBlockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
     try {
       blockUser.user_id = client.userID;
