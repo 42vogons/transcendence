@@ -171,6 +171,7 @@ export class ChatGateway
   }
   @SubscribeMessage('create_direct')
   async createDirect(client: SocketWithAuth, channelDto: CreateChannelDto) {
+    channelDto.name = `direct_${client.userID}_${channelDto.member_id}`;
     try {
       const channel = await this.channelService.createDirect(
         channelDto,
