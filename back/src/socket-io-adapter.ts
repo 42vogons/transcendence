@@ -1,4 +1,4 @@
-import { INestApplicationContext } from '@nestjs/common';
+import { INestApplicationContext, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ServerOptions } from 'socket.io';
@@ -25,7 +25,7 @@ export class SocketAdapter extends IoAdapter {
       },
     });
     const jwtService = this.app.get(JwtService);
-    console.log('this.app:', this.app);
+    Logger.log('this.app:', this.app);
     server.of('game').use(this.authMiddleware(jwtService));
     server.of('chat').use(this.authMiddleware(jwtService));
     return server;

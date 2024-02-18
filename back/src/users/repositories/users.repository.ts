@@ -133,7 +133,7 @@ export class UsersRepository {
       data: {
         userId: blockUser.user_id,
         memberId: blockUser.member_id,
-        blockedAt: new Date(), // Prisma preenche automaticamente com o valor padrão, mas você pode especificar explicitamente se necessário
+        blockedAt: new Date(),
       },
     });
   }
