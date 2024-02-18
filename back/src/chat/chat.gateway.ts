@@ -78,16 +78,31 @@ export class ChatGateway
     this.logger.log(`Init: ${server}`);
   }
 
+  private async notifyFriends(client: SocketWithAuth) {
+    const friends = await this.usersService.findFriends(client.userID);
+    friends.forEach(async friend => {
+      const myFriend = this.users.get(friend.user_id);
+      if (myFriend == null) {
+        return;
+      }
+      //await this.listFriends(client);
+      client
+        .to(myFriend)
+        .emit('refresh_list', `Seu amigo ${client.username} está online`);
+    });
+  }
+
   async handleConnection(client: SocketWithAuth) {
     this.logger.log(`Client connected: ${client.id}`);
     this.logger.log(`Client user: ${client.username}`);
     this.logger.log(`Client id: ${client.userID}`);
     this.users.set(client.userID, client.id);
-    const friends = await this.usersService.findFriends(client.userID);
+
+    this.notifyFriends(client);
 
     await this.usersService.setStatus(client.userID, 'online');
 
-    friends.forEach(friend => {
+    /*friends.forEach(friend => {
       const myFriend = this.users.get(friend.user_id);
       if (myFriend == null) {
         return;
@@ -96,10 +111,10 @@ export class ChatGateway
         .to(myFriend)
         .emit('refreshList', `Seu amigo ${client.username} está online`);
     });
-    await this.listFriends(client);
+    await this.listFriends(client);*/
   }
 
-  @SubscribeMessage('getFriends')
+  @SubscribeMessage('get_friends')
   async listFriends(client: SocketWithAuth): Promise<void> {
     const friends = await this.usersService.findFriends(client.userID);
     const friendsList = friends.map(friend => ({
