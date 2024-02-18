@@ -135,20 +135,21 @@ export default function Home() {
 						</h2>
 					)}
 
-					{match.pausedByUserID === user?.userID && (
-						<PlayButton
-							onMouseUp={() => {
-								resume()
-							}}
-						>
-							<FaGamepad size={40} />
-							Resume
-						</PlayButton>
-					)}
-
-					<Button buttonType="cancel">
-						<MdClose size={40} /> Give up
-					</Button>
+					<div className="buttonsContainer">
+						<Button buttonType="cancel">
+							<MdClose size={40} /> Give up
+						</Button>
+						{match.pausedByUserID === user?.userID && (
+							<PlayButton
+								onMouseUp={() => {
+									resume()
+								}}
+							>
+								<FaGamepad size={40} />
+								Resume
+							</PlayButton>
+						)}
+					</div>
 				</PauseModal>
 			</Modal>
 		</>

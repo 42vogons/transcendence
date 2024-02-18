@@ -1,10 +1,15 @@
 import { ReactNode, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { FaGamepad, FaUserAstronaut } from 'react-icons/fa6'
+import { FaGamepad, FaUserAstronaut, FaUserPlus } from 'react-icons/fa6'
 import { FaUserFriends } from 'react-icons/fa'
 import { BsChatSquareTextFill } from 'react-icons/bs'
 import { RiLogoutBoxFill } from 'react-icons/ri'
-import { MdOutlineMenu, MdOutlineArrowBackIos, MdClose } from 'react-icons/md'
+import {
+	MdOutlineMenu,
+	MdOutlineArrowBackIos,
+	MdClose,
+	MdGroupAdd,
+} from 'react-icons/md'
 
 import {
 	ApplicationContainer,
@@ -23,6 +28,7 @@ import { UserContext } from '@/contexts/UserContext'
 import { toast } from 'react-toastify'
 import { isDateExpired } from '@/reducers/User/Reducer'
 import { GameContext } from '@/contexts/GameContext'
+import NewChatModal from './newChatModal'
 
 type activePanelType = 'menu' | 'friends' | 'chat'
 
@@ -40,11 +46,13 @@ interface iLayoutProps {
 export default function Layout({ children }: iLayoutProps) {
 	const iconSize = 28
 	const iconSizeMobile = 24
+	const iconSizeMenuOptions = 28
 
 	const router = useRouter()
 
 	const [currentPath, setCurrentPath] = useState('')
 	const [showSidePanel, setShowSidePanel] = useState(false)
+	const [showNewChatModal, setShowNewChatModal] = useState(false)
 
 	useEffect(() => {
 		setCurrentPath(router.asPath)
@@ -324,6 +332,7 @@ export default function Layout({ children }: iLayoutProps) {
 							title={item.title}
 							isActive={item.isActive}
 							handleOnClick={item.handleOnClick}
+							type="desktop"
 						>
 							{item.icon}
 						</IconButton>
@@ -344,7 +353,7 @@ export default function Layout({ children }: iLayoutProps) {
 						isActive={showSidePanel}
 						ref={ref}
 					>
-						<div className="menuOptions">
+						<div className="menuHeader">
 							{activePanel !== 'menu' && (
 								<IconButton
 									title="Menu"
@@ -395,21 +404,48 @@ export default function Layout({ children }: iLayoutProps) {
 								))}
 
 							{showSidePanel === true &&
-								activePanel === 'chat' &&
-								chatList.map((item: iChatListItem) => (
-									<ChatListItem
-										key={item.username}
-										userAvatarSrc={item.userAvatarSrc}
-										username={item.username}
-										lastMessage={item.lastMessage}
-										isActive={
-											activeChatUser === item.username
-										}
-										handleOnClick={() =>
-											router.push('/chat')
-										}
-									/>
-								))}
+								activePanel === 'chat' && (
+									<>
+										<div className="menuOptions">
+											<IconButton
+												handleOnClick={() => {
+													console.log('new chat')
+													setShowNewChatModal(true)
+												}}
+											>
+												<FaUserPlus
+													size={iconSizeMenuOptions}
+												/>
+											</IconButton>
+											<IconButton
+												handleOnClick={() => {
+													console.log('new channel')
+												}}
+											>
+												<MdGroupAdd
+													size={iconSizeMenuOptions}
+												/>
+											</IconButton>
+										</div>
+										{chatList.map((item: iChatListItem) => (
+											<ChatListItem
+												key={item.username}
+												userAvatarSrc={
+													item.userAvatarSrc
+												}
+												username={item.username}
+												lastMessage={item.lastMessage}
+												isActive={
+													activeChatUser ===
+													item.username
+												}
+												handleOnClick={() =>
+													router.push('/chat')
+												}
+											/>
+										))}
+									</>
+								)}
 						</div>
 					</SidePanelContainer>
 				)}
@@ -420,6 +456,10 @@ export default function Layout({ children }: iLayoutProps) {
 					{children}
 				</PageContainer>
 			</ApplicationContainer>
+			<NewChatModal
+				setShowNewChatModal={setShowNewChatModal}
+				showNewChatModal={showNewChatModal}
+			/>
 		</LayoutContainer>
 	) : null
 }

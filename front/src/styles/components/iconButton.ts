@@ -65,6 +65,12 @@ export const IconButtonContainer = styled('button', {
 					},
 				},
 			},
+			default: {
+				display: 'flex',
+				padding: '12px',
+				borderRadius: 14,
+				border: '2px solid transparent',
+			},
 		},
 	},
 
