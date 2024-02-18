@@ -17,6 +17,7 @@ interface ChatContextType {
 	friendList: FriendListItem[]
 	addFriend: (userID: number) => void
 	removeFriend: (userID: number) => void
+	createDirectChat: (userID: number) => void
 	closeChatSocket: () => void
 }
 
@@ -46,7 +47,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
 	function handleErrors(err: any) {
 		console.log('error:', err)
-		toast(err.toString(), {
+		toast(err.message ? err.message : err, {
 			type: 'error',
 		})
 	}
@@ -61,7 +62,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		})
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
-		socket.on('exception', (error) => handleErrors(error.message))
+		socket.on('exception', (err) => handleErrors(err))
 		if (user && !isDateExpired(user?.expiresAt as Date)) {
 			socket.open()
 		}
@@ -95,7 +96,11 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	}
 
 	function createDirectChat(userID: number) {
-		emitSocketIfUserIsNotExpired('add_friend', { member_id: userID })
+		console.log('createDirectChat:', userID)
+		emitSocketIfUserIsNotExpired('create_direct', {
+			member_id: userID,
+			type: 'direct',
+		})
 	}
 
 	function closeChatSocket() {
@@ -108,6 +113,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				friendList,
 				addFriend,
 				removeFriend,
+				createDirectChat,
 				closeChatSocket,
 			}}
 		>

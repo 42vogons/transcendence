@@ -44,6 +44,9 @@ export class ChannelService {
     ) {
       throw new Error('Invalid channel type.');
     }
+    if (user_id === createChanneltDto.member_id) {
+      throw new Error('You can not create a channel with yourself.');
+    }
     const existChannel = await this.repository.directChannelExists(
       user_id,
       createChanneltDto.member_id,

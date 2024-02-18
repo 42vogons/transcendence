@@ -188,6 +188,9 @@ export class ChatGateway
       this.logger.log(`User ${client.userID} created Channel ${channel}.`);
     } catch (error) {
       this.logger.error(error);
+      if (error instanceof Error)
+        error = { message: error.message, stack: error.stack };
+      throw new WsException(error);
     }
   }
 

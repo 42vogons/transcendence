@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import Modal from './modal'
 import UserInput from './UserInput'
 import Button from './button'
 import { MdClose } from 'react-icons/md'
 import { FaUserPlus } from 'react-icons/fa6'
 import { NewChatModalContainer } from '@/styles/components/newChatModal'
+import { ChatContext } from '@/contexts/ChatContext'
 
 interface iNewChatModal {
 	showNewChatModal: boolean
@@ -15,6 +16,13 @@ export default function NewChatModal({
 	setShowNewChatModal,
 }: iNewChatModal) {
 	const [userInput, setUserInput] = useState('')
+
+	const { createDirectChat } = useContext(ChatContext)
+
+	function handleCreateNewChat() {
+		createDirectChat(Number(userInput))
+		setShowNewChatModal(false)
+	}
 	return (
 		<Modal isOpen={showNewChatModal}>
 			<NewChatModalContainer>
@@ -31,12 +39,7 @@ export default function NewChatModal({
 						<MdClose size={40} />
 						Cancel
 					</Button>
-					<Button
-						buttonType="accept"
-						onClick={() => {
-							console.log('new chat', userInput)
-						}}
-					>
+					<Button buttonType="accept" onClick={handleCreateNewChat}>
 						<FaUserPlus size={40} />
 						Add
 					</Button>
