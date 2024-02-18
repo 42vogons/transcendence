@@ -1,3 +1,4 @@
+import { FriendListItem as iFriendListItem } from '@/reducers/Chat/Reducer'
 import {
 	FriendAction,
 	FriendAvatarContainer,
@@ -14,12 +15,6 @@ import Image from 'next/image'
 import userDefaulAvatar from 'public/assets/user.png'
 import { BsChatSquareTextFill } from 'react-icons/bs'
 import { FaGamepad } from 'react-icons/fa6'
-
-export interface iFriendListItem {
-	userAvatarSrc: string
-	username: string
-	userStatus: 'online' | 'offline' | 'ingame'
-}
 
 export function FriendListItem({
 	userAvatarSrc,

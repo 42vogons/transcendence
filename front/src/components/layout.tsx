@@ -29,6 +29,7 @@ import { toast } from 'react-toastify'
 import { isDateExpired } from '@/reducers/User/Reducer'
 import { GameContext } from '@/contexts/GameContext'
 import NewChatModal from './newChatModal'
+import { ChatContext } from '@/contexts/ChatContext'
 
 type activePanelType = 'menu' | 'friends' | 'chat'
 
@@ -139,78 +140,78 @@ export default function Layout({ children }: iLayoutProps) {
 		},
 	]
 
-	const friendList: iFriendListItem[] = [
-		{
-			userAvatarSrc: '',
-			username: 'rfelipe-',
-			userStatus: 'ingame',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'cpereira',
-			userStatus: 'online',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'anoliver',
-			userStatus: 'online',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12341',
-			userStatus: 'offline',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12342',
-			userStatus: 'offline',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12343',
-			userStatus: 'offline',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12344',
-			userStatus: 'offline',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12345',
-			userStatus: 'offline',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12346',
-			userStatus: 'offline',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12347',
-			userStatus: 'offline',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12348',
-			userStatus: 'offline',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12349',
-			userStatus: 'offline',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12350',
-			userStatus: 'offline',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12351',
-			userStatus: 'offline',
-		},
-	]
+	// const friendList: iFriendListItem[] = [
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'rfelipe-',
+	// 		userStatus: 'ingame',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'cpereira',
+	// 		userStatus: 'online',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'anoliver',
+	// 		userStatus: 'online',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'abc12341',
+	// 		userStatus: 'offline',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'abc12342',
+	// 		userStatus: 'offline',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'abc12343',
+	// 		userStatus: 'offline',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'abc12344',
+	// 		userStatus: 'offline',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'abc12345',
+	// 		userStatus: 'offline',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'abc12346',
+	// 		userStatus: 'offline',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'abc12347',
+	// 		userStatus: 'offline',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'abc12348',
+	// 		userStatus: 'offline',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'abc12349',
+	// 		userStatus: 'offline',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'abc12350',
+	// 		userStatus: 'offline',
+	// 	},
+	// 	{
+	// 		userAvatarSrc: '',
+	// 		username: 'abc12351',
+	// 		userStatus: 'offline',
+	// 	},
+	// ]
 
 	const chatList: iChatListItem[] = [
 		{
@@ -301,6 +302,7 @@ export default function Layout({ children }: iLayoutProps) {
 	const activeChatUser = 'rfelipe-'
 
 	const { user } = useContext(UserContext)
+	const { friendList } = useContext(ChatContext)
 	const { closeSocket } = useContext(GameContext)
 
 	useEffect(() => {
@@ -393,7 +395,8 @@ export default function Layout({ children }: iLayoutProps) {
 								))}
 
 							{showSidePanel === true &&
-								activePanel === 'friends' &&
+							activePanel === 'friends' &&
+							friendList.length > 0 ? (
 								friendList.map((item: iFriendListItem) => (
 									<FriendListItem
 										key={item.username}
@@ -401,7 +404,10 @@ export default function Layout({ children }: iLayoutProps) {
 										username={item.username}
 										userStatus={item.userStatus}
 									/>
-								))}
+								))
+							) : (
+								<p>vazio</p>
+							)}
 
 							{showSidePanel === true &&
 								activePanel === 'chat' && (
