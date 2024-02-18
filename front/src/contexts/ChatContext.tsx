@@ -15,6 +15,7 @@ import { updateFriendList } from '@/reducers/Chat/Action'
 
 interface ChatContextType {
 	friendList: FriendListItem[]
+	addFriend: (userID: number) => void
 }
 
 interface ChatProviderProps {
@@ -82,6 +83,14 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		emitSocketIfUserIsNotExpired('get_friends', '')
 	}
 
+	function addFriend(userID: number) {
+		emitSocketIfUserIsNotExpired('add_friend', { member_id: userID })
+	}
+
+	function removeFriend(userID: number) {
+		emitSocketIfUserIsNotExpired('remove_friend', { member_id: userID })
+	}
+
 	function closeSocket() {
 		socket.close()
 	}
@@ -90,6 +99,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		<ChatContext.Provider
 			value={{
 				friendList,
+				addFriend,
 			}}
 		>
 			{children}

@@ -22,7 +22,8 @@ import IconButton from './iconButton'
 import MenuListItem from './menuListItem'
 
 import { useOutsideMenuClick } from '@/hooks/useOutsideMenuClick'
-import { FriendListItem, iFriendListItem } from './friendListItem'
+import { FriendListItem } from './friendListItem'
+import { FriendListItem as iFriendListItem } from '@/reducers/Chat/Reducer'
 import { ChatListItem, iChatListItem } from './chatListItem'
 import { UserContext } from '@/contexts/UserContext'
 import { toast } from 'react-toastify'
@@ -30,6 +31,7 @@ import { isDateExpired } from '@/reducers/User/Reducer'
 import { GameContext } from '@/contexts/GameContext'
 import NewChatModal from './newChatModal'
 import { ChatContext } from '@/contexts/ChatContext'
+import NewFriendModal from './newFriendModal'
 
 type activePanelType = 'menu' | 'friends' | 'chat'
 
@@ -54,6 +56,7 @@ export default function Layout({ children }: iLayoutProps) {
 	const [currentPath, setCurrentPath] = useState('')
 	const [showSidePanel, setShowSidePanel] = useState(false)
 	const [showNewChatModal, setShowNewChatModal] = useState(false)
+	const [showNewFriendModal, setShowNewFriendModal] = useState(false)
 
 	useEffect(() => {
 		setCurrentPath(router.asPath)
@@ -395,19 +398,40 @@ export default function Layout({ children }: iLayoutProps) {
 								))}
 
 							{showSidePanel === true &&
-							activePanel === 'friends' &&
-							friendList.length > 0 ? (
-								friendList.map((item: iFriendListItem) => (
-									<FriendListItem
-										key={item.username}
-										userAvatarSrc={item.userAvatarSrc}
-										username={item.username}
-										userStatus={item.userStatus}
-									/>
-								))
-							) : (
-								<p>vazio</p>
-							)}
+								activePanel === 'friends' && (
+									<>
+										<div className="menuOptions">
+											<IconButton
+												handleOnClick={() => {
+													console.log('new Friend')
+													setShowNewFriendModal(true)
+												}}
+											>
+												<FaUserPlus
+													size={iconSizeMenuOptions}
+												/>
+											</IconButton>
+										</div>
+										{friendList.length > 0 ? (
+											friendList.map(
+												(item: iFriendListItem) => (
+													<FriendListItem
+														key={item.username}
+														userAvatarSrc={
+															item.userAvatarSrc
+														}
+														username={item.username}
+														userStatus={
+															item.userStatus
+														}
+													/>
+												),
+											)
+										) : (
+											<p>vazio</p>
+										)}
+									</>
+								)}
 
 							{showSidePanel === true &&
 								activePanel === 'chat' && (
@@ -462,6 +486,10 @@ export default function Layout({ children }: iLayoutProps) {
 					{children}
 				</PageContainer>
 			</ApplicationContainer>
+			<NewFriendModal
+				setShowNewFriendModal={setShowNewFriendModal}
+				showNewFriendModal={showNewFriendModal}
+			/>
 			<NewChatModal
 				setShowNewChatModal={setShowNewChatModal}
 				showNewChatModal={showNewChatModal}
