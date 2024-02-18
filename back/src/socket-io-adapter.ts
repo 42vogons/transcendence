@@ -6,11 +6,7 @@ import { SocketWithAuth } from './types';
 const secretJwt = process.env.SECRET_JWT;
 
 export class SocketAdapter extends IoAdapter {
-  constructor(
-    private app: INestApplicationContext,
-    private logger: Logger = new Logger('UsersService'),
-    {},
-  ) {
+  constructor(private app: INestApplicationContext) {
     super(app);
   }
 
@@ -29,7 +25,7 @@ export class SocketAdapter extends IoAdapter {
       },
     });
     const jwtService = this.app.get(JwtService);
-    this.logger.log('this.app:', this.app);
+    Logger.log('this.app:', this.app);
     server.of('game').use(this.authMiddleware(jwtService));
     server.of('chat').use(this.authMiddleware(jwtService));
     return server;

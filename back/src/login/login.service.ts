@@ -13,14 +13,13 @@ export class LoginService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly twoFactorAutenticateService: TwoFactorAutenticateService,
-    private logger: Logger = new Logger('LoginService'),
   ) {}
 
   async getToken(authorizationCode: string): Promise<string> {
     const clientId = process.env.CLIENT_ID;
     const clientSecret = process.env.CLIENT_SECRET;
     const redirectUri = process.env.REDIRECT_URI;
-    this.logger.log('Client' + clientId);
+    Logger.log('Client' + clientId);
 
     try {
       const formData = new FormData();
@@ -52,14 +51,14 @@ export class LoginService {
 
   async getInfo(token: string): Promise<any> {
     try {
-      this.logger.log('token ' + token);
+      Logger.log('token ' + token);
       return await axios.get('https://api.intra.42.fr/v2/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
     } catch (error) {
-      this.logger.error('Error making the request:', error.message);
+      Logger.error('Error making the request:', error.message);
       throw error;
     }
   }
@@ -70,7 +69,7 @@ export class LoginService {
       login: profile.username,
     };
     const token = await this.generateToken(payload);
-    this.logger.log('cookie=' + token);
+    Logger.log('cookie=' + token);
     res.cookie('accessToken', token, {
       expires: expiresAt,
       httpOnly: true,
@@ -81,7 +80,7 @@ export class LoginService {
   async checkUser(profile: any): Promise<UserEntity | null> {
     try {
       const user = await this.usersService.findEmail(profile.data.email);
-      this.logger.log('User found.');
+      Logger.log('User found.');
       return user;
     } catch (error) {
       return this.createNewUser(profile);
@@ -89,7 +88,7 @@ export class LoginService {
   }
 
   private createNewUser(profile: any) {
-    this.logger.log('Creating new user.');
+    Logger.log('Creating new user.');
     const newUser: CreateUserDto = new CreateUserDto();
     newUser.username = profile.data.login;
     newUser.email = profile.data.email;
@@ -109,13 +108,13 @@ export class LoginService {
   }
 
   async login(@Body() body: any, @Response() res) {
-    this.logger.log('body:', body);
+    Logger.log('body:', body);
     const token = await this.getToken(body.code);
     const profile = await this.getInfo(token);
     const user = await this.checkUser(profile);
     const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
     await this.insertToken(user, expiresAt, res);
-    this.logger.log('user ', user);
+    Logger.log('user ', user);
     let action = 'logged';
     const { user_id: userID, username } = user;
     if (user.two_factor_enabled) {

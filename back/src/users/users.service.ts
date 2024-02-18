@@ -13,7 +13,6 @@ export class UsersService {
   constructor(
     private readonly repository: UsersRepository,
     private readonly jwtService: JwtService,
-    private logger: Logger = new Logger('UsersService'),
   ) {}
 
   createNewUser(profile: any) {
@@ -23,7 +22,7 @@ export class UsersService {
     newUser.two_factor_enabled = false;
     newUser.user_id_42 = profile.id;
     this.repository.create(newUser);
-    this.logger.log(`New user created: ${newUser}.`);
+    Logger.log(`New user created: ${newUser}.`);
   }
 
   async create(createUserDto: CreateUserDto) {
