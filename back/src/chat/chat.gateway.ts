@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { SocketWithAuth } from 'src/types';
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
 import { ChatDto } from './dto/chat.dto';
 import { UsersService } from 'src/users/users.service';
 import { FriendsService } from 'src/friends/friends.service';
@@ -55,7 +55,7 @@ export class ChatGateway
         `User ${client.userID} sent message on channel ${chatDto.channel_id}`,
       );
     } catch (error) {
-      this.logger.error(error);
+      this.sendError(error);
     }
   }
 
@@ -71,7 +71,7 @@ export class ChatGateway
       );
       client.emit('update_channel', msgs);
     } catch (error) {
-      this.logger.error(error);
+      this.sendError(error);
     }
   }
 
@@ -102,17 +102,6 @@ export class ChatGateway
 
     await this.usersService.setStatus(client.userID, 'online');
     await this.listFriends(client);
-
-    /*friends.forEach(friend => {
-      const myFriend = this.users.get(friend.user_id);
-      if (myFriend == null) {
-        return;
-      }
-      client
-        .to(myFriend)
-        .emit('refreshList', `Your friend ${client.username} is online.`);
-    });
-    await this.listFriends(client);*/
   }
 
   @SubscribeMessage('get_friends')
@@ -144,8 +133,7 @@ export class ChatGateway
       this.notifyFriends(client);
       client.emit('refresh_list', ``);
     } catch (error) {
-      this.logger.error(`${friendDto.member_id} does not exist`);
-      throw new WsException(`${friendDto.member_id} does not exist`);
+      this.sendError(error);
     }
   }
 
@@ -160,8 +148,7 @@ export class ChatGateway
       client.to(friendClientId).emit('refresh_list', ``);
       client.emit('refresh_list', ``);
     } catch (error) {
-      this.logger.error(`${friendDto.member_id} is not your friend`);
-      throw new WsException(`${friendDto.member_id} is not your friend`);
+      this.sendError(error);
     }
   }
 
@@ -174,7 +161,7 @@ export class ChatGateway
       );
       this.logger.log(`User ${client.userID} created Channel ${channel}.`);
     } catch (error) {
-      this.logger.error(error);
+      this.sendError(error);
     }
   }
   @SubscribeMessage('create_direct')
@@ -187,29 +174,20 @@ export class ChatGateway
       );
       this.logger.log(`User ${client.userID} created Channel ${channel}.`);
     } catch (error) {
-      this.logger.error(error);
-      if (error instanceof Error)
-        error = { message: error.message, stack: error.stack };
-      throw new WsException(error);
+      this.sendError(error);
     }
   }
 
   @SubscribeMessage('add_member')
   async addMember(client: SocketWithAuth, memberDto: MemberDto) {
-    if (
-      !Object.values(ChannelMemberStatus).includes(
-        memberDto.status as ChannelMemberStatus,
-      )
-    ) {
-      throw new Error('Invalid member status.');
-    }
     try {
+      this.checkType(memberDto);
       await this.channelService.addMember(memberDto, client.userID);
       this.logger.log(
         `Member ${memberDto.member_id} added by ${client.userID} in channel ${memberDto.channel_id}.`,
       );
     } catch (error) {
-      this.logger.error(error);
+      this.sendError(error);
     }
   }
 
@@ -221,7 +199,7 @@ export class ChatGateway
         `Member ${memberDto.member_id} have changed status to ${memberDto.status} by ${client.userID} in channel ${memberDto.channel_id}.`,
       );
     } catch (error) {
-      this.logger.error(error);
+      this.sendError(error);
     }
   }
 
@@ -230,7 +208,7 @@ export class ChatGateway
     try {
       await this.channelService.adminAction(adminActionDto, client.userID);
     } catch (error) {
-      this.logger.error(error);
+      this.sendError(error);
     }
   }
 
@@ -242,7 +220,7 @@ export class ChatGateway
         `User ${client.userID} leave channel ${leaveDto.channel_id}.`,
       );
     } catch (error) {
-      this.logger.error(error);
+      this.sendError(error);
     }
   }
 
@@ -254,7 +232,7 @@ export class ChatGateway
         `User ${client.userID} joined the channel ${channelDto.channel_id}.`,
       );
     } catch (error) {
-      this.logger.error(error);
+      this.sendError(error);
     }
   }
 
@@ -266,7 +244,7 @@ export class ChatGateway
         `User ${client.userID} changed password in channel ${channelDto.channel_id}.`,
       );
     } catch (error) {
-      this.logger.error(error);
+      this.sendError(error);
     }
   }
 
@@ -277,7 +255,7 @@ export class ChatGateway
       await this.usersService.blockUser(blockUser);
       this.logger.log(`User ${client.userID} Blocked ${blockUser.member_id}.`);
     } catch (error) {
-      this.logger.error(error);
+      this.sendError(error);
     }
   }
 
@@ -290,7 +268,24 @@ export class ChatGateway
         `User ${client.userID} UnBlocked ${blockUser.member_id}.`,
       );
     } catch (error) {
-      this.logger.error(error);
+      this.sendError(error);
+    }
+  }
+
+  private sendError(error: any) {
+    if (error instanceof Error) {
+      error = { message: error.message, stack: error.stack };
+      this.logger.error(error.message);
+      throw new WsException(error);
+    }
+  }
+  private checkType(memberDto: MemberDto) {
+    if (
+      !Object.values(ChannelMemberStatus).includes(
+        memberDto.status as ChannelMemberStatus,
+      )
+    ) {
+      throw new NotFoundException('Invalid member status');
     }
   }
 }
