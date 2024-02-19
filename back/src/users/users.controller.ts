@@ -49,7 +49,7 @@ export class UsersController {
     return this.usersService.update(user.user_id, updateUserDto);
   }
 
-  @Get('/findByUser')
+  @Get('/findByUserName')
   async findByUserName(@Req() request) {
     return this.usersService.findUserByUserName(request.user_name);
   }
