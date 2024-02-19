@@ -36,6 +36,15 @@ export class UsersRepository {
     });
   }
 
+  async findByUserName(userName: string): Promise<number | null> {
+    const user = await this.prisma.users.findFirst({
+      where: {
+        username: userName,
+      },
+    });
+    return user ? user.user_id : null;
+  }
+
   async update(
     user_id: number,
     updateUserDto: UpdateUserDto,
