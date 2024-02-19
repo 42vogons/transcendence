@@ -80,4 +80,8 @@ export class UsersService {
   async checkBlockedStatus(blockUser: BlockUserDto) {
     return await this.repository.checkBlockStatus(blockUser);
   }
+
+  async findUserByUserName(user_name: string) {
+    return await this.repository.findByUserName(user_name);
+  }
 }

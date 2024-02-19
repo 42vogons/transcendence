@@ -49,6 +49,11 @@ export class UsersController {
     return this.usersService.update(user.user_id, updateUserDto);
   }
 
+  @Get('/findByUserName')
+  async findByUserName(@Req() request) {
+    return this.usersService.findUserByUserName(request.user_name);
+  }
+
   @Post('/activeTwoFactor')
   @UseGuards(AuthGuard)
   async activeTwoFactor(@Req() request, @Response() response) {
