@@ -52,12 +52,10 @@ model channels {
 model chat_messages {
   message_id                             Int       @id @default(autoincrement())
   sender_id                              Int
-  receiver_id                            Int?
   channel_id                             Int?
   content                                String
   timestamp                              DateTime? @default(now()) @db.Timestamp(6)
   channels                               channels? @relation(fields: [channel_id], references: [channel_id], onDelete: NoAction, onUpdate: NoAction)
-  users_chat_messages_receiver_idTousers users?    @relation("chat_messages_receiver_idTousers", fields: [receiver_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   users_chat_messages_sender_idTousers   users     @relation("chat_messages_sender_idTousers", fields: [sender_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -131,7 +129,6 @@ model users {
   admin_actions_admin_actions_target_user_idTousers admin_actions[]     @relation("admin_actions_target_user_idTousers")
   channel_members                                   channel_members[]
   channels                                          channels[]
-  chat_messages_chat_messages_receiver_idTousers    chat_messages[]     @relation("chat_messages_receiver_idTousers")
   chat_messages_chat_messages_sender_idTousers      chat_messages[]     @relation("chat_messages_sender_idTousers")
   friends_friends_friend_idTousers                  friends[]           @relation("friends_friend_idTousers")
   friends_friends_user_idTousers                    friends[]           @relation("friends_user_idTousers")

@@ -8,9 +8,6 @@ export class ChatDto {
   sender_id: number;
 
   @IsInt()
-  receiver_id: number;
-
-  @IsInt()
   channel_id: number;
 
   @IsString()
