@@ -45,6 +45,20 @@ export class UsersRepository {
     return user ? user.user_id : null;
   }
 
+  async findUsersByPartOfUserName(userName: string) {
+    const users = await this.prisma.users.findMany({
+      where: {
+        username: {
+          startsWith: userName,
+        },
+      },
+      orderBy: {
+        username: 'asc',
+      },
+    });
+    return users;
+  }
+
   async update(
     user_id: number,
     updateUserDto: UpdateUserDto,

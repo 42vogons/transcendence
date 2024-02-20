@@ -15,11 +15,16 @@ export const ButtonContainer = styled('button', {
 	cursor: 'pointer',
 	transition: '0.2s',
 
+	'&:disabled': {
+		opacity: '40%',
+		cursor: 'not-allowed',
+	},
+
 	variants: {
 		buttonType: {
 			cancel: {
 				backgroundColor: '$red',
-				'&:hover': {
+				'&:not(:disabled):hover': {
 					backgroundColor: '$white',
 					color: '$red',
 					border: '4px solid $red',
@@ -28,7 +33,7 @@ export const ButtonContainer = styled('button', {
 
 			accept: {
 				backgroundColor: '$green300',
-				'&:hover': {
+				'&:not(:disabled):hover': {
 					backgroundColor: '$white',
 					color: '$green300',
 					border: '4px solid $green300',
@@ -37,7 +42,7 @@ export const ButtonContainer = styled('button', {
 
 			default: {
 				backgroundColor: '$blue100',
-				'&:hover': {
+				'&:not(:disabled):hover': {
 					backgroundColor: '$white',
 					color: '$blue100',
 					border: '4px solid $blue100',

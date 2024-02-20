@@ -6,7 +6,7 @@ export const NewFriendModalContainer = styled('div', {
 	// backgroundColor: 'red',
 	display: 'flex',
 	flexDirection: 'column',
-	justifyContent: 'center',
+	justifyContent: 'space-between',
 	alignItems: 'center',
 	gap: 64,
 	h2: {

@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { NotFoundError } from '../common/errors/types/NotFoundError';
 import { UserEntity } from './entities/user.entity';
 import { BlockUserDto } from './dto/blockUser.dto';
+import { ProfileDto } from './dto/profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -81,7 +82,18 @@ export class UsersService {
     return await this.repository.checkBlockStatus(blockUser);
   }
 
-  async findUserByUserName(user_name: string) {
-    return await this.repository.findByUserName(user_name);
+  async findUsersByPartOfUserName(user_name: string) {
+    return (await this.repository.findUsersByPartOfUserName(user_name)).map(
+      user => this.mapToProfileDTO(user),
+    );
+  }
+
+  private mapToProfileDTO(user: UserEntity): Partial<ProfileDto> {
+    const userDTO: Partial<ProfileDto> = {
+      user_id: user.user_id,
+      avatar_url: user.avatar_url,
+      username: user.username,
+    };
+    return userDTO;
   }
 }
