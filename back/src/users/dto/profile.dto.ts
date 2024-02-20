@@ -1,6 +1,7 @@
 // user.dto.ts
 
 export class ProfileDto {
+  user_id: number = 0;
   username: string = '';
   email: string = '';
   avatar_url: string = '';
