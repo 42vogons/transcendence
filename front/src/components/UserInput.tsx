@@ -10,8 +10,10 @@ import Image from 'next/image'
 import { FaUserAstronaut } from 'react-icons/fa6'
 
 import userDefaulAvatar from 'public/assets/user.png'
-import { ChangeEvent } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import Loading from './loading'
+import { api } from '@/services/api'
+import { toast } from 'react-toastify'
 
 export interface iUser {
 	user_id: number
@@ -20,32 +22,52 @@ export interface iUser {
 }
 
 interface iUserInputProps {
-	userInput: string
-	setUserInput: (value: string) => void
-	options: iUser[]
-	isOptionsLoading: boolean
 	selectedUser: iUser | undefined
 	setSelectedUser: (user: iUser | undefined) => void
 }
 
 export default function UserInput({
-	userInput,
-	setUserInput,
-	options,
 	selectedUser,
 	setSelectedUser,
-	isOptionsLoading,
 }: iUserInputProps) {
+	const [userInput, setUserInput] = useState('')
+	const [options, setOptions] = useState<iUser[]>([])
+	const [isOptionsLoading, setIsOptionsLoading] = useState(false)
+
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
 		setSelectedUser(undefined)
 		setUserInput(e.target.value)
 	}
 
 	function handleSelect(user: iUser) {
-		console.log('user.user_id:', user.username)
 		setUserInput(user.username)
 		setSelectedUser(user)
 	}
+
+	useEffect(() => {
+		if (userInput) {
+			const findUsersByPartOfUsername = async () => {
+				try {
+					setIsOptionsLoading(true)
+					const { data } = await api.post(
+						'/users/findUsersByPartOfUserName',
+						{
+							user_name: userInput,
+						},
+					)
+					data ? setOptions(data) : setOptions([])
+					setIsOptionsLoading(false)
+				} catch (error: any) {
+					setIsOptionsLoading(false)
+					console.log('error:', error)
+					toast(error.message ? error.message : error, {
+						type: 'error',
+					})
+				}
+			}
+			findUsersByPartOfUsername()
+		}
+	}, [userInput])
 
 	return (
 		<UserInputContainer

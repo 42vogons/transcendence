@@ -6,8 +6,6 @@ import { MdClose } from 'react-icons/md'
 import { FaUserPlus } from 'react-icons/fa6'
 import { NewFriendModalContainer } from '@/styles/components/newFriendModal'
 import { ChatContext } from '@/contexts/ChatContext'
-import { api } from '@/services/api'
-import { toast } from 'react-toastify'
 
 interface iNewFriendModal {
 	showNewFriendModal: boolean
@@ -19,9 +17,6 @@ export default function NewFriendModal({
 	setShowNewFriendModal,
 }: iNewFriendModal) {
 	const { addFriend } = useContext(ChatContext)
-	const [userInput, setUserInput] = useState('')
-	const [options, setOptions] = useState<iUser[]>([])
-	const [isOptionsLoading, setIsOptionsLoading] = useState(false)
 	const [selectedUser, setSelectedUser] = useState<iUser>()
 
 	function handleAddNewFriend() {
@@ -29,52 +24,22 @@ export default function NewFriendModal({
 		if (selectedUser) {
 			addFriend(selectedUser.user_id)
 		}
-		setSelectedUser(undefined)
-		setUserInput('')
 		setShowNewFriendModal(false)
 	}
 
 	useEffect(() => {
-		if (userInput) {
-			const findUsersByPartOfUsername = async () => {
-				try {
-					setIsOptionsLoading(true)
-					const { data } = await api.post(
-						'/users/findUsersByPartOfUserName',
-						{
-							user_name: userInput,
-						},
-					)
-					console.log('options:', data)
-					data ? setOptions(data) : setOptions([])
-					setIsOptionsLoading(false)
-				} catch (error: any) {
-					setIsOptionsLoading(false)
-					console.log('error:', error)
-					toast(error.message ? error.message : error, {
-						type: 'error',
-					})
-				}
-			}
-			findUsersByPartOfUsername()
+		if (!showNewFriendModal) {
+			setSelectedUser(undefined)
 		}
-	}, [userInput])
-
-	useEffect(() => {
-		console.log('selectedUser:', selectedUser)
-	}, [selectedUser])
+	}, [showNewFriendModal])
 
 	return (
 		<Modal isOpen={showNewFriendModal}>
 			<NewFriendModalContainer>
 				<h2>New Friend</h2>
 				<UserInput
-					userInput={userInput}
-					setUserInput={setUserInput}
-					options={options}
 					selectedUser={selectedUser}
 					setSelectedUser={setSelectedUser}
-					isOptionsLoading={isOptionsLoading}
 				/>
 				<div className="buttonsContainer">
 					<Button

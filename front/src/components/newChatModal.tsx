@@ -1,6 +1,6 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import Modal from './modal'
-import UserInput from './UserInput'
+import UserInput, { iUser } from './UserInput'
 import Button from './button'
 import { MdClose } from 'react-icons/md'
 import { FaUserPlus } from 'react-icons/fa6'
@@ -15,19 +15,31 @@ export default function NewChatModal({
 	showNewChatModal,
 	setShowNewChatModal,
 }: iNewChatModal) {
-	const [userInput, setUserInput] = useState('')
+	const [selectedUser, setSelectedUser] = useState<iUser>()
 
 	const { createDirectChat } = useContext(ChatContext)
 
 	function handleCreateNewChat() {
-		createDirectChat(Number(userInput))
+		if (selectedUser) {
+			createDirectChat(selectedUser.user_id)
+		}
 		setShowNewChatModal(false)
 	}
+
+	useEffect(() => {
+		if (!showNewChatModal) {
+			setSelectedUser(undefined)
+		}
+	}, [showNewChatModal])
+
 	return (
 		<Modal isOpen={showNewChatModal}>
 			<NewChatModalContainer>
 				<h2>New Chat</h2>
-				<UserInput userInput={userInput} setUserInput={setUserInput} />
+				<UserInput
+					selectedUser={selectedUser}
+					setSelectedUser={setSelectedUser}
+				/>
 				<div className="buttonsContainer">
 					<Button
 						buttonType="cancel"
@@ -39,9 +51,13 @@ export default function NewChatModal({
 						<MdClose size={40} />
 						Cancel
 					</Button>
-					<Button buttonType="accept" onClick={handleCreateNewChat}>
+					<Button
+						buttonType="accept"
+						onClick={handleCreateNewChat}
+						disabled={!selectedUser}
+					>
 						<FaUserPlus size={40} />
-						Add
+						Create
 					</Button>
 				</div>
 			</NewChatModalContainer>
