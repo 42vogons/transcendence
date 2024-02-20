@@ -49,8 +49,11 @@ export class UsersRepository {
     const users = await this.prisma.users.findMany({
       where: {
         username: {
-          contains: userName,
+          startsWith: userName,
         },
+      },
+      orderBy: {
+        username: 'asc',
       },
     });
     return users;

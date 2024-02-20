@@ -17,11 +17,14 @@ export const UserInputContainer = styled('div', {
 	input: {
 		width: '100%',
 		borderRadius: '16px',
-		border: 'none',
+		border: '2px solid $gray300',
 		fontSize: '$2xl',
 		fontFamily: 'monospace',
 		fontVariantNnumeric: 'slashed-zero',
 		padding: '8px 14px 8px 50px',
+		'&:focus::placeholder': {
+			color: 'transparent',
+		},
 	},
 
 	variants: {
@@ -43,8 +46,14 @@ export const UserInputContainer = styled('div', {
 })
 
 export const UserList = styled('ul', {
-	maxHeight: 80,
+	position: 'absolute',
+	top: 56,
+	maxHeight: 140,
+	width: '100%',
 	overflowY: 'auto',
+	border: '1px solid $gray300',
+	borderTop: 'none',
+	borderRadius: '0 0 16px 16px ',
 
 	'&::-webkit-scrollbar': {
 		width: 4,
@@ -73,6 +82,15 @@ export const UserListItem = styled('li', {
 		borderBottom: 'none',
 		borderRadius: '0 0 0 16px',
 	},
+})
+export const LoadingContainer = styled('div', {
+	paddingTop: 8,
+	display: 'flex',
+	flexDirection: 'row',
+	justifyContent: 'center',
+	alignItems: 'center',
+	gap: 16,
+	fontSize: '$2xl',
 })
 
 export const UserAvatarContainer = styled('div', {

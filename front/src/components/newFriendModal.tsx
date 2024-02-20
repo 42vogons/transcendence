@@ -21,6 +21,8 @@ export default function NewFriendModal({
 	const { addFriend } = useContext(ChatContext)
 	const [userInput, setUserInput] = useState('')
 	const [options, setOptions] = useState<iUser[]>([])
+	const [isOptionsLoading, setIsOptionsLoading] = useState(false)
+	const [selectedUser, setSelectedUser] = useState<iUser>()
 
 	function handleAddNewFriend() {
 		console.log('new Friend', userInput)
@@ -29,27 +31,37 @@ export default function NewFriendModal({
 	}
 
 	useEffect(() => {
-		// if (userInput) {
-		const findUsersByPartOfUsername = async () => {
-			try {
-				const { data } = await api.post(
-					'/users/findUsersByPartOfUserName',
-					{
-						user_name: userInput,
-					},
-				)
-				console.log('options:', data)
-				data ? setOptions(data) : setOptions([])
-			} catch (error: any) {
-				console.log('error:', error)
-				toast(error.message ? error.message : error, {
-					type: 'error',
-				})
+		if (userInput) {
+			const findUsersByPartOfUsername = async () => {
+				try {
+					setIsOptionsLoading(true)
+					const { data } = await api.post(
+						'/users/findUsersByPartOfUserName',
+						{
+							user_name: userInput,
+						},
+					)
+					console.log('options:', data)
+					data ? setOptions(data) : setOptions([])
+					setIsOptionsLoading(false)
+				} catch (error: any) {
+					setIsOptionsLoading(false)
+					console.log('error:', error)
+					toast(error.message ? error.message : error, {
+						type: 'error',
+					})
+				}
 			}
+			findUsersByPartOfUsername()
 		}
-		findUsersByPartOfUsername()
-		// }
 	}, [userInput])
+
+	useEffect(() => {
+		console.log('selectedUser:', selectedUser)
+	}, [selectedUser])
+
+	// todo disable button
+
 	return (
 		<Modal isOpen={showNewFriendModal}>
 			<NewFriendModalContainer>
@@ -58,6 +70,9 @@ export default function NewFriendModal({
 					userInput={userInput}
 					setUserInput={setUserInput}
 					options={options}
+					selectedUser={selectedUser}
+					setSelectedUser={setSelectedUser}
+					isOptionsLoading={isOptionsLoading}
 				/>
 				<div className="buttonsContainer">
 					<Button
