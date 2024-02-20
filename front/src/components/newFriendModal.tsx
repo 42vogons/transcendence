@@ -25,8 +25,12 @@ export default function NewFriendModal({
 	const [selectedUser, setSelectedUser] = useState<iUser>()
 
 	function handleAddNewFriend() {
-		console.log('new Friend', userInput)
-		// addFriend(Number(userInput))
+		console.log('new Friend', selectedUser)
+		if (selectedUser) {
+			addFriend(selectedUser.user_id)
+		}
+		setSelectedUser(undefined)
+		setUserInput('')
 		setShowNewFriendModal(false)
 	}
 
@@ -60,8 +64,6 @@ export default function NewFriendModal({
 		console.log('selectedUser:', selectedUser)
 	}, [selectedUser])
 
-	// todo disable button
-
 	return (
 		<Modal isOpen={showNewFriendModal}>
 			<NewFriendModalContainer>
@@ -85,7 +87,11 @@ export default function NewFriendModal({
 						<MdClose size={40} />
 						Cancel
 					</Button>
-					<Button buttonType="accept" onClick={handleAddNewFriend}>
+					<Button
+						buttonType="accept"
+						onClick={handleAddNewFriend}
+						disabled={!selectedUser}
+					>
 						<FaUserPlus size={40} />
 						Add
 					</Button>
