@@ -15,9 +15,9 @@ export const ModalContainer = styled('div', {
 
 export const ModalContent = styled('div', {
 	backgroundColor: '$white',
-	padding: '1rem',
+	padding: '4rem 1rem',
 	borderRadius: 16,
-	minHeight: 800,
+	height: 800,
 	width: 600,
 	color: '$gray900',
 	display: 'flex',

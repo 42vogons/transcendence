@@ -9,7 +9,6 @@ export class ChatRepository {
     return await this.prisma.chat_messages.create({
       data: {
         sender_id: chatDto.sender_id,
-        receiver_id: chatDto.receiver_id,
         channel_id: chatDto.channel_id,
         content: chatDto.content,
       },
