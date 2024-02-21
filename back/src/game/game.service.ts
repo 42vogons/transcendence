@@ -36,6 +36,7 @@ export class GameService {
     y: this.court.height * 0.005,
   };
   private paddleSpeed = this.paddle.height * 0.2;
+  private timeToBeReady = 60 * 1000;
 
   throwError(client: SocketWithAuth, msg: string) {
     let player = this.findPlayerByUserID(client.userID)
@@ -264,18 +265,18 @@ export class GameService {
     client: SocketWithAuth,
     roomID: string,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
-  ): UserData[] {
+  ): Room {
     const room = this.findRoomByRoomID(roomID);
     if (!room) {
       this.throwError(client, "error on join room")
-      return this.players;
+      return;
     }
 
     const player1 = this.findPlayerByUserID(client.userID);
     const player2 = this.findPlayerByUserID(room.users[0].userID);
     if (!player1 || !player2) {
       this.throwError(client, "error on join room")
-      return this.players;
+      return;
     }
 
     player1.status = 'readyToPlay';
@@ -288,13 +289,15 @@ export class GameService {
 
     client.join(roomID);
     room.users.push(player1);
-    this.updateRoom(room);
 
+    const now = new Date();
+    room.ExpiredAt = new Date(now.getTime() + this.timeToBeReady);
+    this.updateRoom(room);
     setTimeout(() => {
       this.notReadyInTime(room.ID, io);
-    }, 60 * 1000);
+    }, this.timeToBeReady);
 
-    return this.players;
+    return room;
   }
 
   createRoom(client: SocketWithAuth) {
@@ -749,4 +752,12 @@ export class GameService {
   getAllMatchHistoryByUserID(userID: string): Promise<MatchHistoryEntity[] | null> {
     return this.matchRepository.getAllMatchHistoryByUserID(Number(userID))
   }
+
+  // requestMatch(
+  //   io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  //   client: SocketWithAuth,
+  //   guestID: string,
+  // ) {
+  //   const guest = this.findPlayerByUserID
+  // }
 }

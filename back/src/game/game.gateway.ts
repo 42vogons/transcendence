@@ -53,8 +53,9 @@ export class GameGateway
 
     if (availablePlayers.length > 0) {
       const roomID = availablePlayers[0].roomID;
-      this.players = this.gameService.joinRoom(client, roomID, this.io);
+      const room = this.gameService.joinRoom(client, roomID, this.io);
       this.io.to(roomID).emit('status_changed', 'readyToPlay');
+      this.io.to(roomID).emit('time_to_be_ready', room.ExpiredAt)
     } else {
       this.gameService.createRoom(client);
       client.emit('status_changed', 'searching');
@@ -122,4 +123,10 @@ export class GameGateway
     const match = this.gameService.findMatchByUserID(client.userID)
     this.gameService.giveUpMatch(match, this.io, client)
   }
+
+  // @SubscribeMessage('request_match')
+  // handleRequestMatch(client: SocketWithAuth, data) {
+  //   const { guestID } = data;
+  //   this.gameService.requestMatch(this.io, client, guestID)
+  // }
 }

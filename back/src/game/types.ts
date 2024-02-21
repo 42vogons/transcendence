@@ -12,6 +12,7 @@ export type Room = {
   ID: string;
   users: UserData[];
   IsReady: boolean;
+  ExpiredAt?: Date;
 };
 
 export type Ball = {
