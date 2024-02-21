@@ -3,7 +3,7 @@ export type UserData = {
   userID: number;
   username: string;
   roomID: string;
-  status: 'idle' | 'searching' | 'readyToPlay' | 'playing';
+  status: 'idle' | 'awaiting' | 'searching' | 'readyToPlay' | 'playing';
   waitingReconnect: boolean;
   isReconnect: boolean;
 };

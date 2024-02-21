@@ -124,9 +124,15 @@ export class GameGateway
     this.gameService.giveUpMatch(match, this.io, client)
   }
 
-  // @SubscribeMessage('request_match')
-  // handleRequestMatch(client: SocketWithAuth, data) {
-  //   const { guestID } = data;
-  //   this.gameService.requestMatch(this.io, client, guestID)
-  // }
+  @SubscribeMessage('request_match')
+  handleRequestMatch(client: SocketWithAuth, data) {
+    const { guestID } = data;
+    this.gameService.requestMatch(this.io, client, guestID)
+  }
+
+  @SubscribeMessage('response_resquest_match')
+  handleResponseRequestMatch(client: SocketWithAuth, data) {
+    const { response } = data;
+    this.gameService.responseRequestMatch(this.io, client, response)
+  }
 }
