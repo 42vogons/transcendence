@@ -96,7 +96,7 @@ export function GameProvider({ children }: GameProviderProps) {
 			status === 'playing' &&
 			match.status === 'pause'
 		) {
-			toast('The game is paused1.', { type: 'info' })
+			toast('The game is paused.', { type: 'info' })
 		}
 		return () => {
 			if (
