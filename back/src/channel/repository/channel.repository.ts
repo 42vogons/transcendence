@@ -141,7 +141,7 @@ export class ChannelRepository {
   async findAllChannels() {
     return await this.prisma.channels.findMany({
       where: {
-        OR: [{ type: 'Public' }, { type: 'protected' }],
+        OR: [{ type: 'public' }, { type: 'protected' }],
       },
       select: {
         channel_id: true,
