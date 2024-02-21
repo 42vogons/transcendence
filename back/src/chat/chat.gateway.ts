@@ -207,6 +207,9 @@ export class ChatGateway
   async adminAction(client: SocketWithAuth, adminActionDto: AdminActionDto) {
     try {
       await this.channelService.adminAction(adminActionDto, client.userID);
+      this.logger.log(
+        `User ${client.userID} ${adminActionDto.action} member ${adminActionDto.member_id} to ${adminActionDto.end_date} minutes`,
+      );
     } catch (error) {
       this.sendError(error);
     }
@@ -217,7 +220,7 @@ export class ChatGateway
     try {
       await this.channelService.leaveChannel(leaveDto, client.userID);
       this.logger.log(
-        `User ${client.userID} leave channel ${leaveDto.channel_id}.`,
+        `User ${client.userID} leave channel ${leaveDto.channel_id}`,
       );
     } catch (error) {
       this.sendError(error);

@@ -281,7 +281,7 @@ export class ChannelService {
       throw new ForbiddenException('Member is banned.');
     }
     if (adminAction.action_type === AdminActionType.MUTED) {
-      if (adminAction.end_time < new Date()) {
+      if (adminAction.end_time > new Date()) {
         throw new ForbiddenException('Member is muted.');
       }
     }
