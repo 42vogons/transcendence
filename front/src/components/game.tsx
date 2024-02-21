@@ -15,15 +15,6 @@ export default function Game() {
 	const height = 458
 	const width = 928
 	const { match, sendKey } = useContext(GameContext)
-	// const [player1Y, setPlayer1y] = useState(0)
-	// const [ball, setBall] = useState<Ball>({
-	// 	x: width / 2 - 19,
-	// 	y: height / 2 - 8,
-	// 	xSpeed: 5,
-	// 	ySpeed: 5 * (height / width),
-	// 	xDirection: 1,
-	// 	yDirection: 1,
-	// })
 
 	useEffect(() => {
 		const sendKeyEvent = (e: KeyboardEvent) => {

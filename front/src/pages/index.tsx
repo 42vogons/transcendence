@@ -29,13 +29,21 @@ export default function Home() {
 		matchResult,
 		isMatchCompleted,
 		clearMatchCompleted,
+		sendKey,
 	} = useContext(GameContext)
 
 	const { user } = useContext(UserContext)
 
 	useEffect(() => {
-		console.log('GameStatus:', status)
-	}, [status])
+		console.log('rodou effect game')
+		return () => {
+			if (!isMatchCompleted && status === 'playing') {
+				sendKey('keydown', 'p')
+			}
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [status, isMatchCompleted])
+
 	return (
 		<>
 			<Head>
