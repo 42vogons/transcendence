@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { SocketWithAuth } from 'src/types';
-import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { ChatDto } from './dto/chat.dto';
 import { UsersService } from 'src/users/users.service';
 import { FriendsService } from 'src/friends/friends.service';
@@ -44,6 +44,7 @@ export class ChatGateway
   @SubscribeMessage('msg_to_server')
   async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
+      chatDto.sender_id = client.userID;
       const members = await this.chatService.saveMessage(chatDto);
       members.forEach(member => {
         const memberId = this.users.get(member);

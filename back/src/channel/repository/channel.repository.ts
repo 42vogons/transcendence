@@ -214,7 +214,7 @@ export class ChannelRepository {
         channel_id: channel_id,
       },
       orderBy: {
-        action_id: 'desc',
+        end_time: 'desc', // Substitua 'action_id' pelo campo que representa a ordem temporal correta das ações, se diferente
       },
     });
   }

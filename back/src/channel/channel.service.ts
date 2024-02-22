@@ -155,22 +155,18 @@ export class ChannelService {
       }
       await this.repository.adminAction(adminActionDto, userId);
 
-      if (adminActionDto.action === 'remove') {
+      if (
+        adminActionDto.action === 'kicked' ||
+        adminActionDto.action === 'banned'
+      ) {
         await this.repository.removeMemberChannel(
           adminActionDto.member_id,
           adminActionDto.channel_id,
         );
-        return 'Member removed.';
+        return 'Member ' + adminActionDto.action;
       }
-      if (adminActionDto.action === 'mute') {
+      if (adminActionDto.action === 'muted') {
         return 'Member muted.';
-      }
-      if (adminActionDto.action === 'banned') {
-        await this.repository.removeMemberChannel(
-          adminActionDto.member_id,
-          adminActionDto.channel_id,
-        );
-        return 'Member banned.';
       }
     } else {
       throw new UnauthorizedException(
@@ -282,7 +278,9 @@ export class ChannelService {
     }
     if (adminAction.action_type === AdminActionType.MUTED) {
       if (adminAction.end_time > new Date()) {
-        throw new ForbiddenException('Member is muted.');
+        throw new ForbiddenException(
+          'You are muted until ' + adminAction.end_time,
+        );
       }
     }
   }
