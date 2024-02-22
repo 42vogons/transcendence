@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './repositories/users.repository';
@@ -71,6 +71,14 @@ export class UsersService {
   }
 
   async blockUser(blockUser: BlockUserDto) {
+    const isBlocked = await this.checkBlockedStatus(blockUser);
+    if (isBlocked) {
+      throw new BadRequestException('This user already blocked');
+    }
+    const isUser = await this.findOne(blockUser.member_id);
+    if (!isUser) {
+      throw new BadRequestException('Invalid member');
+    }
     return await this.repository.blockUser(blockUser);
   }
 
