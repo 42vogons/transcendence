@@ -831,7 +831,7 @@ export class GameService {
     const playerOwner = this.findPlayerByUserID(
       room.users[0].userID === client.userID
         ? room.users[1].userID
-        : client.userID,
+        : room.users[0].userID,
     );
     console.log('playerOwner:', playerOwner);
 
