@@ -9,6 +9,7 @@ import { ReactElement, ReactNode } from 'react'
 import { GameProvider } from '@/contexts/GameContext'
 import { UserProvider } from '@/contexts/UserContext'
 import { ChatProvider } from '@/contexts/ChatContext'
+import RequestGameModal from '@/components/requestGameModal'
 
 globalStyles()
 
@@ -28,6 +29,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 				<ChatProvider>
 					<GameProvider>
 						{getLayout(<Component {...pageProps} />)}
+						<RequestGameModal />
 					</GameProvider>
 				</ChatProvider>
 			</UserProvider>

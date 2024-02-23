@@ -1,11 +1,12 @@
 import { ActionTypes } from './Action'
-import { MatchData, MatchResult } from './Types'
+import { MatchData, MatchResult, RequestGame } from './Types'
 
 interface GameState {
 	status: string
 	match: MatchData
 	matchResult: MatchResult
 	isMatchCompleted: boolean
+	gameRequest: RequestGame | undefined
 }
 
 export function GameReducer(state: GameState, action: any) {
@@ -24,6 +25,13 @@ export function GameReducer(state: GameState, action: any) {
 			const newState = {
 				...state,
 				match: action.payload.match,
+			}
+			return newState
+		}
+		case ActionTypes.REQUEST_GAME: {
+			const newState = {
+				...state,
+				gameRequest: action.payload.request,
 			}
 			return newState
 		}

@@ -813,8 +813,11 @@ export class GameService {
 
     this.updateRoom(room);
 
-    client.emit('status_changed', 'awainting');
-    io.to(playerGuest.socketID).emit('request_game', client.username);
+    client.emit('status_changed', 'awaiting');
+    io.to(playerGuest.socketID).emit('request_game', {
+      type: 'request',
+      username: client.username,
+    });
   }
 
   responseRequestMatch(
@@ -823,12 +826,14 @@ export class GameService {
     response: string,
   ) {
     const playerGuest = this.findPlayerByUserID(client.userID);
+    console.log('playerGuest:', playerGuest);
     const room = this.findRoomByRoomID(playerGuest.roomID);
     const playerOwner = this.findPlayerByUserID(
       room.users[0].userID === client.userID
         ? room.users[1].userID
         : client.userID,
     );
+    console.log('playerOwner:', playerOwner);
 
     if (response === 'refused') {
       playerGuest.roomID = '';
@@ -841,7 +846,10 @@ export class GameService {
       this.updatePlayer(playerOwner);
 
       this.deleteRoomByRoomID(room.ID);
-      io.to(playerOwner.socketID).emit('match_refused', playerGuest.username);
+      io.to(playerOwner.socketID).emit('request_game', {
+        type: 'refused',
+        username: playerGuest.username,
+      });
       io.to(playerOwner.socketID).emit('status_changed', 'connected');
       return;
     }

@@ -2,10 +2,11 @@ import {
 	clearMatch,
 	endMatch,
 	matchUpdate,
+	requestGame,
 	statusChange,
 } from '@/reducers/Game/Action'
 import { GameReducer } from '@/reducers/Game/Reducer'
-import { MatchData, MatchResult } from '@/reducers/Game/Types'
+import { MatchData, MatchResult, RequestGame } from '@/reducers/Game/Types'
 import { useRouter } from 'next/router'
 import {
 	ReactNode,
@@ -24,11 +25,15 @@ interface GameContextType {
 	match: MatchData
 	matchResult: MatchResult
 	isMatchCompleted: boolean
+	gameRequest: RequestGame
 	sendKey: (type: string, key: string) => void
 	joinQueue: () => void
 	exitQueue: () => void
 	playing: () => void
 	resume: () => void
+	requestMatch: (guestID: number) => void
+	answerRequestMatch: (response: 'accept' | 'refused') => void
+	resetGameRequest: () => void
 	clearMatchCompleted: () => void
 	closeGameSocket: () => void
 }
@@ -52,11 +57,12 @@ export function GameProvider({ children }: GameProviderProps) {
 		match: {} as MatchData,
 		matchResult: {} as MatchResult,
 		isMatchCompleted: false,
+		gameRequest: {} as RequestGame,
 	})
 
 	const { user } = useContext(UserContext)
 
-	const { status, match, matchResult, isMatchCompleted } = state
+	const { status, match, matchResult, isMatchCompleted, gameRequest } = state
 
 	const router = useRouter()
 
@@ -77,6 +83,9 @@ export function GameProvider({ children }: GameProviderProps) {
 		})
 		socket.on('match_updated', (match: MatchData) => {
 			dispatch(matchUpdate(match))
+		})
+		socket.on('request_game', (request: RequestGame) => {
+			dispatch(requestGame(request))
 		})
 		socket.on('end_match', (matchResult: MatchResult) => {
 			console.log('end_match: ', matchResult)
@@ -107,7 +116,7 @@ export function GameProvider({ children }: GameProviderProps) {
 				toast('The game restarted.', { type: 'success' })
 			}
 		}
-	}, [status, isMatchCompleted, match.status])
+	}, [status, isMatchCompleted, match?.status])
 
 	function emitSocketIfUserIsNotExpired(ev: string, ...args: any[]) {
 		if (user && !isDateExpired(user?.expiresAt as Date)) {
@@ -148,6 +157,22 @@ export function GameProvider({ children }: GameProviderProps) {
 		emitSocketIfUserIsNotExpired('resume', '')
 	}
 
+	function requestMatch(guestID: number) {
+		emitSocketIfUserIsNotExpired('request_match', { guestID })
+	}
+
+	function resetGameRequest() {
+		const request = undefined
+		dispatch(requestGame(request))
+	}
+
+	function answerRequestMatch(response: 'accept' | 'refused') {
+		resetGameRequest()
+		emitSocketIfUserIsNotExpired('response_resquest_match', {
+			response,
+		})
+	}
+
 	function exitQueue() {
 		emitSocketIfUserIsNotExpired('exit_queue', '')
 	}
@@ -172,6 +197,10 @@ export function GameProvider({ children }: GameProviderProps) {
 				exitQueue,
 				playing,
 				resume,
+				requestMatch,
+				gameRequest,
+				answerRequestMatch,
+				resetGameRequest,
 				clearMatchCompleted,
 				closeGameSocket,
 			}}

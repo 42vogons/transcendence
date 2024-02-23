@@ -72,3 +72,8 @@ export type MatchResult = {
 	looserID: number
 	endedAt: Date
 }
+
+export type RequestGame = {
+	type: 'request' | 'refused'
+	username: string
+}

@@ -1,8 +1,9 @@
-import { MatchData, MatchResult } from './Types'
+import { MatchData, MatchResult, RequestGame } from './Types'
 
 export enum ActionTypes {
 	STATUS_CHANGE = 'STATUS_CHANGE',
 	MATCH_UPDATE = 'MATCH_UPDATE',
+	REQUEST_GAME = 'REQUEST_GAME',
 	END_MATCH = 'END_MATCH',
 	CLEAR_MATCH = 'CLEAR_MATCH',
 }
@@ -21,6 +22,15 @@ export function matchUpdate(match: MatchData) {
 		type: ActionTypes.MATCH_UPDATE,
 		payload: {
 			match,
+		},
+	}
+}
+
+export function requestGame(request: RequestGame | undefined) {
+	return {
+		type: ActionTypes.REQUEST_GAME,
+		payload: {
+			request,
 		},
 	}
 }

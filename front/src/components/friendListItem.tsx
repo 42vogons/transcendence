@@ -1,4 +1,5 @@
 import { ChatContext } from '@/contexts/ChatContext'
+import { GameContext } from '@/contexts/GameContext'
 import { FriendListItem as iFriendListItem } from '@/reducers/Chat/Reducer'
 import {
 	FriendAction,
@@ -25,6 +26,8 @@ export function FriendListItem({
 	userStatus,
 }: iFriendListItem) {
 	const { removeFriend } = useContext(ChatContext)
+	const { requestMatch } = useContext(GameContext)
+
 	const iconSize = 26
 
 	function handleChatOnClick() {
@@ -33,6 +36,9 @@ export function FriendListItem({
 
 	function handleGameOnClick() {
 		console.log('game', username)
+		if (userID) {
+			requestMatch(userID)
+		}
 	}
 
 	function handleRemoveOnClick() {
