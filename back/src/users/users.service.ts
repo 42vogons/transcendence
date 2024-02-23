@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './repositories/users.repository';
@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { NotFoundError } from '../common/errors/types/NotFoundError';
 import { UserEntity } from './entities/user.entity';
 import { BlockUserDto } from './dto/blockUser.dto';
+import { ProfileDto } from './dto/profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -22,8 +23,7 @@ export class UsersService {
     newUser.two_factor_enabled = false;
     newUser.user_id_42 = profile.id;
     this.repository.create(newUser);
-    console.log('Novo usuário criado');
-    console.log(newUser);
+    Logger.log(`New user created: ${newUser}.`);
   }
 
   async create(createUserDto: CreateUserDto) {
@@ -41,7 +41,7 @@ export class UsersService {
   async findOne(user_id: number): Promise<UserEntity> {
     const user = await this.repository.findOne(user_id);
     if (!user) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError('User not found.');
     }
     return user;
   }
@@ -49,7 +49,7 @@ export class UsersService {
   async findEmail(user_email: string): Promise<UserEntity> {
     const user = await this.repository.findEmail(user_email);
     if (!user) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError('User not found.');
     }
     return user;
   }
@@ -71,6 +71,14 @@ export class UsersService {
   }
 
   async blockUser(blockUser: BlockUserDto) {
+    const isBlocked = await this.checkBlockedStatus(blockUser);
+    if (isBlocked) {
+      throw new BadRequestException('This user already blocked');
+    }
+    const isUser = await this.findOne(blockUser.member_id);
+    if (!isUser) {
+      throw new BadRequestException('Invalid member');
+    }
     return await this.repository.blockUser(blockUser);
   }
 
@@ -80,5 +88,20 @@ export class UsersService {
 
   async checkBlockedStatus(blockUser: BlockUserDto) {
     return await this.repository.checkBlockStatus(blockUser);
+  }
+
+  async findUsersByPartOfUserName(user_name: string) {
+    return (await this.repository.findUsersByPartOfUserName(user_name)).map(
+      user => this.mapToProfileDTO(user),
+    );
+  }
+
+  private mapToProfileDTO(user: UserEntity): Partial<ProfileDto> {
+    const userDTO: Partial<ProfileDto> = {
+      user_id: user.user_id,
+      avatar_url: user.avatar_url,
+      username: user.username,
+    };
+    return userDTO;
   }
 }

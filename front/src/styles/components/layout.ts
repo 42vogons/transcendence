@@ -91,7 +91,7 @@ export const SidePanelContainer = styled('div', {
 		background: '$white',
 	},
 
-	'.menuOptions': {
+	'.menuHeader': {
 		// position: 'absolute',
 		width: '100%',
 		top: 18,
@@ -108,6 +108,19 @@ export const SidePanelContainer = styled('div', {
 			textAlign: 'center',
 		},
 		marginBottom: 24,
+	},
+
+	'.menuOptions': {
+		// position: 'absolute',
+		width: '100%',
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'space-around',
+		alignItems: 'center',
+		color: '$white',
+		borderBottom: '1px solid $white',
+
+		padding: '1rem 0',
 	},
 
 	'.content': {

@@ -4,6 +4,8 @@ import { FriendsService } from './friends.service';
 import { FriendsRepository } from './repositories/friends.repository';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { UsersService } from 'src/users/users.service';
+import { UsersRepository } from 'src/users/repositories/users.repository';
 
 @Module({
   imports: [
@@ -14,7 +16,20 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
   ],
 
   controllers: [FriendsController],
-  providers: [FriendsService, FriendsRepository, PrismaService, JwtService],
-  exports: [FriendsService, PrismaService, FriendsRepository], // Exporte o UsersService, se necessário
+  providers: [
+    FriendsService,
+    FriendsRepository,
+    PrismaService,
+    JwtService,
+    UsersService,
+    UsersRepository,
+  ],
+  exports: [
+    FriendsService,
+    PrismaService,
+    FriendsRepository,
+    UsersService,
+    UsersRepository,
+  ],
 })
 export class FriendsModule {}

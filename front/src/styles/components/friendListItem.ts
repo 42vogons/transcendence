@@ -116,7 +116,7 @@ export const MenuItem = styled(DropdownMenu.Item, {
 })
 
 export const FriendAction = styled('button', {
-	width: 120,
+	width: 140,
 	display: 'flex',
 	justifyContent: 'space-between',
 	alignItems: 'center',

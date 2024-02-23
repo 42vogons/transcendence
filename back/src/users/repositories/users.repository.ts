@@ -36,6 +36,29 @@ export class UsersRepository {
     });
   }
 
+  async findByUserName(userName: string): Promise<number | null> {
+    const user = await this.prisma.users.findFirst({
+      where: {
+        username: userName,
+      },
+    });
+    return user ? user.user_id : null;
+  }
+
+  async findUsersByPartOfUserName(userName: string) {
+    const users = await this.prisma.users.findMany({
+      where: {
+        username: {
+          startsWith: userName,
+        },
+      },
+      orderBy: {
+        username: 'asc',
+      },
+    });
+    return users;
+  }
+
   async update(
     user_id: number,
     updateUserDto: UpdateUserDto,
@@ -133,7 +156,7 @@ export class UsersRepository {
       data: {
         userId: blockUser.user_id,
         memberId: blockUser.member_id,
-        blockedAt: new Date(), // Prisma preenche automaticamente com o valor padrão, mas você pode especificar explicitamente se necessário
+        blockedAt: new Date(),
       },
     });
   }

@@ -43,7 +43,6 @@ export class GameService {
     if (!player) {
       player = this.createNewPlayer(client.id, client.userID, client.username);
       this.players.push(player);
-      return;
     } else {
       if (player.roomID) client.leave(player.roomID);
       if (player.status === 'playing') {
@@ -639,7 +638,7 @@ export class GameService {
     const player = this.findPlayerByUserID(userID);
     const match = this.findMatchByRoomID(player.roomID);
 
-    if (match.status === 'play') {
+    if (match && match.status === 'play') {
       match.isResumed = false;
       match.status = 'pause';
       match.pausedAt = new Date();

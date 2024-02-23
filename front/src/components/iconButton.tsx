@@ -3,9 +3,9 @@ import { ReactNode } from 'react'
 
 interface iIconButtonProps {
 	children: ReactNode
-	title: string
+	title?: string
 	isActive?: boolean
-	type?: 'mobile' | 'desktop'
+	type?: 'mobile' | 'desktop' | 'default'
 	handleOnClick?: () => void | undefined
 }
 
@@ -13,7 +13,7 @@ export default function IconButton({
 	children,
 	title,
 	isActive,
-	type,
+	type = 'default',
 	handleOnClick,
 }: iIconButtonProps) {
 	return (
@@ -29,7 +29,7 @@ export default function IconButton({
 			}
 		>
 			{children}
-			<div className="tooltip">{title}</div>
+			{title && <div className="tooltip">{title}</div>}
 		</IconButtonContainer>
 	)
 }

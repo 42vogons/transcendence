@@ -5,6 +5,7 @@ import { CreateChannelDto } from '../dto/create-channel.dto';
 import { ChannelDto } from '../dto/channel.dto';
 import { MemberDto } from '../dto/member.dto';
 import { ChannelMemberStatus } from '../constants';
+import { AdminActionDto } from '../dto/adminAction.dto';
 
 @Injectable()
 export class ChannelRepository {
@@ -139,6 +140,9 @@ export class ChannelRepository {
 
   async findAllChannels() {
     return await this.prisma.channels.findMany({
+      where: {
+        OR: [{ type: 'public' }, { type: 'protected' }],
+      },
       select: {
         channel_id: true,
         name: true,
@@ -184,6 +188,33 @@ export class ChannelRepository {
       },
       include: {
         users: true,
+      },
+    });
+  }
+
+  async adminAction(adminActionDto: AdminActionDto, user_id: number) {
+    const now = new Date();
+    const end = now.setMinutes(now.getMinutes() + adminActionDto.end_date);
+    await this.prisma.admin_actions.create({
+      data: {
+        channel_id: adminActionDto.channel_id,
+        target_user_id: adminActionDto.member_id,
+        action_type: adminActionDto.action,
+        executed_by: user_id,
+        start_time: now,
+        end_time: new Date(end),
+      },
+    });
+  }
+
+  async getLastAdminActionByUser(member_id: number, channel_id: number) {
+    return await this.prisma.admin_actions.findFirst({
+      where: {
+        target_user_id: member_id,
+        channel_id: channel_id,
+      },
+      orderBy: {
+        action_id: 'desc',
       },
     });
   }

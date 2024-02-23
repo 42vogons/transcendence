@@ -7,6 +7,10 @@ export const globalStyles = globalCss({
 		boxSizing: 'border-box',
 	},
 
+	':root': {
+		'--toastify-color-info': '#00a7ff',
+	},
+
 	body: {
 		minHeight: '100vh',
 		background: 'url(/assets/background.png)',
