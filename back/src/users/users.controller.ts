@@ -104,8 +104,7 @@ export class UsersController {
     FileInterceptor('avatar', {
       storage: diskStorage({
         destination: (request, file, callback) => {
-          const user = 1;
-          const path = `./uploads/${user}`;
+          const path = `./uploads/avatar`;
           fs.mkdirSync(path, { recursive: true });
           callback(null, path);
         },
@@ -129,7 +128,7 @@ export class UsersController {
   ) {
     const userId = request.user.id;
     const user = await this.usersService.findByToken(request.user.id);
-    const avatarUrl = `/uploads/${userId}/${file.originalname}`;
+    const avatarUrl = `/uploads/avatar/${userId}/${file.originalname}`;
     user.avatar_url = avatarUrl;
     await this.usersService.update(user.user_id, user);
     return {
