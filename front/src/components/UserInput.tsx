@@ -9,7 +9,7 @@ import {
 import Image from 'next/image'
 import { FaUserAstronaut } from 'react-icons/fa6'
 
-import userDefaulAvatar from 'public/assets/user.png'
+import userDefaulAvatar from '../../public/assets/user.png'
 import { ChangeEvent, useEffect, useState } from 'react'
 import Loading from './loading'
 import { api } from '@/services/api'

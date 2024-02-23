@@ -14,7 +14,7 @@ import {
 
 import { MdSend } from 'react-icons/md'
 
-import userDefaulAvatar from 'public/assets/user.png'
+import userDefaulAvatar from '../../../public/assets/user.png'
 import { FormEvent, ReactElement, useState } from 'react'
 import Layout from '@/components/layout'
 
