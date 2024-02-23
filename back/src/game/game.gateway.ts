@@ -16,10 +16,11 @@ import { SocketWithAuth } from 'src/types';
   namespace: 'game',
 })
 export class GameGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   private readonly logger = new Logger(GameGateway.name);
   private players: UserData[] = [];
-  constructor(private readonly gameService: GameService) { }
+  constructor(private readonly gameService: GameService) {}
 
   @WebSocketServer() io: Namespace;
 
@@ -37,7 +38,7 @@ export class GameGateway
   }
 
   handleDisconnect(client: SocketWithAuth) {
-    this.gameService.waitReconnect(client, this.io)
+    this.gameService.waitReconnect(client, this.io);
 
     this.logger.log(`Disconnected socket id: ${client.id}`);
     this.logger.debug(`Number of connected sockets: ${this.io.sockets.size}`);
@@ -53,8 +54,9 @@ export class GameGateway
 
     if (availablePlayers.length > 0) {
       const roomID = availablePlayers[0].roomID;
-      this.players = this.gameService.joinRoom(client, roomID, this.io);
+      const room = this.gameService.joinRoom(client, roomID, this.io);
       this.io.to(roomID).emit('status_changed', 'readyToPlay');
+      this.io.to(roomID).emit('time_to_be_ready', room.ExpiredAt);
     } else {
       this.gameService.createRoom(client);
       client.emit('status_changed', 'searching');
@@ -119,7 +121,19 @@ export class GameGateway
 
   @SubscribeMessage('give_up')
   handleGiveUpMatch(client: SocketWithAuth) {
-    const match = this.gameService.findMatchByUserID(client.userID)
-    this.gameService.giveUpMatch(match, this.io, client)
+    const match = this.gameService.findMatchByUserID(client.userID);
+    this.gameService.giveUpMatch(match, this.io, client);
+  }
+
+  @SubscribeMessage('request_match')
+  handleRequestMatch(client: SocketWithAuth, data) {
+    const { guestID } = data;
+    this.gameService.requestMatch(this.io, client, guestID);
+  }
+
+  @SubscribeMessage('response_resquest_match')
+  handleResponseRequestMatch(client: SocketWithAuth, data) {
+    const { response } = data;
+    this.gameService.responseRequestMatch(this.io, client, response);
   }
 }
