@@ -46,18 +46,15 @@ export class ChatService {
     if (channel.type !== 'direct') {
       return await this.repository.getChatMessage(channel_id);
     }
-
     const blockUserDto = new BlockUserDto();
     blockUserDto.member_id = members.find(
       member => member.user_id !== user_id,
     ).user_id;
     blockUserDto.user_id = user_id;
     const blocked = await this.usersService.checkBlockedStatus(blockUserDto);
-
     if (blocked) {
       return await this.repository.getChatMessageBefore(channel_id, blocked);
     }
-
     return await this.repository.getChatMessage(channel_id);
   }
 }

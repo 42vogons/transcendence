@@ -36,28 +36,34 @@ export class GameService {
     y: this.court.height * 0.005,
   };
   private paddleSpeed = this.paddle.height * 0.2;
+  private timeToBeReady = 60 * 1000;
 
   throwError(client: SocketWithAuth, msg: string) {
     let player = this.findPlayerByUserID(client.userID);
-    if (player.roomID) client.leave(player.roomID);
-    if (player.status === 'playing') {
-      const match = this.findMatchByUserID(player.userID);
-      match.quitterID = player.userID;
-      match.status = 'end';
-      this.endMatch(match);
-      this.removeMatchFromList(match);
-    } else if (player.status === 'readyToPlay') {
-      this.disconnectPlayerWhenStatusIsReadyToPlay(player);
-    } else if (player.status === 'searching') {
-      this.deleteRoomByRoomID(player.roomID);
-      this.removePlayerFromList(player.userID);
+    if (!player) {
+      player = this.createNewPlayer(client.id, client.userID, client.username);
+      this.players.push(player);
+    } else {
+      if (player.roomID) client.leave(player.roomID);
+      if (player.status === 'playing') {
+        const match = this.findMatchByUserID(player.userID);
+        match.quitterID = player.userID;
+        match.status = 'end';
+        this.endMatch(match);
+        this.removeMatchFromList(match);
+      } else if (player.status === 'readyToPlay') {
+        this.disconnectPlayerWhenStatusIsReadyToPlay(player);
+      } else if (player.status === 'searching') {
+        this.deleteRoomByRoomID(player.roomID);
+        this.removePlayerFromList(player.userID);
+      }
+      player = this.createNewPlayer(
+        player.socketID,
+        player.userID,
+        player.username,
+      );
+      this.updatePlayer(player);
     }
-    player = this.createNewPlayer(
-      player.socketID,
-      player.userID,
-      player.username,
-    );
-    this.updatePlayer(player);
     client.emit('status_changed', `connected`);
     throw new WsException(msg);
   }
@@ -282,18 +288,18 @@ export class GameService {
     client: SocketWithAuth,
     roomID: string,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
-  ): UserData[] {
+  ): Room {
     const room = this.findRoomByRoomID(roomID);
     if (!room) {
       this.throwError(client, 'error on join room');
-      return this.players;
+      return;
     }
 
     const player1 = this.findPlayerByUserID(client.userID);
     const player2 = this.findPlayerByUserID(room.users[0].userID);
     if (!player1 || !player2) {
       this.throwError(client, 'error on join room');
-      return this.players;
+      return;
     }
 
     player1.status = 'readyToPlay';
@@ -306,16 +312,18 @@ export class GameService {
 
     client.join(roomID);
     room.users.push(player1);
-    this.updateRoom(room);
 
+    const now = new Date();
+    room.ExpiredAt = new Date(now.getTime() + this.timeToBeReady);
+    this.updateRoom(room);
     setTimeout(() => {
       this.notReadyInTime(room.ID, io);
-    }, 60 * 1000);
+    }, this.timeToBeReady);
 
-    return this.players;
+    return room;
   }
 
-  createRoom(client: SocketWithAuth) {
+  createRoom(client: SocketWithAuth): Room {
     const player1 = this.findPlayerByUserID(client.userID);
     if (!player1) {
       this.throwError(client, 'error on create room');
@@ -331,6 +339,7 @@ export class GameService {
     };
     this.rooms.push(room);
     client.join(client.id);
+    return room;
   }
 
   removeUserFromQueue(userID: number): UserData[] {
@@ -771,5 +780,86 @@ export class GameService {
     userID: string,
   ): Promise<MatchHistoryEntity[] | null> {
     return this.matchRepository.getAllMatchHistoryByUserID(Number(userID));
+  }
+
+  requestMatch(
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+    client: SocketWithAuth,
+    guestID: number,
+  ) {
+    const playerOwner = this.findPlayerByUserID(client.userID);
+    const playerGuest = this.findPlayerByUserID(guestID);
+
+    if (
+      playerGuest.status === 'readyToPlay' ||
+      playerGuest.status === 'playing'
+    ) {
+      client.emit('request_game', 'already on match');
+      return;
+    }
+
+    const room = this.createRoom(client);
+    room.users.push(playerOwner);
+    room.users.push(playerGuest);
+
+    playerOwner.status = 'awaiting';
+    playerOwner.roomID = room.ID;
+    this.updatePlayer(playerOwner);
+
+    playerGuest.roomID = room.ID;
+    this.updatePlayer(playerGuest);
+
+    client.join(room.ID);
+
+    this.updateRoom(room);
+
+    client.emit('status_changed', 'awainting');
+    io.to(playerGuest.socketID).emit('request_game', client.username);
+  }
+
+  responseRequestMatch(
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+    client: SocketWithAuth,
+    response: string,
+  ) {
+    const playerGuest = this.findPlayerByUserID(client.userID);
+    const room = this.findRoomByRoomID(playerGuest.roomID);
+    const playerOwner = this.findPlayerByUserID(
+      room.users[0].userID === client.userID
+        ? room.users[1].userID
+        : client.userID,
+    );
+
+    if (response === 'refused') {
+      playerGuest.roomID = '';
+      this.updatePlayer(playerGuest);
+
+      playerOwner.roomID = '';
+      playerOwner.status = 'idle';
+      io.in(room.ID).socketsLeave(playerOwner.socketID);
+      this.updatePlayer(playerGuest);
+      this.updatePlayer(playerOwner);
+
+      this.deleteRoomByRoomID(room.ID);
+      io.to(playerOwner.socketID).emit('match_refused', playerGuest.username);
+      io.to(playerOwner.socketID).emit('status_changed', 'connected');
+      return;
+    }
+    playerOwner.status = 'readyToPlay';
+    this.updatePlayer(playerOwner);
+
+    playerGuest.status = 'readyToPlay';
+    playerGuest.roomID = room.ID;
+    this.updatePlayer(playerGuest);
+    client.join(room.ID);
+
+    const now = new Date();
+    room.ExpiredAt = new Date(now.getTime() + this.timeToBeReady);
+    this.updateRoom(room);
+    io.to(room.ID).emit('status_changed', 'readyToPlay');
+    io.to(room.ID).emit('time_to_be_ready', room.ExpiredAt);
+    setTimeout(() => {
+      this.notReadyInTime(room.ID, io);
+    }, this.timeToBeReady);
   }
 }
