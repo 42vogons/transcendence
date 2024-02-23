@@ -96,4 +96,17 @@ export class UsersService {
     };
     return userDTO;
   }
+
+  async uploadAvatar(userId: number, file: Express.Multer.File): Promise<void> {
+    try {
+      const imagePath = `/uploads/${file.originalname}`;
+      await this.repository.updateAvatarUrl(userId, imagePath);
+      Logger.log(`Avatar uploaded for user ${userId}.`);
+    } catch (error) {
+      Logger.error(
+        `Failed to upload avatar for user ${userId}: ${error.message}`,
+      );
+      throw new Error('Failed to upload avatar.');
+    }
+  }
 }

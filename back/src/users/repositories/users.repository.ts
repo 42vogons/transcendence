@@ -180,4 +180,15 @@ export class UsersRepository {
 
     return blockEntry ? blockEntry.blockedAt : null;
   }
+
+  async updateAvatarUrl(userId: number, avatarUrl: string): Promise<void> {
+    await this.prisma.users.update({
+      where: {
+        user_id: userId,
+      },
+      data: {
+        avatar_url: avatarUrl,
+      },
+    });
+  }
 }
