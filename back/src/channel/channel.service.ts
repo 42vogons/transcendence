@@ -105,8 +105,6 @@ export class ChannelService {
       userId,
     );
 
-    await this.checkAdminActions(memberDto.member_id, memberDto.channel_id);
-
     if (isAdmin || isOwner) {
       const user = await this.userRepository.findOne(memberDto.member_id);
       if (!user) {
@@ -155,17 +153,17 @@ export class ChannelService {
       }
       await this.repository.adminAction(adminActionDto, userId);
 
-      if (adminActionDto.action === 'remove') {
+      if (adminActionDto.action === AdminActionType.KICKED) {
         await this.repository.removeMemberChannel(
           adminActionDto.member_id,
           adminActionDto.channel_id,
         );
         return 'Member removed.';
       }
-      if (adminActionDto.action === 'mute') {
+      if (adminActionDto.action === AdminActionType.MUTED) {
         return 'Member muted.';
       }
-      if (adminActionDto.action === 'banned') {
+      if (adminActionDto.action === AdminActionType.BANNED) {
         await this.repository.removeMemberChannel(
           adminActionDto.member_id,
           adminActionDto.channel_id,
@@ -231,10 +229,12 @@ export class ChannelService {
       userId,
       channelDto.channel_id,
     );
-    await this.checkAdminActions(userId, channelDto.channel_id);
+
     if (member) {
       throw new ConflictException('You are already a member of the channel.');
     }
+    await this.checkBanned(userId, channelDto.channel_id);
+
     const validPassword = await this.validatePassword(
       channelDto.password,
       channel.password,
@@ -269,21 +269,32 @@ export class ChannelService {
     }
   }
 
-  async checkAdminActions(member_id: number, channel_id: number) {
-    const adminAction = await this.repository.getLastAdminActionByUser(
-      member_id,
-      channel_id,
-    );
+  async checkBanned(member_id: number, channel_id: number) {
+    const adminAction = await this.checkAdminActions(member_id, channel_id);
     if (adminAction == null) {
-      return;
+      return null;
     }
     if (adminAction.action_type === AdminActionType.BANNED) {
       throw new ForbiddenException('Member is banned.');
     }
-    if (adminAction.action_type === AdminActionType.MUTED) {
+  }
+
+  async checkMuted(member_id: number, channel_id: number) {
+    const adminAction = await this.checkAdminActions(member_id, channel_id);
+    if (adminAction == null) {
+      return null;
+    }
+    if ((await adminAction).action_type == AdminActionType.MUTED) {
       if (adminAction.end_time > new Date()) {
         throw new ForbiddenException('Member is muted.');
       }
     }
+  }
+
+  async checkAdminActions(member_id: number, channel_id: number) {
+    return await this.repository.getLastAdminActionByUser(
+      member_id,
+      channel_id,
+    );
   }
 }
