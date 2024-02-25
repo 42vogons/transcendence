@@ -151,6 +151,9 @@ export class ChannelService {
       if (!member) {
         throw new NotFoundException('The member is not in the channel.');
       }
+      if (adminActionDto.end_date == null) {
+        adminActionDto.end_date = 0;
+      }
       await this.repository.adminAction(adminActionDto, userId);
 
       if (adminActionDto.action === AdminActionType.KICKED) {
@@ -284,7 +287,7 @@ export class ChannelService {
     if (adminAction == null) {
       return null;
     }
-    if ((await adminAction).action_type == AdminActionType.MUTED) {
+    if (adminAction.action_type == AdminActionType.MUTED) {
       if (adminAction.end_time > new Date()) {
         throw new ForbiddenException('Member is muted.');
       }
