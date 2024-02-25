@@ -7,7 +7,7 @@ import {
 } from '@/styles/components/chatListItem'
 import Image from 'next/image'
 
-import userDefaulAvatar from 'public/assets/user.png'
+import userDefaulAvatar from '../../public/assets/user.png'
 
 export interface iChatListItem {
 	userAvatarSrc: string
