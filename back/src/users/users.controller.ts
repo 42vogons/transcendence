@@ -20,7 +20,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { TwoFactorAutenticateService } from '../two-factor-autenticate/two-factor-autenticate.service';
 import { AuthGuard } from 'src/login/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
@@ -84,36 +83,9 @@ export class UsersController {
     return response.status(200).send();
   }
 
-  // @Post('/avatar')
-  // @UseGuards(AuthGuard)
-  // @UseInterceptors(FileInterceptor('avatar'))
-  // async uploadAvatar(
-  //   @UploadedFile() file: Express.Multer.File,
-  //   @Req() request,
-  // ) {
-  //   const user = await this.usersService.findByToken(request.user.id);
-  //   const avatarUrl = `/uploads/avatars/${file.originalname}`;
-  //   user.avatar_url = avatarUrl;
-  //   await this.usersService.update(user.user_id, user);
-  //   return { avatarUrl };
-  // }
-
   @Post('upload-avatar')
   @UseGuards(AuthGuard)
-  @UseInterceptors(
-    FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: (request, file, callback) => {
-          const path = `./uploads/avatar`;
-          fs.mkdirSync(path, { recursive: true });
-          callback(null, path);
-        },
-        filename(_, file, callback) {
-          return callback(null, `${file.originalname}`);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('avatar'))
   async uploadAvatar(
     @UploadedFile(
       new ParseFilePipe({
@@ -127,16 +99,31 @@ export class UsersController {
     @Req() request,
   ) {
     const userId = request.user.id;
+    console.log(userId);
+    const path = `./uploads/avatar/${userId}`;
+    try {
+      await fs.promises.mkdir(path, { recursive: true });
+    } catch (error) {
+      throw new Error('Failed to create directory');
+    }
+    const imagePath = `${path}/${file.originalname}`;
+    try {
+      await fs.promises.writeFile(imagePath, file.buffer);
+    } catch (error) {
+      throw new Error('Failed to save image');
+    }
+    const avatarUrl =
+      process.env.BACK_HOST + `/uploads/avatar/${userId}/${file.originalname}`;
     const user = await this.usersService.findByToken(request.user.id);
-    const avatarUrl = `/uploads/avatar/${userId}/${file.originalname}`;
     user.avatar_url = avatarUrl;
-    await this.usersService.update(user.user_id, user);
+    await this.usersService.update(userId, user);
     return {
-      url: process.env.BACK_HOST + avatarUrl,
+      url: avatarUrl,
     };
   }
 
   @Get('/avatar/:userId')
+  @UseGuards(AuthGuard)
   async getAvatarUrl(@Param('userId') userId: number) {
     const user = await this.usersService.findOne(userId);
     if (!user || !user.avatar_url) {
