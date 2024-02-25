@@ -32,6 +32,7 @@ import { GameContext } from '@/contexts/GameContext'
 import NewChatModal from './newChatModal'
 import { ChatContext } from '@/contexts/ChatContext'
 import NewFriendModal from './newFriendModal'
+import NewChannelModal from './newChannelModal'
 
 type activePanelType = 'menu' | 'friends' | 'chat'
 
@@ -57,6 +58,7 @@ export default function Layout({ children }: iLayoutProps) {
 	const [showSidePanel, setShowSidePanel] = useState(false)
 	const [showNewChatModal, setShowNewChatModal] = useState(false)
 	const [showNewFriendModal, setShowNewFriendModal] = useState(false)
+	const [showNewChannelModal, setShowNewChannelModal] = useState(false)
 
 	useEffect(() => {
 		setCurrentPath(router.asPath)
@@ -452,6 +454,7 @@ export default function Layout({ children }: iLayoutProps) {
 											<IconButton
 												handleOnClick={() => {
 													console.log('new channel')
+													setShowNewChannelModal(true)
 												}}
 											>
 												<MdGroupAdd
@@ -495,6 +498,10 @@ export default function Layout({ children }: iLayoutProps) {
 			<NewChatModal
 				setShowNewChatModal={setShowNewChatModal}
 				showNewChatModal={showNewChatModal}
+			/>
+			<NewChannelModal
+				setShowNewChannelModal={setShowNewChannelModal}
+				showNewChannelModal={showNewChannelModal}
 			/>
 		</LayoutContainer>
 	) : null

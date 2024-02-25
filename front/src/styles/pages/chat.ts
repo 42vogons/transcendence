@@ -22,13 +22,14 @@ export const ChatHeader = styled('header', {
 	display: 'flex',
 	flexDirection: 'row',
 	alignItems: 'center',
+	justifyContent: 'space-between',
 })
 
 export const ChatHeaderTextContainer = styled('div', {
 	display: 'flex',
-	flexDirection: 'column',
-	marginLeft: '1rem',
-	gap: 4,
+	flexDirection: 'row',
+	alignItems: 'center',
+	gap: 16,
 })
 
 export const ChatTitle = styled('h2', {
@@ -65,6 +66,23 @@ export const ChatMessageContainer = styled('div', {
 	},
 	'@bp3': {
 		minHeight: '77%',
+	},
+})
+
+export const ChatMenu = styled('button', {
+	padding: '0.75rem',
+	display: 'flex',
+	justifyContent: 'center',
+	alignItems: 'center',
+	border: 'none',
+	borderRadius: '50%',
+	cursor: 'pointer',
+	backgroundColor: 'transparent',
+	color: '$white',
+	transition: '0.2s',
+
+	'&:hover': {
+		backgroundColor: '$blue100',
 	},
 })
 

@@ -6,6 +6,7 @@ import {
 	ChatHeader,
 	ChatHeaderTextContainer,
 	ChatInputContainer,
+	ChatMenu,
 	ChatMessage,
 	ChatMessageContainer,
 	ChatSubTitle,
@@ -13,9 +14,10 @@ import {
 } from '@/styles/pages/chat'
 
 import { MdSend } from 'react-icons/md'
+import { SlOptionsVertical } from 'react-icons/sl'
 
 import userDefaulAvatar from 'public/assets/user.png'
-import { FormEvent, ReactElement, useState } from 'react'
+import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react'
 import Layout from '@/components/layout'
 
 interface iMessage {
@@ -25,6 +27,8 @@ interface iMessage {
 }
 
 export default function Chat() {
+	const messagesEndRef = useRef(null)
+
 	const date = Date.now()
 	const message1: iMessage = {
 		sender: 'acarneir',
@@ -62,6 +66,17 @@ export default function Chat() {
 		console.log(input)
 	}
 
+	function scrollToBottom(behavior: 'smooth' | 'instant' = 'instant') {
+		// eslint-disable-next-line prettier/prettier
+		(messagesEndRef.current as unknown as HTMLElement).scrollIntoView({
+			behavior,
+		})
+	}
+
+	useEffect(() => {
+		scrollToBottom()
+	}, [])
+
 	return (
 		<>
 			<Head>
@@ -78,32 +93,40 @@ export default function Chat() {
 			</Head>
 			<ChatContainer>
 				<ChatHeader>
-					<Image
-						src={userDefaulAvatar.src}
-						width={40}
-						height={40}
-						priority={true}
-						alt="user"
-					/>
 					<ChatHeaderTextContainer>
+						<Image
+							src={userDefaulAvatar.src}
+							width={40}
+							height={40}
+							priority={true}
+							alt="user"
+						/>
 						<ChatTitle>rfelipe-</ChatTitle>
-						<ChatSubTitle>online</ChatSubTitle>
+						{/* <ChatSubTitle>online</ChatSubTitle> */}
 					</ChatHeaderTextContainer>
+					<ChatMenu>
+						<SlOptionsVertical size={30} />
+					</ChatMenu>
 				</ChatHeader>
 				<ChatMessageContainer>
-					{chat.map((message, index) => (
-						<ChatMessage
-							key={index}
-							isLoggedUser={message.sender === loggedUser}
-						>
-							{message.sender !== loggedUser && (
-								<p>
-									<b>{message.sender}</b>
-								</p>
-							)}
-							<p>{message.content}</p>
-						</ChatMessage>
-					))}
+					{chat.length > 0 ? (
+						chat.map((message, index) => (
+							<ChatMessage
+								key={index}
+								isLoggedUser={message.sender === loggedUser}
+							>
+								{message.sender !== loggedUser && (
+									<p>
+										<b>{message.sender}</b>
+									</p>
+								)}
+								<p>{message.content}</p>
+							</ChatMessage>
+						))
+					) : (
+						<>vazio</>
+					)}
+					<div ref={messagesEndRef} />
 				</ChatMessageContainer>
 				<ChatInputContainer onSubmit={(e) => handleSubmit(e)}>
 					<input
