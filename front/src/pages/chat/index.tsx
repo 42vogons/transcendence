@@ -12,6 +12,9 @@ import {
 	ChatMessageContainer,
 	ChatSubTitle,
 	ChatTitle,
+	MenuAction,
+	SenderMenu,
+	SenderMenuWrapper,
 } from '@/styles/pages/chat'
 
 import { MdSend } from 'react-icons/md'
@@ -21,12 +24,11 @@ import userDefaulAvatar from 'public/assets/user.png'
 import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react'
 import Layout from '@/components/layout'
 import {
-	FriendAction,
 	MenuArrow,
 	MenuContent,
 	MenuItem,
 } from '@/styles/components/friendListItem'
-import { FaGamepad } from 'react-icons/fa6'
+import { FaGamepad, FaUserAstronaut } from 'react-icons/fa6'
 import { BsChatSquareTextFill } from 'react-icons/bs'
 
 interface iMessage {
@@ -121,23 +123,23 @@ export default function Chat() {
 						<MenuContent>
 							<MenuArrow />
 							<MenuItem>
-								<FriendAction
+								<MenuAction
 									onClick={() => {
 										console.log('play')
 									}}
 								>
 									<FaGamepad size={menuIconSize} /> Play
-								</FriendAction>
+								</MenuAction>
 							</MenuItem>
 							<MenuItem>
-								<FriendAction
+								<MenuAction
 									onClick={() => {
 										console.log('play')
 									}}
 								>
 									<BsChatSquareTextFill size={menuIconSize} />{' '}
 									Chat
-								</FriendAction>
+								</MenuAction>
 							</MenuItem>
 						</MenuContent>
 					</ChatMenuWrapper>
@@ -150,9 +152,39 @@ export default function Chat() {
 								isLoggedUser={message.sender === loggedUser}
 							>
 								{message.sender !== loggedUser && (
-									<p>
-										<b>{message.sender}</b>
-									</p>
+									<SenderMenuWrapper>
+										<SenderMenu>
+											<FaUserAstronaut size={28} />
+											{message.sender}
+										</SenderMenu>
+										<MenuContent>
+											<MenuArrow />
+											<MenuItem>
+												<MenuAction
+													onClick={() => {
+														console.log('play')
+													}}
+												>
+													<FaGamepad
+														size={menuIconSize}
+													/>{' '}
+													Play
+												</MenuAction>
+											</MenuItem>
+											<MenuItem>
+												<MenuAction
+													onClick={() => {
+														console.log('play')
+													}}
+												>
+													<BsChatSquareTextFill
+														size={menuIconSize}
+													/>{' '}
+													Chat
+												</MenuAction>
+											</MenuItem>
+										</MenuContent>
+									</SenderMenuWrapper>
 								)}
 								<p>{message.content}</p>
 							</ChatMessage>

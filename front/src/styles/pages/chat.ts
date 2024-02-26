@@ -77,6 +77,7 @@ export const ChatMessageContainer = styled('div', {
 export const ChatMenuWrapper = styled(DropdownMenu.Root, {})
 
 export const ChatMenu = styled(DropdownMenu.Trigger, {
+	outline: 'none',
 	padding: '0.5rem',
 	display: 'flex',
 	justifyContent: 'center',
@@ -93,9 +94,7 @@ export const ChatMenu = styled(DropdownMenu.Trigger, {
 	},
 })
 
-export const MenuContent = styled(DropdownMenu.Content, {
-	// marginLeft: 94,
-})
+export const MenuContent = styled(DropdownMenu.Content, {})
 
 export const MenuArrow = styled(DropdownMenu.Arrow, {
 	fill: 'white',
@@ -114,16 +113,37 @@ export const MenuItem = styled(DropdownMenu.Item, {
 	},
 })
 
+export const MenuAction = styled('button', {
+	width: 140,
+	display: 'flex',
+	justifyContent: 'space-between',
+	alignItems: 'center',
+	padding: '0.5rem 1rem',
+	backgroundColor: '$white',
+	color: '$blue100',
+	fontSize: 18,
+	fontWeight: 'bold',
+	border: 'none',
+	outline: 'none',
+	borderBottom: '1px solid $blue100',
+	cursor: 'pointer',
+
+	'&:hover': {
+		backgroundColor: '$blue100',
+		color: '$white',
+	},
+})
+
 export const ChatMessage = styled('div', {
 	marginTop: '1.5rem',
 	display: 'flex',
 	flexDirection: 'column',
 	backgroundColor: '$blue600',
-	gap: 8,
+	gap: 4,
 	maxWidth: '80%',
 	fontSize: '$lg',
 	lineHeight: 1.25,
-	padding: '0.5rem 1rem',
+	padding: '0.5rem',
 	borderRadius: 24,
 	color: '$white',
 
@@ -138,6 +158,32 @@ export const ChatMessage = styled('div', {
 
 	'@bp1': {
 		maxWidth: '60%',
+		padding: '0.5rem 1rem',
+	},
+})
+
+export const SenderMenuWrapper = styled(DropdownMenu.Root, {})
+
+export const SenderMenu = styled(DropdownMenu.Trigger, {
+	outline: 'none',
+	width: 140,
+	padding: '0.25rem 0.5rem',
+	display: 'flex',
+	alignItems: 'center',
+	gap: 8,
+	border: 'none',
+	borderRadius: 14,
+	cursor: 'pointer',
+	backgroundColor: 'transparent',
+	color: '$white',
+	transition: '0.2s',
+	fontSize: '$lg',
+	fontWeight: 'bold',
+	fontFamily: 'monospace',
+	fontVariantNnumeric: 'slashed-zero',
+
+	'&:hover': {
+		backgroundColor: '$blue100',
 	},
 })
 
