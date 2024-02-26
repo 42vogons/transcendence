@@ -6,38 +6,55 @@ import {
 	ChatHeader,
 	ChatHeaderTextContainer,
 	ChatInputContainer,
+	ChatMenu,
+	ChatMenuWrapper,
 	ChatMessage,
 	ChatMessageContainer,
+	ChatMessageTimestamp,
 	ChatSubTitle,
 	ChatTitle,
+	MenuAction,
+	SenderMenu,
+	SenderMenuWrapper,
 } from '@/styles/pages/chat'
 
 import { MdSend } from 'react-icons/md'
+import { SlOptionsVertical } from 'react-icons/sl'
 
 import userDefaulAvatar from '../../../public/assets/user.png'
-import { FormEvent, ReactElement, useState } from 'react'
+import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react'
 import Layout from '@/components/layout'
+import {
+	MenuArrow,
+	MenuContent,
+	MenuItem,
+} from '@/styles/components/friendListItem'
+import { FaGamepad, FaUserAstronaut } from 'react-icons/fa6'
+import { BsChatSquareTextFill } from 'react-icons/bs'
 
 interface iMessage {
 	sender: string
 	content: string
-	timestamp: string
+	timestamp: number
 }
 
 export default function Chat() {
-	const date = Date.now()
+	const messagesEndRef = useRef(null)
+	const menuIconSize = 26
+
+	const date = new Date()
 	const message1: iMessage = {
 		sender: 'acarneir',
 		content:
 			'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Velit sit deserunt praesentium nemo accusantium ratione error, quas quaerat omnis perspiciatis est quidem, earum ullam ad dolorum quis optio. Beatae, harum!',
-		timestamp: (date - 10 * 60 * 1000).toLocaleString(),
+		timestamp: date.getTime() - 10 * 60 * 1000,
 	}
 
 	const message2: iMessage = {
 		sender: 'rfelipe-',
 		content:
-			'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Velit sit deserunt praesentium nemo accusantium ratione error, quas quaerat omnis perspiciatis est quidem, earum ullam ad dolorum quis optio. Beatae, harum!',
-		timestamp: (date + 10 * 60 * 1000).toLocaleString(),
+			'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Velit sit deserunt praesentium nemo accusantium ratione error, quas quaerat omnis perspiciatis est quidem, earum ullam ad dolorum',
+		timestamp: date.getTime() + 10 * 60 * 1000,
 	}
 
 	const chat = [
@@ -62,6 +79,17 @@ export default function Chat() {
 		console.log(input)
 	}
 
+	function scrollToBottom(behavior: 'smooth' | 'instant' = 'instant') {
+		// eslint-disable-next-line prettier/prettier
+		(messagesEndRef.current as unknown as HTMLElement).scrollIntoView({
+			behavior,
+		})
+	}
+
+	useEffect(() => {
+		scrollToBottom()
+	}, [])
+
 	return (
 		<>
 			<Head>
@@ -78,32 +106,107 @@ export default function Chat() {
 			</Head>
 			<ChatContainer>
 				<ChatHeader>
-					<Image
-						src={userDefaulAvatar.src}
-						width={40}
-						height={40}
-						priority={true}
-						alt="user"
-					/>
 					<ChatHeaderTextContainer>
+						<Image
+							src={userDefaulAvatar.src}
+							width={40}
+							height={40}
+							priority={true}
+							alt="user"
+						/>
 						<ChatTitle>rfelipe-</ChatTitle>
-						<ChatSubTitle>online</ChatSubTitle>
+						{/* <ChatSubTitle>online</ChatSubTitle> */}
 					</ChatHeaderTextContainer>
+					<ChatMenuWrapper>
+						<ChatMenu>
+							<SlOptionsVertical size={28} />
+						</ChatMenu>
+						<MenuContent>
+							<MenuArrow />
+							<MenuItem>
+								<MenuAction
+									onClick={() => {
+										console.log('play')
+									}}
+								>
+									<FaGamepad size={menuIconSize} /> Play
+								</MenuAction>
+							</MenuItem>
+							<MenuItem>
+								<MenuAction
+									onClick={() => {
+										console.log('play')
+									}}
+								>
+									<BsChatSquareTextFill size={menuIconSize} />{' '}
+									Chat
+								</MenuAction>
+							</MenuItem>
+						</MenuContent>
+					</ChatMenuWrapper>
 				</ChatHeader>
 				<ChatMessageContainer>
-					{chat.map((message, index) => (
-						<ChatMessage
-							key={index}
-							isLoggedUser={message.sender === loggedUser}
-						>
-							{message.sender !== loggedUser && (
-								<p>
-									<b>{message.sender}</b>
-								</p>
-							)}
-							<p>{message.content}</p>
-						</ChatMessage>
-					))}
+					{chat.length > 0 ? (
+						chat.map((message, index) => (
+							<ChatMessage
+								key={index}
+								isLoggedUser={message.sender === loggedUser}
+							>
+								{message.sender !== loggedUser && (
+									<SenderMenuWrapper>
+										<SenderMenu>
+											<FaUserAstronaut size={28} />
+											{message.sender}
+										</SenderMenu>
+										<MenuContent>
+											<MenuArrow />
+											<MenuItem>
+												<MenuAction
+													onClick={() => {
+														console.log('play')
+													}}
+												>
+													<FaGamepad
+														size={menuIconSize}
+													/>{' '}
+													Play
+												</MenuAction>
+											</MenuItem>
+											<MenuItem>
+												<MenuAction
+													onClick={() => {
+														console.log('profile')
+													}}
+												>
+													<FaUserAstronaut
+														size={menuIconSize}
+													/>{' '}
+													Profile
+												</MenuAction>
+											</MenuItem>
+										</MenuContent>
+									</SenderMenuWrapper>
+								)}
+								<p>{message.content}</p>
+								<ChatMessageTimestamp>
+									{new Date(message.timestamp)
+										.toLocaleString('en-CA', {
+											hour: '2-digit',
+											minute: '2-digit',
+											second: '2-digit',
+											year: 'numeric',
+											month: '2-digit',
+											day: '2-digit',
+											hour12: false,
+										})
+										.replace(',', ' ')}
+								</ChatMessageTimestamp>
+							</ChatMessage>
+						))
+					) : (
+						<>vazio</>
+					)}
+					<div ref={messagesEndRef} />
 				</ChatMessageContainer>
 				<ChatInputContainer onSubmit={(e) => handleSubmit(e)}>
 					<input

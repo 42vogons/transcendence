@@ -32,6 +32,9 @@ import { GameContext } from '@/contexts/GameContext'
 import NewChatModal from './newChatModal'
 import { ChatContext } from '@/contexts/ChatContext'
 import NewFriendModal from './newFriendModal'
+import { IoSearchSharp } from 'react-icons/io5'
+import SearchChannelModal from './searchChannelModal'
+import NewChannelModal from './newChannelModal'
 
 type activePanelType = 'menu' | 'friends' | 'chat'
 
@@ -57,6 +60,8 @@ export default function Layout({ children }: iLayoutProps) {
 	const [showSidePanel, setShowSidePanel] = useState(false)
 	const [showNewChatModal, setShowNewChatModal] = useState(false)
 	const [showNewFriendModal, setShowNewFriendModal] = useState(false)
+	const [showNewChannelModal, setShowNewChannelModal] = useState(false)
+	const [showSearchChannelModal, setShowSearchChannelModal] = useState(false)
 
 	useEffect(() => {
 		setCurrentPath(router.asPath)
@@ -452,9 +457,24 @@ export default function Layout({ children }: iLayoutProps) {
 											<IconButton
 												handleOnClick={() => {
 													console.log('new channel')
+													setShowNewChannelModal(true)
 												}}
 											>
 												<MdGroupAdd
+													size={iconSizeMenuOptions}
+												/>
+											</IconButton>
+											<IconButton
+												handleOnClick={() => {
+													console.log(
+														'search channel',
+													)
+													setShowSearchChannelModal(
+														true,
+													)
+												}}
+											>
+												<IoSearchSharp
 													size={iconSizeMenuOptions}
 												/>
 											</IconButton>
@@ -495,6 +515,14 @@ export default function Layout({ children }: iLayoutProps) {
 			<NewChatModal
 				setShowNewChatModal={setShowNewChatModal}
 				showNewChatModal={showNewChatModal}
+			/>
+			<NewChannelModal
+				setShowNewChannelModal={setShowNewChannelModal}
+				showNewChannelModal={showNewChannelModal}
+			/>
+			<SearchChannelModal
+				setShowSearchChannelModal={setShowSearchChannelModal}
+				showSearchChannelModal={showSearchChannelModal}
 			/>
 		</LayoutContainer>
 	) : null
