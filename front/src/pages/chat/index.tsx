@@ -7,6 +7,7 @@ import {
 	ChatHeaderTextContainer,
 	ChatInputContainer,
 	ChatMenu,
+	ChatMenuWrapper,
 	ChatMessage,
 	ChatMessageContainer,
 	ChatSubTitle,
@@ -19,6 +20,14 @@ import { SlOptionsVertical } from 'react-icons/sl'
 import userDefaulAvatar from 'public/assets/user.png'
 import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react'
 import Layout from '@/components/layout'
+import {
+	FriendAction,
+	MenuArrow,
+	MenuContent,
+	MenuItem,
+} from '@/styles/components/friendListItem'
+import { FaGamepad } from 'react-icons/fa6'
+import { BsChatSquareTextFill } from 'react-icons/bs'
 
 interface iMessage {
 	sender: string
@@ -28,6 +37,7 @@ interface iMessage {
 
 export default function Chat() {
 	const messagesEndRef = useRef(null)
+	const menuIconSize = 26
 
 	const date = Date.now()
 	const message1: iMessage = {
@@ -104,9 +114,33 @@ export default function Chat() {
 						<ChatTitle>rfelipe-</ChatTitle>
 						{/* <ChatSubTitle>online</ChatSubTitle> */}
 					</ChatHeaderTextContainer>
-					<ChatMenu>
-						<SlOptionsVertical size={30} />
-					</ChatMenu>
+					<ChatMenuWrapper>
+						<ChatMenu>
+							<SlOptionsVertical size={28} />
+						</ChatMenu>
+						<MenuContent>
+							<MenuArrow />
+							<MenuItem>
+								<FriendAction
+									onClick={() => {
+										console.log('play')
+									}}
+								>
+									<FaGamepad size={menuIconSize} /> Play
+								</FriendAction>
+							</MenuItem>
+							<MenuItem>
+								<FriendAction
+									onClick={() => {
+										console.log('play')
+									}}
+								>
+									<BsChatSquareTextFill size={menuIconSize} />{' '}
+									Chat
+								</FriendAction>
+							</MenuItem>
+						</MenuContent>
+					</ChatMenuWrapper>
 				</ChatHeader>
 				<ChatMessageContainer>
 					{chat.length > 0 ? (

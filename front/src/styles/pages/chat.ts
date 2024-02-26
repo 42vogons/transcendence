@@ -1,4 +1,5 @@
 import { styled } from '..'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 
 export const ChatContainer = styled('main', {
 	margin: '0 auto',
@@ -18,11 +19,15 @@ export const ChatHeader = styled('header', {
 	width: '100%',
 	backgroundColor: '$blue500',
 	borderRadius: '32px 32px 0 0',
-	padding: '1rem 2rem',
+	padding: '0.5rem',
 	display: 'flex',
 	flexDirection: 'row',
 	alignItems: 'center',
 	justifyContent: 'space-between',
+
+	'@bp1': {
+		padding: '1rem 2rem',
+	},
 })
 
 export const ChatHeaderTextContainer = styled('div', {
@@ -69,13 +74,15 @@ export const ChatMessageContainer = styled('div', {
 	},
 })
 
-export const ChatMenu = styled('button', {
-	padding: '0.75rem',
+export const ChatMenuWrapper = styled(DropdownMenu.Root, {})
+
+export const ChatMenu = styled(DropdownMenu.Trigger, {
+	padding: '0.5rem',
 	display: 'flex',
 	justifyContent: 'center',
 	alignItems: 'center',
 	border: 'none',
-	borderRadius: '50%',
+	borderRadius: 14,
 	cursor: 'pointer',
 	backgroundColor: 'transparent',
 	color: '$white',
@@ -83,6 +90,27 @@ export const ChatMenu = styled('button', {
 
 	'&:hover': {
 		backgroundColor: '$blue100',
+	},
+})
+
+export const MenuContent = styled(DropdownMenu.Content, {
+	// marginLeft: 94,
+})
+
+export const MenuArrow = styled(DropdownMenu.Arrow, {
+	fill: 'white',
+})
+
+export const MenuItem = styled(DropdownMenu.Item, {
+	outline: 'none',
+
+	'&:first-of-type button': {
+		borderRadius: '8px 8px 0 0',
+	},
+
+	'&:last-of-type button': {
+		borderBottom: 'none',
+		borderRadius: '0 0 8px 8px',
 	},
 })
 
