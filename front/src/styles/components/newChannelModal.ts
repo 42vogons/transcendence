@@ -6,7 +6,7 @@ export const NewChannelModalContainer = styled('div', {
 	// backgroundColor: 'red',
 	display: 'flex',
 	flexDirection: 'column',
-	justifyContent: 'center',
+	justifyContent: 'space-between',
 	alignItems: 'center',
 	gap: 64,
 

@@ -135,6 +135,7 @@ export const MenuAction = styled('button', {
 })
 
 export const ChatMessage = styled('div', {
+	position: 'relative',
 	marginTop: '1.5rem',
 	display: 'flex',
 	flexDirection: 'column',
@@ -143,7 +144,7 @@ export const ChatMessage = styled('div', {
 	maxWidth: '80%',
 	fontSize: '$lg',
 	lineHeight: 1.25,
-	padding: '0.5rem',
+	padding: '0.5rem 0.5rem 18px',
 	borderRadius: 24,
 	color: '$white',
 
@@ -158,10 +159,18 @@ export const ChatMessage = styled('div', {
 
 	'@bp1': {
 		maxWidth: '60%',
-		padding: '0.5rem 1rem',
+		padding: '0.5rem 1rem 18px',
 	},
 })
 
+export const ChatMessageTimestamp = styled('div', {
+	position: 'absolute',
+	bottom: 2,
+	right: 16,
+	textAlign: 'end',
+	fontSize: 10,
+	fontWeight: '300',
+})
 export const SenderMenuWrapper = styled(DropdownMenu.Root, {})
 
 export const SenderMenu = styled(DropdownMenu.Trigger, {

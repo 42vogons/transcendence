@@ -10,6 +10,7 @@ import {
 	ChatMenuWrapper,
 	ChatMessage,
 	ChatMessageContainer,
+	ChatMessageTimestamp,
 	ChatSubTitle,
 	ChatTitle,
 	MenuAction,
@@ -34,26 +35,26 @@ import { BsChatSquareTextFill } from 'react-icons/bs'
 interface iMessage {
 	sender: string
 	content: string
-	timestamp: string
+	timestamp: number
 }
 
 export default function Chat() {
 	const messagesEndRef = useRef(null)
 	const menuIconSize = 26
 
-	const date = Date.now()
+	const date = new Date()
 	const message1: iMessage = {
 		sender: 'acarneir',
 		content:
 			'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Velit sit deserunt praesentium nemo accusantium ratione error, quas quaerat omnis perspiciatis est quidem, earum ullam ad dolorum quis optio. Beatae, harum!',
-		timestamp: (date - 10 * 60 * 1000).toLocaleString(),
+		timestamp: date.getTime() - 10 * 60 * 1000,
 	}
 
 	const message2: iMessage = {
 		sender: 'rfelipe-',
 		content:
-			'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Velit sit deserunt praesentium nemo accusantium ratione error, quas quaerat omnis perspiciatis est quidem, earum ullam ad dolorum quis optio. Beatae, harum!',
-		timestamp: (date + 10 * 60 * 1000).toLocaleString(),
+			'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Velit sit deserunt praesentium nemo accusantium ratione error, quas quaerat omnis perspiciatis est quidem, earum ullam ad dolorum',
+		timestamp: date.getTime() + 10 * 60 * 1000,
 	}
 
 	const chat = [
@@ -174,19 +175,32 @@ export default function Chat() {
 											<MenuItem>
 												<MenuAction
 													onClick={() => {
-														console.log('play')
+														console.log('profile')
 													}}
 												>
-													<BsChatSquareTextFill
+													<FaUserAstronaut
 														size={menuIconSize}
 													/>{' '}
-													Chat
+													Profile
 												</MenuAction>
 											</MenuItem>
 										</MenuContent>
 									</SenderMenuWrapper>
 								)}
 								<p>{message.content}</p>
+								<ChatMessageTimestamp>
+									{new Date(message.timestamp)
+										.toLocaleString('en-CA', {
+											hour: '2-digit',
+											minute: '2-digit',
+											second: '2-digit',
+											year: 'numeric',
+											month: '2-digit',
+											day: '2-digit',
+											hour12: false,
+										})
+										.replace(',', ' ')}
+								</ChatMessageTimestamp>
 							</ChatMessage>
 						))
 					) : (
