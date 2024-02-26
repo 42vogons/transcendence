@@ -12,7 +12,7 @@ export enum ChannelMemberStatus {
 }
 
 export enum AdminActionType {
-  MUTED = 'muted',
-  BANNED = 'banned',
-  KICKED = 'kicked',
+  MUTED = 'mute',
+  BANNED = 'ban',
+  KICKED = 'kick',
 }

@@ -17,7 +17,7 @@ import { MdViewList } from 'react-icons/md'
 import Stats from '@/components/stats'
 import MatchCard from '@/components/matchCard'
 
-import userDefaulAvatar from 'public/assets/user.png'
+import userDefaulAvatar from '../../../public/assets/user.png'
 import Layout from '@/components/layout'
 import { ReactElement } from 'react'
 

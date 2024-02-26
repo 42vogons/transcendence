@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { SocketWithAuth } from 'src/types';
-import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { ChatDto } from './dto/chat.dto';
 import { UsersService } from 'src/users/users.service';
 import { FriendsService } from 'src/friends/friends.service';
@@ -182,6 +182,10 @@ export class ChatGateway
   async addMember(client: SocketWithAuth, memberDto: MemberDto) {
     try {
       this.checkType(memberDto);
+      await this.channelService.checkBanned(
+        memberDto.member_id,
+        memberDto.channel_id,
+      );
       await this.channelService.addMember(memberDto, client.userID);
       this.logger.log(
         `Member ${memberDto.member_id} added by ${client.userID} in channel ${memberDto.channel_id}.`,

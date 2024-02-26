@@ -8,9 +8,12 @@ import { NotFoundInterceptor } from './common/errors/interceptors/notfound.inter
 import { ConflictInterceptor } from './common/errors/interceptors/conflict.interceptor';
 import { DatabaseInterceptor } from './common/errors/interceptors/database.interceptor';
 import { SocketAdapter } from './socket-io-adapter';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), { prefix: '/uploads' });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

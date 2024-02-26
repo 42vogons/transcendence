@@ -13,7 +13,7 @@ import {
 } from '@/styles/components/friendListItem'
 import Image from 'next/image'
 
-import userDefaulAvatar from 'public/assets/user.png'
+import userDefaulAvatar from '../../public/assets/user.png'
 import { useContext } from 'react'
 import { BsChatSquareTextFill } from 'react-icons/bs'
 import { FaGamepad, FaUserMinus } from 'react-icons/fa6'

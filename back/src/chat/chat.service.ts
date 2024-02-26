@@ -23,10 +23,7 @@ export class ChatService {
     if (!isMember) {
       throw new NotFoundException('You are not a member of this channel.');
     }
-    await this.channelService.checkAdminActions(
-      chatDto.sender_id,
-      chatDto.channel_id,
-    );
+    await this.channelService.checkMuted(chatDto.sender_id, chatDto.channel_id);
     await this.repository.saveMessage(chatDto);
     const members = await this.channelRepository.listMembers(
       chatDto.channel_id,
