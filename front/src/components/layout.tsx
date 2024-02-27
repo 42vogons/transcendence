@@ -104,6 +104,7 @@ export default function Layout({ children }: iLayoutProps) {
 		{
 			icon: <FaGamepad size={iconSize} />,
 			title: 'Game',
+			isActive: currentPath === '/',
 			handleOnClick: () => {
 				console.log('game')
 				router.push('/')
