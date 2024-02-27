@@ -44,16 +44,26 @@ export class ChatGateway
   @SubscribeMessage('msg_to_server')
   async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
+      chatDto.sender_id = client.userID;
+      console.log('id '+ client.userID);
       const members = await this.chatService.saveMessage(chatDto);
-      members.forEach(member => {
+      members.forEach(async member => {
         const memberId = this.users.get(member);
         client
           .to(memberId)
           .emit('refreshChat', `update the channel ${chatDto.channel_id}`);
+        const lastMessageChannel =
+          await this.channelService.getLastChannelMessage(member);
+        client.to(memberId).emit('refresh_channel_list', lastMessageChannel);
       });
       this.logger.log(
         `User ${client.userID} sent message on channel ${chatDto.channel_id}`,
       );
+      const lastMessageChannel =
+        await this.channelService.getLastChannelMessage(client.userID);
+      client
+        .to(this.users.get(client.userID))
+        .emit('refresh_channel_list', lastMessageChannel);
     } catch (error) {
       this.sendError(error);
     }
@@ -265,6 +275,11 @@ export class ChatGateway
       this.sendError(error);
     }
   }
+
+  /*@SubscribeMessage('last_message')
+  async getLastChannelMessage(client: SocketWithAuth){
+    await this.channelService.getLastChannelMessage(client.userID);
+  }*/
 
   @SubscribeMessage('un_block_user')
   async unBlockUser(client: SocketWithAuth, blockUser: BlockUserDto) {

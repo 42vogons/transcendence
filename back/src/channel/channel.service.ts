@@ -15,6 +15,7 @@ import { AdminActionDto } from './dto/adminAction.dto';
 import { LeaveDto } from './dto/leave.dto';
 import { ChannelDto } from './dto/channel.dto';
 import { ChannelType, ChannelMemberStatus, AdminActionType } from './constants';
+import { channel_listDTO } from './dto/channelList.dto';
 
 @Injectable()
 export class ChannelService {
@@ -203,6 +204,10 @@ export class ChannelService {
     return await this.repository.listChannelsByUser(userId);
   }
 
+  async listLastChannelMsg(userId: any) {
+    return await this.repository.listChannelsByUser(userId);
+  }
+
   async leaveChannel(leaveDto: LeaveDto, userId: any) {
     const admins = await this.repository.checkAdmins(
       userId,
@@ -299,5 +304,9 @@ export class ChannelService {
       member_id,
       channel_id,
     );
+  }
+
+  async getLastChannelMessage(user_id: number): Promise<channel_listDTO[]> {
+    return await this.repository.getLastMessagesForUserChannels(user_id);
   }
 }

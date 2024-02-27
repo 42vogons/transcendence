@@ -6,6 +6,7 @@ import { ChannelDto } from '../dto/channel.dto';
 import { MemberDto } from '../dto/member.dto';
 import { ChannelMemberStatus } from '../constants';
 import { AdminActionDto } from '../dto/adminAction.dto';
+import { channel_listDTO } from '../dto/channelList.dto';
 
 @Injectable()
 export class ChannelRepository {
@@ -253,4 +254,43 @@ export class ChannelRepository {
     );
     return directChannels.length > 0;
   }
+
+  async getLastMessagesForUserChannels(
+    userId: number,
+  ): Promise<channel_listDTO[]> {
+    const userChannels = await this.prisma.channel_members.findMany({
+      where: { user_id: userId },
+      select: { channel_id: true },
+    });
+
+    const channelIds = userChannels.map(channel => channel.channel_id);
+
+    const lastMessagesPromises = channelIds.map(async channelId => {
+      const lastMessage = await this.prisma.chat_messages.findFirst({
+        where: { channel_id: channelId },
+        orderBy: { timestamp: 'desc' },
+        include: {
+          users_chat_messages_sender_idTousers: {
+            select: { username: true, avatar_url: true },
+          },
+          channels: { select: { type: true } },
+        },
+      });
+
+      if (lastMessage) {
+        return {
+          lastMessage: lastMessage.content,
+          lastAvatar:
+            lastMessage.users_chat_messages_sender_idTousers.avatar_url,
+          userName: lastMessage.users_chat_messages_sender_idTousers.username,
+          channelId: channelId,
+          type: lastMessage.channels.type,
+        } as channel_listDTO;
+      }
+    });
+
+    const lastMessages = await Promise.all(lastMessagesPromises);
+    return lastMessages.filter(message => message !== undefined);
+  }
+
 }
