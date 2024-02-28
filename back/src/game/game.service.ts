@@ -790,16 +790,17 @@ export class GameService {
     const playerOwner = this.findPlayerByUserID(client.userID);
     const playerGuest = this.findPlayerByUserID(guestID);
 
-    if (
-      playerGuest.status === 'readyToPlay' ||
-      playerGuest.status === 'playing'
-    ) {
-      client.emit('request_game', 'already on match');
+    if (!playerGuest) {
+      client.emit('request_game_error', 'player not found');
+      return;
+    }
+
+    if (playerGuest.status !== 'idle') {
+      client.emit('request_game_error', 'player not available');
       return;
     }
 
     const room = this.createRoom(client);
-    room.users.push(playerOwner);
     room.users.push(playerGuest);
 
     playerOwner.status = 'awaiting';
@@ -842,7 +843,6 @@ export class GameService {
       playerOwner.roomID = '';
       playerOwner.status = 'idle';
       io.in(room.ID).socketsLeave(playerOwner.socketID);
-      this.updatePlayer(playerGuest);
       this.updatePlayer(playerOwner);
 
       this.deleteRoomByRoomID(room.ID);
