@@ -91,6 +91,7 @@ export function GameProvider({ children }: GameProviderProps) {
 			console.log('end_match: ', matchResult)
 			dispatch(endMatch(matchResult))
 		})
+		socket.on('request_game_error', (err) => handleErrors(err))
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
 		socket.on('exception', () => handleErrors('Something went wrong'))

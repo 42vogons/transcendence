@@ -757,6 +757,7 @@ export class GameService {
       io.to(roomID).emit('end_match', matchResult);
       io.to(roomID).emit('status_changed', 'connected');
       this.removeMatchFromList(match);
+      io.socketsLeave(roomID);
       return;
     }
 
@@ -790,13 +791,23 @@ export class GameService {
     const playerOwner = this.findPlayerByUserID(client.userID);
     const playerGuest = this.findPlayerByUserID(guestID);
 
+    //todo testar com 3 usuarios logados, abrir um jogo com 2 e tentar chamar o 3 para game
+
+    if (playerOwner.status !== 'idle') {
+      client.emit(
+        'request_game_error',
+        'You are not allowed to play a new game.',
+      );
+      return;
+    }
+
     if (!playerGuest) {
-      client.emit('request_game_error', 'player not found');
+      client.emit('request_game_error', 'Player not found.');
       return;
     }
 
     if (playerGuest.status !== 'idle') {
-      client.emit('request_game_error', 'player not available');
+      client.emit('request_game_error', 'Player not available.');
       return;
     }
 
@@ -827,14 +838,12 @@ export class GameService {
     response: string,
   ) {
     const playerGuest = this.findPlayerByUserID(client.userID);
-    console.log('playerGuest:', playerGuest);
     const room = this.findRoomByRoomID(playerGuest.roomID);
     const playerOwner = this.findPlayerByUserID(
       room.users[0].userID === client.userID
         ? room.users[1].userID
         : room.users[0].userID,
     );
-    console.log('playerOwner:', playerOwner);
 
     if (response === 'refused') {
       playerGuest.roomID = '';
@@ -842,15 +851,15 @@ export class GameService {
 
       playerOwner.roomID = '';
       playerOwner.status = 'idle';
-      io.in(room.ID).socketsLeave(playerOwner.socketID);
-      this.updatePlayer(playerOwner);
-
-      this.deleteRoomByRoomID(room.ID);
-      io.to(playerOwner.socketID).emit('request_game', {
+      io.to(room.ID).emit('request_game', {
         type: 'refused',
         username: playerGuest.username,
       });
-      io.to(playerOwner.socketID).emit('status_changed', 'connected');
+      io.to(room.ID).emit('status_changed', 'connected');
+      this.updatePlayer(playerOwner);
+      io.in(room.ID).socketsLeave(playerOwner.socketID);
+
+      this.deleteRoomByRoomID(room.ID);
       return;
     }
     playerOwner.status = 'readyToPlay';
