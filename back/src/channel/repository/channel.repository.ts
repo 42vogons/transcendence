@@ -285,11 +285,16 @@ export class ChannelRepository {
           userName: lastMessage.users_chat_messages_sender_idTousers.username,
           channelId: channelId,
           type: lastMessage.channels.type,
+          timestamp: lastMessage.timestamp, // Incluindo o timestamp
         } as channel_listDTO;
       }
     });
 
-    const lastMessages = await Promise.all(lastMessagesPromises);
+    let lastMessages = await Promise.all(lastMessagesPromises);
+    lastMessages = lastMessages.filter(
+      (message): message is channel_listDTO => message !== undefined,
+    );
+    lastMessages.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     return lastMessages.filter(message => message !== undefined);
   }
 }

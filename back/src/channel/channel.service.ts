@@ -61,7 +61,7 @@ export class ChannelService {
     );
     const member = new MemberDto();
     member.channel_id = channel.channel_id;
-    member.status = ChannelMemberStatus.ADMIN;
+    member.status = ChannelMemberStatus.MEMBER;
     member.member_id = user_id;
     await this.addMember(member, user_id);
     member.member_id = createChanneltDto.member_id;

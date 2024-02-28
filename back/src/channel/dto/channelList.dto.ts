@@ -20,6 +20,7 @@ export class channel_listDTO {
   @IsNotEmpty()
   @IsString()
   type: string;
+  timestamp: any;
 
   constructor(
     lastMessage: string,
