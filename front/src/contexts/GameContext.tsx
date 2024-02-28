@@ -42,7 +42,7 @@ interface GameProviderProps {
 	children: ReactNode
 }
 
-const socket = socketClient('http://localhost:3001/game', {
+const socket = socketClient(`${process.env.NEXT_PUBLIC_BACK_HOST}/game`, {
 	autoConnect: false,
 	reconnectionAttempts: 2,
 	reconnectionDelay: 5000,
@@ -98,7 +98,12 @@ export function GameProvider({ children }: GameProviderProps) {
 		if (user && !isDateExpired(user?.expiresAt as Date)) {
 			socket.open()
 		}
-	}, [router, user])
+
+		return () => {
+			socket.close()
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user])
 
 	useEffect(() => {
 		if (

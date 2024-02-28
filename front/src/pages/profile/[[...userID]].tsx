@@ -42,7 +42,7 @@ export default function Profile() {
 	const match2 = [player2, player1]
 	const matchHistory = [match1, match2, match2, match1, match1, match2]
 
-	const profileUser = router.query.userId ? router.query.userId : 'acarneir'
+	const profileUser = router.query.userID ? router.query.userID : 'acarneir'
 	return (
 		<>
 			<Head>

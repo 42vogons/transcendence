@@ -188,7 +188,7 @@ export class ChannelRepository {
         channel_id: channel_id,
       },
       include: {
-        users: true,
+        users: { select: { username: true, user_id: true } },
       },
     });
   }
@@ -292,5 +292,4 @@ export class ChannelRepository {
     const lastMessages = await Promise.all(lastMessagesPromises);
     return lastMessages.filter(message => message !== undefined);
   }
-
 }

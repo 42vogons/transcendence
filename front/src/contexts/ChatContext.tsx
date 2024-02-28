@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { useRouter } from 'next/router'
 import {
 	ReactNode,
@@ -18,6 +19,7 @@ interface ChatContextType {
 	addFriend: (userID: number) => void
 	removeFriend: (userID: number) => void
 	createDirectChat: (userID: number) => void
+	getChannelMsgs: (channel_id: number) => void
 	closeChatSocket: () => void
 }
 
@@ -25,7 +27,7 @@ interface ChatProviderProps {
 	children: ReactNode
 }
 
-const socket = socketClient('http://localhost:3001/chat', {
+const socket = socketClient(`${process.env.NEXT_PUBLIC_BACK_HOST}/chat`, {
 	autoConnect: false,
 	reconnectionAttempts: 2,
 	reconnectionDelay: 5000,
@@ -60,14 +62,32 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		socket.on('refresh_list', () => {
 			getFriends()
 		})
+		socket.on('refresh_chat', (data: { channelID: number }) => {
+			console.log('refresh_channel data:', data)
+			const { channelID } = data
+			console.log('refresh_channel:', channelID)
+			getChannelMsgs(channelID)
+		})
+
+		socket.on('update_channel', (msgs) => {
+			console.log('update_channel:', msgs)
+		})
+
+		socket.on('refresh_channel_list', (msgs) => {
+			console.log('refresh_channel_list:', msgs)
+		})
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
 		socket.on('exception', (err) => handleErrors(err))
 		if (user && !isDateExpired(user?.expiresAt as Date)) {
 			socket.open()
 		}
+
+		return () => {
+			socket.close()
+		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [router, user])
+	}, [user])
 
 	function emitSocketIfUserIsNotExpired(ev: string, ...args: any[]) {
 		if (user && !isDateExpired(user?.expiresAt as Date)) {
@@ -103,6 +123,13 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		})
 	}
 
+	function getChannelMsgs(channel_id: number) {
+		console.log('refreshChat channelID:', channel_id)
+		emitSocketIfUserIsNotExpired('get_channel_msg', {
+			channel_id,
+		})
+	}
+
 	function closeChatSocket() {
 		socket.close()
 	}
@@ -115,6 +142,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				removeFriend,
 				createDirectChat,
 				closeChatSocket,
+				getChannelMsgs,
 			}}
 		>
 			{children}

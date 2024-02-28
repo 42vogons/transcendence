@@ -22,7 +22,14 @@ import { MdSend } from 'react-icons/md'
 import { SlOptionsVertical } from 'react-icons/sl'
 
 import userDefaulAvatar from '../../../public/assets/user.png'
-import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react'
+import {
+	FormEvent,
+	ReactElement,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from 'react'
 import Layout from '@/components/layout'
 import {
 	MenuArrow,
@@ -31,6 +38,9 @@ import {
 } from '@/styles/components/friendListItem'
 import { FaGamepad, FaUserAstronaut } from 'react-icons/fa6'
 import { BsChatSquareTextFill } from 'react-icons/bs'
+import { UserContext } from '@/contexts/UserContext'
+import { useRouter } from 'next/router'
+import { ChatContext } from '@/contexts/ChatContext'
 
 interface iMessage {
 	sender: string
@@ -41,6 +51,9 @@ interface iMessage {
 export default function Chat() {
 	const messagesEndRef = useRef(null)
 	const menuIconSize = 26
+	const { user } = useContext(UserContext)
+	const { getChannelMsgs } = useContext(ChatContext)
+	const router = useRouter()
 
 	const date = new Date()
 	const message1: iMessage = {
@@ -69,7 +82,7 @@ export default function Chat() {
 		message1,
 		message2,
 	]
-	const loggedUser = 'acarneir'
+	const loggedUser = user?.username
 
 	const [input, setInput] = useState('')
 
@@ -85,6 +98,14 @@ export default function Chat() {
 			behavior,
 		})
 	}
+
+	useEffect(() => {
+		const { channelID } = router.query
+		console.log('channelID:', channelID)
+		if (channelID) {
+			getChannelMsgs(Number(channelID))
+		}
+	}, [router.query])
 
 	useEffect(() => {
 		scrollToBottom()

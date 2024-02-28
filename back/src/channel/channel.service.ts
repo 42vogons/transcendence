@@ -309,4 +309,12 @@ export class ChannelService {
   async getLastChannelMessage(user_id: number): Promise<channel_listDTO[]> {
     return await this.repository.getLastMessagesForUserChannels(user_id);
   }
+
+  async findChannel(channel_id: number) {
+    return await this.repository.findChannel(channel_id);
+  }
+
+  async getChannelMembers(channel_id: number) {
+    return await this.repository.listMembers(channel_id);
+  }
 }

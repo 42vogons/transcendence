@@ -49,9 +49,10 @@ export class ChatGateway
       const members = await this.chatService.saveMessage(chatDto);
       members.forEach(async member => {
         const memberId = this.users.get(member);
+        console.log('member:', member);
         client
           .to(memberId)
-          .emit('refreshChat', `update the channel ${chatDto.channel_id}`);
+          .emit('refresh_chat', { channelID: chatDto.channel_id });
         const lastMessageChannel =
           await this.channelService.getLastChannelMessage(member);
         client.to(memberId).emit('refresh_channel_list', lastMessageChannel);
@@ -74,12 +75,24 @@ export class ChatGateway
     client: SocketWithAuth,
     channelMessageDto: ChannelMessageDto,
   ): Promise<void> {
+    console.log('getchannelMessageDto:', channelMessageDto);
     try {
       const msgs = await this.chatService.getChatMessage(
         channelMessageDto.channel_id,
         client.userID,
       );
-      client.emit('update_channel', msgs);
+      const channel = await this.channelService.findChannel(
+        channelMessageDto.channel_id,
+      );
+      delete channel.password;
+      const channelMembers = await this.channelService.getChannelMembers(
+        channelMessageDto.channel_id,
+      );
+      client.emit('update_channel', {
+        channel,
+        channelMembers,
+        msgs,
+      });
     } catch (error) {
       this.sendError(error);
     }
