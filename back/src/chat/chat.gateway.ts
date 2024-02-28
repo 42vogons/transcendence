@@ -45,7 +45,7 @@ export class ChatGateway
   async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
       chatDto.sender_id = client.userID;
-      console.log('id '+ client.userID);
+      console.log('id ' + client.userID);
       const members = await this.chatService.saveMessage(chatDto);
       members.forEach(async member => {
         const memberId = this.users.get(member);
