@@ -757,6 +757,7 @@ export class GameService {
       io.to(roomID).emit('end_match', matchResult);
       io.to(roomID).emit('status_changed', 'connected');
       this.removeMatchFromList(match);
+      io.socketsLeave(roomID);
       return;
     }
 
@@ -790,16 +791,27 @@ export class GameService {
     const playerOwner = this.findPlayerByUserID(client.userID);
     const playerGuest = this.findPlayerByUserID(guestID);
 
-    if (
-      playerGuest.status === 'readyToPlay' ||
-      playerGuest.status === 'playing'
-    ) {
-      client.emit('request_game', 'already on match');
+    //todo testar com 3 usuarios logados, abrir um jogo com 2 e tentar chamar o 3 para game
+
+    if (playerOwner.status !== 'idle') {
+      client.emit(
+        'request_game_error',
+        'You are not allowed to play a new game.',
+      );
+      return;
+    }
+
+    if (!playerGuest) {
+      client.emit('request_game_error', 'Player not found.');
+      return;
+    }
+
+    if (playerGuest.status !== 'idle') {
+      client.emit('request_game_error', 'Player not available.');
       return;
     }
 
     const room = this.createRoom(client);
-    room.users.push(playerOwner);
     room.users.push(playerGuest);
 
     playerOwner.status = 'awaiting';
@@ -813,8 +825,11 @@ export class GameService {
 
     this.updateRoom(room);
 
-    client.emit('status_changed', 'awainting');
-    io.to(playerGuest.socketID).emit('request_game', client.username);
+    client.emit('status_changed', 'awaiting');
+    io.to(playerGuest.socketID).emit('request_game', {
+      type: 'request',
+      username: client.username,
+    });
   }
 
   responseRequestMatch(
@@ -827,7 +842,7 @@ export class GameService {
     const playerOwner = this.findPlayerByUserID(
       room.users[0].userID === client.userID
         ? room.users[1].userID
-        : client.userID,
+        : room.users[0].userID,
     );
 
     if (response === 'refused') {
@@ -836,13 +851,15 @@ export class GameService {
 
       playerOwner.roomID = '';
       playerOwner.status = 'idle';
-      io.in(room.ID).socketsLeave(playerOwner.socketID);
-      this.updatePlayer(playerGuest);
+      io.to(room.ID).emit('request_game', {
+        type: 'refused',
+        username: playerGuest.username,
+      });
+      io.to(room.ID).emit('status_changed', 'connected');
       this.updatePlayer(playerOwner);
+      io.in(room.ID).socketsLeave(playerOwner.socketID);
 
       this.deleteRoomByRoomID(room.ID);
-      io.to(playerOwner.socketID).emit('match_refused', playerGuest.username);
-      io.to(playerOwner.socketID).emit('status_changed', 'connected');
       return;
     }
     playerOwner.status = 'readyToPlay';

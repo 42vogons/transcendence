@@ -122,6 +122,13 @@ export default function Home() {
 						</Button>
 					</LoadingContainer>
 				)}
+
+				{!isMatchCompleted && status === 'awaiting' && (
+					<LoadingContainer>
+						{/* <Loading size={200} /> */}
+						<h3>Awaiting for the other player.</h3>
+					</LoadingContainer>
+				)}
 				{!isMatchCompleted && status === 'playing' && <Game />}
 			</HomeContainer>
 			<Modal
@@ -132,7 +139,7 @@ export default function Home() {
 				}
 			>
 				<PauseModal>
-					{match.pausedByUserID === user?.userID ? (
+					{match?.pausedByUserID === user?.userID ? (
 						<h2>Paused</h2>
 					) : (
 						<h2>
@@ -147,7 +154,7 @@ export default function Home() {
 						<Button buttonType="cancel">
 							<MdClose size={40} /> Give up
 						</Button>
-						{match.pausedByUserID === user?.userID && (
+						{match?.pausedByUserID === user?.userID && (
 							<PlayButton
 								onMouseUp={() => {
 									resume()
