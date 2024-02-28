@@ -45,7 +45,7 @@ export class ChatGateway
   async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
       chatDto.sender_id = client.userID;
-      console.log('id '+ client.userID);
+      console.log('id ' + client.userID);
       const members = await this.chatService.saveMessage(chatDto);
       members.forEach(async member => {
         const memberId = this.users.get(member);
@@ -89,16 +89,14 @@ export class ChatGateway
     this.logger.log(`Init: ${server}`);
   }
 
-  private async notifyFriends(client: SocketWithAuth) {
-    const friends = await this.usersService.findFriends(client.userID);
+  private async notifyFriends(userID) {
+    const friends = await this.usersService.findFriends(userID);
     friends.forEach(async friend => {
       const myFriend = this.users.get(friend.user_id);
       if (myFriend == null) {
         return;
       }
-      client
-        .to(myFriend)
-        .emit('refresh_list', `Seu amigo ${client.username} está online`);
+      this.server.to(myFriend).emit('refresh_list', ``);
     });
   }
 
@@ -108,7 +106,7 @@ export class ChatGateway
     this.logger.log(`Client id: ${client.userID}`);
     this.users.set(client.userID, client.id);
 
-    this.notifyFriends(client);
+    this.notifyFriends(client.userID);
 
     await this.usersService.setStatus(client.userID, 'online');
     await this.listFriends(client);
@@ -130,7 +128,7 @@ export class ChatGateway
     this.logger.log(`Client disconnected: ${client.id}`);
     await this.usersService.setStatus(client.userID, 'offline');
     this.users.delete(client.userID);
-    this.notifyFriends(client);
+    this.notifyFriends(client.userID);
   }
 
   @SubscribeMessage('add_friend')
@@ -140,7 +138,7 @@ export class ChatGateway
       this.logger.log(
         `User ${client.userID} added ${friendDto.member_id} in listFriends.`,
       );
-      this.notifyFriends(client);
+      this.notifyFriends(client.userID);
       client.emit('refresh_list', ``);
     } catch (error) {
       this.sendError(error);
