@@ -5,31 +5,21 @@ import {
 	ChatContainer,
 	ChatHeader,
 	ChatHeaderTextContainer,
-	ChatInputContainer,
 	ChatMenu,
 	ChatMenuWrapper,
 	ChatMessage,
 	ChatMessageContainer,
 	ChatMessageTimestamp,
-	ChatSubTitle,
+	// ChatSubTitle,
 	ChatTitle,
 	MenuAction,
 	SenderMenu,
 	SenderMenuWrapper,
 } from '@/styles/pages/chat'
 
-import { MdSend } from 'react-icons/md'
 import { SlOptionsVertical } from 'react-icons/sl'
 
-import userDefaulAvatar from '../../../public/assets/user.png'
-import {
-	FormEvent,
-	ReactElement,
-	useContext,
-	useEffect,
-	useRef,
-	useState,
-} from 'react'
+import { ReactElement, useContext, useEffect, useRef } from 'react'
 import Layout from '@/components/layout'
 import {
 	MenuArrow,
@@ -41,60 +31,29 @@ import { BsChatSquareTextFill } from 'react-icons/bs'
 import { UserContext } from '@/contexts/UserContext'
 import { useRouter } from 'next/router'
 import { ChatContext } from '@/contexts/ChatContext'
-
-interface iMessage {
-	sender: string
-	content: string
-	timestamp: number
-}
+import { iChannelMessage } from '@/reducers/Chat/Types'
+import ChatInput from '@/components/ChatInput'
 
 export default function Chat() {
 	const messagesEndRef = useRef(null)
 	const menuIconSize = 26
 	const { user } = useContext(UserContext)
-	const { getChannelMsgs } = useContext(ChatContext)
+	const {
+		getChannelMessages,
+		activeChannelData,
+		getUsernameFromChannelMembers,
+		getActiveChannelName,
+		getActiveChannelAvatar,
+	} = useContext(ChatContext)
+
+	const messages = activeChannelData?.msgs
 	const router = useRouter()
 
-	const date = new Date()
-	const message1: iMessage = {
-		sender: 'acarneir',
-		content:
-			'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Velit sit deserunt praesentium nemo accusantium ratione error, quas quaerat omnis perspiciatis est quidem, earum ullam ad dolorum quis optio. Beatae, harum!',
-		timestamp: date.getTime() - 10 * 60 * 1000,
-	}
-
-	const message2: iMessage = {
-		sender: 'rfelipe-',
-		content:
-			'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Velit sit deserunt praesentium nemo accusantium ratione error, quas quaerat omnis perspiciatis est quidem, earum ullam ad dolorum',
-		timestamp: date.getTime() + 10 * 60 * 1000,
-	}
-
-	const chat = [
-		message1,
-		message2,
-		message2,
-		message2,
-		message1,
-		message1,
-		message1,
-		message2,
-		message1,
-		message2,
-	]
-	const loggedUser = user?.username
-
-	const [input, setInput] = useState('')
-
-	function handleSubmit(e: FormEvent<HTMLFormElement>) {
-		e.preventDefault()
-		console.log(e)
-		console.log(input)
-	}
+	const loggedUserID = user?.userID
 
 	function scrollToBottom(behavior: 'smooth' | 'instant' = 'instant') {
 		// eslint-disable-next-line prettier/prettier
-		(messagesEndRef.current as unknown as HTMLElement).scrollIntoView({
+		(messagesEndRef.current as unknown as HTMLElement)?.scrollIntoView({
 			behavior,
 		})
 	}
@@ -103,13 +62,15 @@ export default function Chat() {
 		const { channelID } = router.query
 		console.log('channelID:', channelID)
 		if (channelID) {
-			getChannelMsgs(Number(channelID))
+			getChannelMessages(Number(channelID))
 		}
 	}, [router.query])
 
 	useEffect(() => {
-		scrollToBottom()
-	}, [])
+		if (activeChannelData) {
+			scrollToBottom()
+		}
+	}, [activeChannelData])
 
 	return (
 		<>
@@ -126,119 +87,135 @@ export default function Chat() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<ChatContainer>
-				<ChatHeader>
-					<ChatHeaderTextContainer>
-						<Image
-							src={userDefaulAvatar.src}
-							width={40}
-							height={40}
-							priority={true}
-							alt="user"
-						/>
-						<ChatTitle>rfelipe-</ChatTitle>
-						{/* <ChatSubTitle>online</ChatSubTitle> */}
-					</ChatHeaderTextContainer>
-					<ChatMenuWrapper>
-						<ChatMenu>
-							<SlOptionsVertical size={28} />
-						</ChatMenu>
-						<MenuContent>
-							<MenuArrow />
-							<MenuItem>
-								<MenuAction
-									onClick={() => {
-										console.log('play')
-									}}
-								>
-									<FaGamepad size={menuIconSize} /> Play
-								</MenuAction>
-							</MenuItem>
-							<MenuItem>
-								<MenuAction
-									onClick={() => {
-										console.log('play')
-									}}
-								>
-									<BsChatSquareTextFill size={menuIconSize} />{' '}
-									Chat
-								</MenuAction>
-							</MenuItem>
-						</MenuContent>
-					</ChatMenuWrapper>
-				</ChatHeader>
-				<ChatMessageContainer>
-					{chat.length > 0 ? (
-						chat.map((message, index) => (
-							<ChatMessage
-								key={index}
-								isLoggedUser={message.sender === loggedUser}
-							>
-								{message.sender !== loggedUser && (
-									<SenderMenuWrapper>
-										<SenderMenu>
-											<FaUserAstronaut size={28} />
-											{message.sender}
-										</SenderMenu>
-										<MenuContent>
-											<MenuArrow />
-											<MenuItem>
-												<MenuAction
-													onClick={() => {
-														console.log('play')
-													}}
-												>
-													<FaGamepad
-														size={menuIconSize}
-													/>{' '}
-													Play
-												</MenuAction>
-											</MenuItem>
-											<MenuItem>
-												<MenuAction
-													onClick={() => {
-														console.log('profile')
-													}}
-												>
+				{activeChannelData ? (
+					<>
+						<ChatHeader>
+							<ChatHeaderTextContainer>
+								<Image
+									src={getActiveChannelAvatar()}
+									width={40}
+									height={40}
+									priority={true}
+									alt="user"
+								/>
+								<ChatTitle>{getActiveChannelName()}</ChatTitle>
+								{/* <ChatSubTitle>online</ChatSubTitle> */}
+							</ChatHeaderTextContainer>
+							<ChatMenuWrapper>
+								<ChatMenu>
+									<SlOptionsVertical size={28} />
+								</ChatMenu>
+								<MenuContent>
+									<MenuArrow />
+									<MenuItem>
+										<MenuAction
+											onClick={() => {
+												console.log('play')
+											}}
+										>
+											<FaGamepad size={menuIconSize} />{' '}
+											Play
+										</MenuAction>
+									</MenuItem>
+									<MenuItem>
+										<MenuAction
+											onClick={() => {
+												console.log('play')
+											}}
+										>
+											<BsChatSquareTextFill
+												size={menuIconSize}
+											/>{' '}
+											Chat
+										</MenuAction>
+									</MenuItem>
+								</MenuContent>
+							</ChatMenuWrapper>
+						</ChatHeader>
+						<ChatMessageContainer>
+							{messages && messages?.length > 0 ? (
+								messages.map((message: iChannelMessage) => (
+									<ChatMessage
+										key={message.message_id}
+										isLoggedUser={
+											message.sender_id === loggedUserID
+										}
+									>
+										{message.sender_id !== loggedUserID && (
+											<SenderMenuWrapper>
+												<SenderMenu>
 													<FaUserAstronaut
-														size={menuIconSize}
-													/>{' '}
-													Profile
-												</MenuAction>
-											</MenuItem>
-										</MenuContent>
-									</SenderMenuWrapper>
-								)}
-								<p>{message.content}</p>
-								<ChatMessageTimestamp>
-									{new Date(message.timestamp)
-										.toLocaleString('en-CA', {
-											hour: '2-digit',
-											minute: '2-digit',
-											second: '2-digit',
-											year: 'numeric',
-											month: '2-digit',
-											day: '2-digit',
-											hour12: false,
-										})
-										.replace(',', ' ')}
-								</ChatMessageTimestamp>
-							</ChatMessage>
-						))
-					) : (
-						<>vazio</>
-					)}
-					<div ref={messagesEndRef} />
-				</ChatMessageContainer>
-				<ChatInputContainer onSubmit={(e) => handleSubmit(e)}>
-					<input
-						type="text"
-						value={input}
-						onChange={(e) => setInput(e.target.value)}
-					/>
-					<button>
-						<MdSend size={48} />
-					</button>
-				</ChatInputContainer>
+														size={28}
+													/>
+													{getUsernameFromChannelMembers(
+														message.sender_id,
+													)}
+												</SenderMenu>
+												<MenuContent>
+													<MenuArrow />
+													<MenuItem>
+														<MenuAction
+															onClick={() => {
+																console.log(
+																	'play',
+																)
+															}}
+														>
+															<FaGamepad
+																size={
+																	menuIconSize
+																}
+															/>{' '}
+															Play
+														</MenuAction>
+													</MenuItem>
+													<MenuItem>
+														<MenuAction
+															onClick={() => {
+																console.log(
+																	'profile',
+																)
+															}}
+														>
+															<FaUserAstronaut
+																size={
+																	menuIconSize
+																}
+															/>{' '}
+															Profile
+														</MenuAction>
+													</MenuItem>
+												</MenuContent>
+											</SenderMenuWrapper>
+										)}
+										<p>{message.content}</p>
+										<ChatMessageTimestamp>
+											{new Date(message.timestamp)
+												.toLocaleString('en-CA', {
+													hourCycle: 'h23',
+													hour: '2-digit',
+													minute: '2-digit',
+													second: '2-digit',
+													year: 'numeric',
+													month: '2-digit',
+													day: '2-digit',
+												})
+												.replace(',', ' ')}
+										</ChatMessageTimestamp>
+									</ChatMessage>
+								))
+							) : (
+								<>vazio</>
+							)}
+							<div ref={messagesEndRef} />
+						</ChatMessageContainer>
+						<ChatInput
+							channel_id={activeChannelData.channel.channel_id}
+						/>
+					</>
+				) : (
+					<>activeChannel vazio</>
+				)}
 			</ChatContainer>
 		</>
 	)

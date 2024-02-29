@@ -11,7 +11,7 @@ import userDefaulAvatar from '../../public/assets/user.png'
 
 export interface iChatListItem {
 	userAvatarSrc: string
-	username: string
+	name: string
 	lastMessage: string
 	isActive?: boolean
 	handleOnClick?: () => Promise<boolean> | undefined
@@ -19,7 +19,7 @@ export interface iChatListItem {
 
 export function ChatListItem({
 	userAvatarSrc,
-	username,
+	name,
 	lastMessage,
 	isActive,
 	handleOnClick,
@@ -47,7 +47,7 @@ export function ChatListItem({
 			</ChatAvatarContainer>
 
 			<ChatInfoContainer>
-				<ChatName>{username}</ChatName>
+				<ChatName>{name}</ChatName>
 				<ChatLastMessage title={lastMessage} isActive={isActive}>
 					{lastMessage}
 				</ChatLastMessage>

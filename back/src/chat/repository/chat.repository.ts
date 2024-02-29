@@ -21,7 +21,7 @@ export class ChatRepository {
         channel_id: channel_id,
       },
       orderBy: {
-        timestamp: 'desc',
+        timestamp: 'asc',
       },
     });
   }

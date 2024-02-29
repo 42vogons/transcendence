@@ -12,14 +12,30 @@ import socketClient from 'socket.io-client'
 import { UserContext } from './UserContext'
 import { isDateExpired } from '@/reducers/User/Reducer'
 import { ChatReducer, FriendListItem } from '@/reducers/Chat/Reducer'
-import { updateFriendList } from '@/reducers/Chat/Action'
+import {
+	updateChannel,
+	updateChannelList,
+	updateFriendList,
+} from '@/reducers/Chat/Action'
+import {
+	iChannelData,
+	iChannelMember,
+	iLastChannelMessage,
+} from '@/reducers/Chat/Types'
+import userDefaulAvatar from '../../public/assets/user.png'
 
 interface ChatContextType {
 	friendList: FriendListItem[]
+	activeChannelData: iChannelData | undefined
+	channelList: iLastChannelMessage[]
 	addFriend: (userID: number) => void
 	removeFriend: (userID: number) => void
 	createDirectChat: (userID: number) => void
-	getChannelMsgs: (channel_id: number) => void
+	getChannelMessages: (channel_id: number) => void
+	sendMessageToChannel: (channel_id: number, content: string) => void
+	getUsernameFromChannelMembers: (userID: number) => string
+	getActiveChannelName: () => string
+	getActiveChannelAvatar: () => string
 	closeChatSocket: () => void
 }
 
@@ -39,11 +55,13 @@ export const ChatContext = createContext({} as ChatContextType)
 export function ChatProvider({ children }: ChatProviderProps) {
 	const [state, dispatch] = useReducer(ChatReducer, {
 		friendList: [],
+		activeChannelData: undefined,
+		channelList: [],
 	})
 
 	const { user } = useContext(UserContext)
 
-	const { friendList } = state
+	const { friendList, activeChannelData, channelList } = state
 
 	const router = useRouter()
 
@@ -66,16 +84,20 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			console.log('refresh_channel data:', data)
 			const { channelID } = data
 			console.log('refresh_channel:', channelID)
-			getChannelMsgs(channelID)
+			getChannelMessages(channelID)
 		})
 
-		socket.on('update_channel', (msgs) => {
-			console.log('update_channel:', msgs)
+		socket.on('update_channel', (activeChannelData) => {
+			console.log('update_channel:', activeChannelData)
+			dispatch(updateChannel(activeChannelData))
 		})
 
-		socket.on('refresh_channel_list', (msgs) => {
-			console.log('refresh_channel_list:', msgs)
-		})
+		socket.on(
+			'refresh_channel_list',
+			(channelList: iLastChannelMessage[]) => {
+				dispatch(updateChannelList(channelList))
+			},
+		)
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
 		socket.on('exception', (err) => handleErrors(err))
@@ -123,11 +145,61 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		})
 	}
 
-	function getChannelMsgs(channel_id: number) {
+	function getChannelMessages(channel_id: number) {
 		console.log('refreshChat channelID:', channel_id)
 		emitSocketIfUserIsNotExpired('get_channel_msg', {
 			channel_id,
 		})
+	}
+
+	function sendMessageToChannel(channel_id: number, content: string) {
+		console.log('sendMessageToChannel:', channel_id, content)
+		emitSocketIfUserIsNotExpired('msg_to_server', {
+			channel_id,
+			content,
+		})
+	}
+
+	function getUsernameFromChannelMembers(userID: number) {
+		const member = (activeChannelData as iChannelData)?.channelMembers.find(
+			(member) => member.user_id === userID,
+		)
+		return member ? member.users.username : 'name not found'
+	}
+
+	function getTheOtherChannelMember(
+		userID: number | undefined,
+	): iChannelMember['users'] | undefined {
+		const member = (activeChannelData as iChannelData)?.channelMembers.find(
+			(member) => member.user_id !== userID,
+		)
+		return member ? member.users : undefined
+	}
+
+	function getActiveChannelName(): string {
+		if (activeChannelData.channel.type === 'direct') {
+			const userData = getTheOtherChannelMember(user?.userID)
+			if (userData) {
+				return userData.username
+			} else {
+				return 'error'
+			}
+		} else {
+			return activeChannelData.channel.name
+		}
+	}
+
+	function getActiveChannelAvatar() {
+		if (activeChannelData.channel.type === 'direct') {
+			const userData = getTheOtherChannelMember(user?.userID)
+			if (userData && userData.avatar_url) {
+				return userData.avatar_url
+			} else {
+				return userDefaulAvatar.src
+			}
+		} else {
+			return 'todo'
+		}
 	}
 
 	function closeChatSocket() {
@@ -138,11 +210,17 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		<ChatContext.Provider
 			value={{
 				friendList,
+				channelList,
+				activeChannelData,
 				addFriend,
 				removeFriend,
 				createDirectChat,
 				closeChatSocket,
-				getChannelMsgs,
+				getChannelMessages,
+				sendMessageToChannel,
+				getUsernameFromChannelMembers,
+				getActiveChannelName,
+				getActiveChannelAvatar,
 			}}
 		>
 			{children}
