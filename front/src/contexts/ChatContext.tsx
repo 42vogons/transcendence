@@ -12,14 +12,18 @@ import socketClient from 'socket.io-client'
 import { UserContext } from './UserContext'
 import { isDateExpired } from '@/reducers/User/Reducer'
 import { ChatReducer, FriendListItem } from '@/reducers/Chat/Reducer'
-import { updateFriendList } from '@/reducers/Chat/Action'
+import { updateChannel, updateFriendList } from '@/reducers/Chat/Action'
+import { iChannelData } from '@/reducers/Chat/Types'
 
 interface ChatContextType {
 	friendList: FriendListItem[]
+	activeChannelData: iChannelData | undefined
 	addFriend: (userID: number) => void
 	removeFriend: (userID: number) => void
 	createDirectChat: (userID: number) => void
 	getChannelMsgs: (channel_id: number) => void
+	getUsernameFromChannelMembers: (userID: number) => string
+	getActiveChannelName: () => string
 	closeChatSocket: () => void
 }
 
@@ -39,11 +43,12 @@ export const ChatContext = createContext({} as ChatContextType)
 export function ChatProvider({ children }: ChatProviderProps) {
 	const [state, dispatch] = useReducer(ChatReducer, {
 		friendList: [],
+		activeChannelData: undefined,
 	})
 
 	const { user } = useContext(UserContext)
 
-	const { friendList } = state
+	const { friendList, activeChannelData } = state
 
 	const router = useRouter()
 
@@ -69,8 +74,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			getChannelMsgs(channelID)
 		})
 
-		socket.on('update_channel', (msgs) => {
-			console.log('update_channel:', msgs)
+		socket.on('update_channel', (activeChannelData) => {
+			console.log('update_channel:', activeChannelData)
+			dispatch(updateChannel(activeChannelData))
 		})
 
 		socket.on('refresh_channel_list', (msgs) => {
@@ -130,6 +136,28 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		})
 	}
 
+	function getUsernameFromChannelMembers(userID: number) {
+		const member = (activeChannelData as iChannelData)?.channelMembers.find(
+			(member) => member.user_id === userID,
+		)
+		return member ? member.users.username : 'name not found'
+	}
+
+	function getUsernameOfTheOtherChannelMember(userID: number | undefined) {
+		const member = (activeChannelData as iChannelData)?.channelMembers.find(
+			(member) => member.user_id !== userID,
+		)
+		return member ? member.users.username : 'name not found'
+	}
+
+	function getActiveChannelName() {
+		if (activeChannelData.channel.type === 'direct') {
+			return getUsernameOfTheOtherChannelMember(user?.userID)
+		} else {
+			return 'todo'
+		}
+	}
+
 	function closeChatSocket() {
 		socket.close()
 	}
@@ -143,6 +171,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				createDirectChat,
 				closeChatSocket,
 				getChannelMsgs,
+				activeChannelData,
+				getUsernameFromChannelMembers,
+				getActiveChannelName,
 			}}
 		>
 			{children}

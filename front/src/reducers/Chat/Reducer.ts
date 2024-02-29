@@ -1,4 +1,5 @@
 import { ActionTypes } from './Action'
+import { iChannelData } from './Types'
 
 export interface FriendListItem {
 	userID?: number
@@ -9,6 +10,7 @@ export interface FriendListItem {
 
 export interface ChatState {
 	friendList: FriendListItem[]
+	activeChannelData: iChannelData | undefined
 }
 
 export function ChatReducer(state: ChatState, action: any) {
@@ -20,6 +22,13 @@ export function ChatReducer(state: ChatState, action: any) {
 			const newState = {
 				...state,
 				friendList: action.payload.friendList,
+			}
+			return newState
+		}
+		case ActionTypes.UPDATE_CHANNEL: {
+			const newState = {
+				...state,
+				activeChannelData: action.payload.activeChannelData,
 			}
 			return newState
 		}

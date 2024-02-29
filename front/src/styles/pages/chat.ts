@@ -144,7 +144,7 @@ export const ChatMessage = styled('div', {
 	maxWidth: '80%',
 	fontSize: '$lg',
 	lineHeight: 1.25,
-	padding: '0.5rem 0.5rem 18px',
+	padding: '0.5rem 0.5rem',
 	borderRadius: 24,
 	color: '$white',
 
@@ -159,13 +159,14 @@ export const ChatMessage = styled('div', {
 
 	'@bp1': {
 		maxWidth: '60%',
-		padding: '0.5rem 1rem 18px',
+		padding: '0.5rem 1rem',
 	},
 })
 
 export const ChatMessageTimestamp = styled('div', {
+	width: 120,
 	position: 'absolute',
-	bottom: 2,
+	bottom: -16,
 	right: 16,
 	textAlign: 'end',
 	fontSize: 10,

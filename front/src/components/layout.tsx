@@ -88,10 +88,10 @@ export default function Layout({ children }: iLayoutProps) {
 				setActivePanel('menu')
 			} else {
 				setShowSidePanel(true)
-				if (router.asPath !== '/chat') {
-					setActivePanel('friends')
-				} else {
+				if (router.asPath.includes('/chat')) {
 					setActivePanel('chat')
+				} else {
+					setActivePanel('friends')
 				}
 			}
 		}
