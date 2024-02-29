@@ -35,3 +35,12 @@ export interface iChannelData {
 	channelMembers: iChannelMember[]
 	msgs: iChannelMessage[]
 }
+
+export interface iLastChannelMessage {
+	channelId: number
+	lastAvatar: string
+	lastMessage: string
+	timestamp: Date
+	type: 'direct' | 'public' | 'protected' | 'private'
+	userName: string
+}

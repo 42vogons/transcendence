@@ -12,13 +12,22 @@ import socketClient from 'socket.io-client'
 import { UserContext } from './UserContext'
 import { isDateExpired } from '@/reducers/User/Reducer'
 import { ChatReducer, FriendListItem } from '@/reducers/Chat/Reducer'
-import { updateChannel, updateFriendList } from '@/reducers/Chat/Action'
-import { iChannelData, iChannelMember } from '@/reducers/Chat/Types'
+import {
+	updateChannel,
+	updateChannelList,
+	updateFriendList,
+} from '@/reducers/Chat/Action'
+import {
+	iChannelData,
+	iChannelMember,
+	iLastChannelMessage,
+} from '@/reducers/Chat/Types'
 import userDefaulAvatar from '../../public/assets/user.png'
 
 interface ChatContextType {
 	friendList: FriendListItem[]
 	activeChannelData: iChannelData | undefined
+	channelList: iLastChannelMessage[]
 	addFriend: (userID: number) => void
 	removeFriend: (userID: number) => void
 	createDirectChat: (userID: number) => void
@@ -47,11 +56,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	const [state, dispatch] = useReducer(ChatReducer, {
 		friendList: [],
 		activeChannelData: undefined,
+		channelList: [],
 	})
 
 	const { user } = useContext(UserContext)
 
-	const { friendList, activeChannelData } = state
+	const { friendList, activeChannelData, channelList } = state
 
 	const router = useRouter()
 
@@ -82,9 +92,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			dispatch(updateChannel(activeChannelData))
 		})
 
-		socket.on('refresh_channel_list', (msgs) => {
-			console.log('refresh_channel_list:', msgs)
-		})
+		socket.on(
+			'refresh_channel_list',
+			(channelList: iLastChannelMessage[]) => {
+				dispatch(updateChannelList(channelList))
+			},
+		)
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
 		socket.on('exception', (err) => handleErrors(err))
@@ -172,7 +185,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				return 'error'
 			}
 		} else {
-			return 'todo'
+			return activeChannelData.channel.name
 		}
 	}
 
@@ -197,13 +210,14 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		<ChatContext.Provider
 			value={{
 				friendList,
+				channelList,
+				activeChannelData,
 				addFriend,
 				removeFriend,
 				createDirectChat,
 				closeChatSocket,
 				getChannelMessages,
 				sendMessageToChannel,
-				activeChannelData,
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
 				getActiveChannelAvatar,

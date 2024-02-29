@@ -24,7 +24,7 @@ import MenuListItem from './menuListItem'
 import { useOutsideMenuClick } from '@/hooks/useOutsideMenuClick'
 import { FriendListItem } from './friendListItem'
 import { FriendListItem as iFriendListItem } from '@/reducers/Chat/Reducer'
-import { ChatListItem, iChatListItem } from './chatListItem'
+import { ChatListItem } from './chatListItem'
 import { UserContext } from '@/contexts/UserContext'
 import { toast } from 'react-toastify'
 import { isDateExpired } from '@/reducers/User/Reducer'
@@ -35,6 +35,7 @@ import NewFriendModal from './newFriendModal'
 import { IoSearchSharp } from 'react-icons/io5'
 import SearchChannelModal from './searchChannelModal'
 import NewChannelModal from './newChannelModal'
+import { iLastChannelMessage } from '@/reducers/Chat/Types'
 
 type activePanelType = 'menu' | 'friends' | 'chat'
 
@@ -149,169 +150,9 @@ export default function Layout({ children }: iLayoutProps) {
 		},
 	]
 
-	// const friendList: iFriendListItem[] = [
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'rfelipe-',
-	// 		userStatus: 'ingame',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'cpereira',
-	// 		userStatus: 'online',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'anoliver',
-	// 		userStatus: 'online',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'abc12341',
-	// 		userStatus: 'offline',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'abc12342',
-	// 		userStatus: 'offline',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'abc12343',
-	// 		userStatus: 'offline',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'abc12344',
-	// 		userStatus: 'offline',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'abc12345',
-	// 		userStatus: 'offline',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'abc12346',
-	// 		userStatus: 'offline',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'abc12347',
-	// 		userStatus: 'offline',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'abc12348',
-	// 		userStatus: 'offline',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'abc12349',
-	// 		userStatus: 'offline',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'abc12350',
-	// 		userStatus: 'offline',
-	// 	},
-	// 	{
-	// 		userAvatarSrc: '',
-	// 		username: 'abc12351',
-	// 		userStatus: 'offline',
-	// 	},
-	// ]
-
-	const chatList: iChatListItem[] = [
-		{
-			userAvatarSrc: '',
-			username: 'rfelipe-',
-			lastMessage: 'test',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'cpereira',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'anoliver',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12341',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12342',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12343',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12344',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12345',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12346',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12347',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12348',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12349',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12350',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-		{
-			userAvatarSrc: '',
-			username: 'abc12351',
-			lastMessage:
-				'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure magni iste aut dolor vero, dicta commodi omnis fuga aliquid quia quasi consequuntur placeat, autem rerum laudantium perspiciatis? Nihil, nulla accusantium.',
-		},
-	]
-
-	const activeChatUser = 'rfelipe-'
-
 	const { user } = useContext(UserContext)
-	const { friendList, closeChatSocket } = useContext(ChatContext)
+	const { friendList, activeChannelData, channelList, closeChatSocket } =
+		useContext(ChatContext)
 	const { closeGameSocket } = useContext(GameContext)
 
 	useEffect(() => {
@@ -480,23 +321,34 @@ export default function Layout({ children }: iLayoutProps) {
 												/>
 											</IconButton>
 										</div>
-										{chatList.map((item: iChatListItem) => (
-											<ChatListItem
-												key={item.username}
-												userAvatarSrc={
-													item.userAvatarSrc
-												}
-												username={item.username}
-												lastMessage={item.lastMessage}
-												isActive={
-													activeChatUser ===
-													item.username
-												}
-												handleOnClick={() =>
-													router.push('/chat')
-												}
-											/>
-										))}
+										{channelList.map(
+											(channel: iLastChannelMessage) => (
+												<ChatListItem
+													key={channel.channelId}
+													userAvatarSrc={
+														channel.lastAvatar
+													}
+													name={channel.userName}
+													lastMessage={
+														channel.userName +
+														': ' +
+														channel.lastMessage
+													}
+													isActive={
+														channel.channelId ===
+														activeChannelData
+															?.channel.channel_id
+													}
+													handleOnClick={() =>
+														router.push(
+															'/chat' +
+																'/' +
+																channel.channelId,
+														)
+													}
+												/>
+											),
+										)}
 									</>
 								)}
 						</div>

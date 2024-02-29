@@ -125,6 +125,10 @@ export class ChatGateway
 
     await this.usersService.setStatus(client.userID, 'online');
     await this.listFriends(client);
+    const lastMessageChannel = await this.channelService.getLastChannelMessage(
+      client.userID,
+    );
+    client.emit('refresh_channel_list', lastMessageChannel);
   }
 
   @SubscribeMessage('get_friends')
