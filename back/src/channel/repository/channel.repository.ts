@@ -188,7 +188,7 @@ export class ChannelRepository {
         channel_id: channel_id,
       },
       include: {
-        users: { select: { username: true, user_id: true } },
+        users: { select: { username: true, user_id: true, avatar_url: true } },
       },
     });
   }

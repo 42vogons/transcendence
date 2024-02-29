@@ -50,19 +50,21 @@ export class ChatGateway
       members.forEach(async member => {
         const memberId = this.users.get(member);
         console.log('member:', member);
-        client
+        this.server
           .to(memberId)
           .emit('refresh_chat', { channelID: chatDto.channel_id });
         const lastMessageChannel =
           await this.channelService.getLastChannelMessage(member);
-        client.to(memberId).emit('refresh_channel_list', lastMessageChannel);
+        this.server
+          .to(memberId)
+          .emit('refresh_channel_list', lastMessageChannel);
       });
       this.logger.log(
         `User ${client.userID} sent message on channel ${chatDto.channel_id}`,
       );
       const lastMessageChannel =
         await this.channelService.getLastChannelMessage(client.userID);
-      client
+      this.server
         .to(this.users.get(client.userID))
         .emit('refresh_channel_list', lastMessageChannel);
     } catch (error) {

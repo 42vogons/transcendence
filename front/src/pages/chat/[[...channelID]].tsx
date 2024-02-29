@@ -5,7 +5,6 @@ import {
 	ChatContainer,
 	ChatHeader,
 	ChatHeaderTextContainer,
-	ChatInputContainer,
 	ChatMenu,
 	ChatMenuWrapper,
 	ChatMessage,
@@ -18,18 +17,9 @@ import {
 	SenderMenuWrapper,
 } from '@/styles/pages/chat'
 
-import { MdSend } from 'react-icons/md'
 import { SlOptionsVertical } from 'react-icons/sl'
 
-import userDefaulAvatar from '../../../public/assets/user.png'
-import {
-	FormEvent,
-	ReactElement,
-	useContext,
-	useEffect,
-	useRef,
-	useState,
-} from 'react'
+import { ReactElement, useContext, useEffect, useRef } from 'react'
 import Layout from '@/components/layout'
 import {
 	MenuArrow,
@@ -42,28 +32,24 @@ import { UserContext } from '@/contexts/UserContext'
 import { useRouter } from 'next/router'
 import { ChatContext } from '@/contexts/ChatContext'
 import { iChannelMessage } from '@/reducers/Chat/Types'
+import ChatInput from '@/components/ChatInput'
 
 export default function Chat() {
 	const messagesEndRef = useRef(null)
 	const menuIconSize = 26
 	const { user } = useContext(UserContext)
 	const {
-		getChannelMsgs,
+		getChannelMessages,
 		activeChannelData,
 		getUsernameFromChannelMembers,
 		getActiveChannelName,
+		getActiveChannelAvatar,
 	} = useContext(ChatContext)
+
+	const messages = activeChannelData?.msgs
 	const router = useRouter()
 
 	const loggedUserID = user?.userID
-
-	const [input, setInput] = useState('')
-
-	function handleSubmit(e: FormEvent<HTMLFormElement>) {
-		e.preventDefault()
-		console.log(e)
-		console.log(input)
-	}
 
 	function scrollToBottom(behavior: 'smooth' | 'instant' = 'instant') {
 		// eslint-disable-next-line prettier/prettier
@@ -76,8 +62,7 @@ export default function Chat() {
 		const { channelID } = router.query
 		console.log('channelID:', channelID)
 		if (channelID) {
-			getChannelMsgs(Number(channelID))
-			scrollToBottom()
+			getChannelMessages(Number(channelID))
 		}
 	}, [router.query])
 
@@ -107,7 +92,7 @@ export default function Chat() {
 						<ChatHeader>
 							<ChatHeaderTextContainer>
 								<Image
-									src={userDefaulAvatar.src}
+									src={getActiveChannelAvatar()}
 									width={40}
 									height={40}
 									priority={true}
@@ -148,96 +133,85 @@ export default function Chat() {
 							</ChatMenuWrapper>
 						</ChatHeader>
 						<ChatMessageContainer>
-							{activeChannelData.msgs.length > 0 ? (
-								activeChannelData.msgs
-									.reverse()
-									.map((message: iChannelMessage) => (
-										<ChatMessage
-											key={message.message_id}
-											isLoggedUser={
-												message.sender_id ===
-												loggedUserID
-											}
-										>
-											{message.sender_id !==
-												loggedUserID && (
-												<SenderMenuWrapper>
-													<SenderMenu>
-														<FaUserAstronaut
-															size={28}
-														/>
-														{getUsernameFromChannelMembers(
-															message.sender_id,
-														)}
-													</SenderMenu>
-													<MenuContent>
-														<MenuArrow />
-														<MenuItem>
-															<MenuAction
-																onClick={() => {
-																	console.log(
-																		'play',
-																	)
-																}}
-															>
-																<FaGamepad
-																	size={
-																		menuIconSize
-																	}
-																/>{' '}
-																Play
-															</MenuAction>
-														</MenuItem>
-														<MenuItem>
-															<MenuAction
-																onClick={() => {
-																	console.log(
-																		'profile',
-																	)
-																}}
-															>
-																<FaUserAstronaut
-																	size={
-																		menuIconSize
-																	}
-																/>{' '}
-																Profile
-															</MenuAction>
-														</MenuItem>
-													</MenuContent>
-												</SenderMenuWrapper>
-											)}
-											<p>{message.content}</p>
-											<ChatMessageTimestamp>
-												{new Date(message.timestamp)
-													.toLocaleString('en-CA', {
-														hour: '2-digit',
-														minute: '2-digit',
-														second: '2-digit',
-														year: 'numeric',
-														month: '2-digit',
-														day: '2-digit',
-														hour12: false,
-													})
-													.replace(',', ' ')}
-											</ChatMessageTimestamp>
-										</ChatMessage>
-									))
+							{messages && messages?.length > 0 ? (
+								messages.map((message: iChannelMessage) => (
+									<ChatMessage
+										key={message.message_id}
+										isLoggedUser={
+											message.sender_id === loggedUserID
+										}
+									>
+										{message.sender_id !== loggedUserID && (
+											<SenderMenuWrapper>
+												<SenderMenu>
+													<FaUserAstronaut
+														size={28}
+													/>
+													{getUsernameFromChannelMembers(
+														message.sender_id,
+													)}
+												</SenderMenu>
+												<MenuContent>
+													<MenuArrow />
+													<MenuItem>
+														<MenuAction
+															onClick={() => {
+																console.log(
+																	'play',
+																)
+															}}
+														>
+															<FaGamepad
+																size={
+																	menuIconSize
+																}
+															/>{' '}
+															Play
+														</MenuAction>
+													</MenuItem>
+													<MenuItem>
+														<MenuAction
+															onClick={() => {
+																console.log(
+																	'profile',
+																)
+															}}
+														>
+															<FaUserAstronaut
+																size={
+																	menuIconSize
+																}
+															/>{' '}
+															Profile
+														</MenuAction>
+													</MenuItem>
+												</MenuContent>
+											</SenderMenuWrapper>
+										)}
+										<p>{message.content}</p>
+										<ChatMessageTimestamp>
+											{new Date(message.timestamp)
+												.toLocaleString('en-CA', {
+													hourCycle: 'h23',
+													hour: '2-digit',
+													minute: '2-digit',
+													second: '2-digit',
+													year: 'numeric',
+													month: '2-digit',
+													day: '2-digit',
+												})
+												.replace(',', ' ')}
+										</ChatMessageTimestamp>
+									</ChatMessage>
+								))
 							) : (
 								<>vazio</>
 							)}
 							<div ref={messagesEndRef} />
 						</ChatMessageContainer>
-						<ChatInputContainer onSubmit={(e) => handleSubmit(e)}>
-							<input
-								type="text"
-								value={input}
-								onChange={(e) => setInput(e.target.value)}
-							/>
-							<button>
-								<MdSend size={48} />
-							</button>
-						</ChatInputContainer>
+						<ChatInput
+							channel_id={activeChannelData.channel.channel_id}
+						/>
 					</>
 				) : (
 					<>activeChannel vazio</>

@@ -25,6 +25,11 @@ export const ChatHeader = styled('header', {
 	alignItems: 'center',
 	justifyContent: 'space-between',
 
+	img: {
+		borderRadius: '50%',
+		border: '1px $blue600 solid',
+	},
+
 	'@bp1': {
 		padding: '1rem 2rem',
 	},
@@ -194,64 +199,5 @@ export const SenderMenu = styled(DropdownMenu.Trigger, {
 
 	'&:hover': {
 		backgroundColor: '$blue100',
-	},
-})
-
-export const ChatInputContainer = styled('form', {
-	borderTop: '1px solid $white',
-	height: 'calc(100% - 60px - 80%)',
-	display: 'flex',
-	flexDirection: 'row',
-	alignItems: 'center',
-	justifyContent: 'center',
-	padding: '0 .5rem',
-	backgroundColor: '$blue700',
-	borderRadius: '0 0 32px 32px',
-
-	input: {
-		width: '100%',
-		padding: '0.25rem 0.5rem',
-		fontSize: '$2xl',
-		lineHeight: 1.25,
-		backgroundColor: '$blue300',
-		color: '$white',
-		borderRadius: '16px',
-		border: 'none',
-
-		'&:focus-visible': {
-			outline: '2px solid $white',
-		},
-	},
-
-	button: {
-		marginLeft: '0.25rem',
-		padding: '0.75rem',
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		border: 'none',
-		borderRadius: '50%',
-		cursor: 'pointer',
-		backgroundColor: 'transparent',
-		color: '$green300',
-		transition: '0.2s',
-
-		'&:hover': {
-			backgroundColor: '$green300',
-			color: '$white',
-		},
-	},
-
-	'@bp1': {
-		padding: '1rem 1rem',
-		height: 100,
-
-		input: {
-			padding: '1rem',
-		},
-
-		button: {
-			marginLeft: '0.75rem',
-		},
 	},
 })

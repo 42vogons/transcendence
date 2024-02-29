@@ -13,7 +13,8 @@ import { UserContext } from './UserContext'
 import { isDateExpired } from '@/reducers/User/Reducer'
 import { ChatReducer, FriendListItem } from '@/reducers/Chat/Reducer'
 import { updateChannel, updateFriendList } from '@/reducers/Chat/Action'
-import { iChannelData } from '@/reducers/Chat/Types'
+import { iChannelData, iChannelMember } from '@/reducers/Chat/Types'
+import userDefaulAvatar from '../../public/assets/user.png'
 
 interface ChatContextType {
 	friendList: FriendListItem[]
@@ -21,9 +22,11 @@ interface ChatContextType {
 	addFriend: (userID: number) => void
 	removeFriend: (userID: number) => void
 	createDirectChat: (userID: number) => void
-	getChannelMsgs: (channel_id: number) => void
+	getChannelMessages: (channel_id: number) => void
+	sendMessageToChannel: (channel_id: number, content: string) => void
 	getUsernameFromChannelMembers: (userID: number) => string
 	getActiveChannelName: () => string
+	getActiveChannelAvatar: () => string
 	closeChatSocket: () => void
 }
 
@@ -71,7 +74,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			console.log('refresh_channel data:', data)
 			const { channelID } = data
 			console.log('refresh_channel:', channelID)
-			getChannelMsgs(channelID)
+			getChannelMessages(channelID)
 		})
 
 		socket.on('update_channel', (activeChannelData) => {
@@ -129,10 +132,18 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		})
 	}
 
-	function getChannelMsgs(channel_id: number) {
+	function getChannelMessages(channel_id: number) {
 		console.log('refreshChat channelID:', channel_id)
 		emitSocketIfUserIsNotExpired('get_channel_msg', {
 			channel_id,
+		})
+	}
+
+	function sendMessageToChannel(channel_id: number, content: string) {
+		console.log('sendMessageToChannel:', channel_id, content)
+		emitSocketIfUserIsNotExpired('msg_to_server', {
+			channel_id,
+			content,
 		})
 	}
 
@@ -143,16 +154,36 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		return member ? member.users.username : 'name not found'
 	}
 
-	function getUsernameOfTheOtherChannelMember(userID: number | undefined) {
+	function getTheOtherChannelMember(
+		userID: number | undefined,
+	): iChannelMember['users'] | undefined {
 		const member = (activeChannelData as iChannelData)?.channelMembers.find(
 			(member) => member.user_id !== userID,
 		)
-		return member ? member.users.username : 'name not found'
+		return member ? member.users : undefined
 	}
 
-	function getActiveChannelName() {
+	function getActiveChannelName(): string {
 		if (activeChannelData.channel.type === 'direct') {
-			return getUsernameOfTheOtherChannelMember(user?.userID)
+			const userData = getTheOtherChannelMember(user?.userID)
+			if (userData) {
+				return userData.username
+			} else {
+				return 'error'
+			}
+		} else {
+			return 'todo'
+		}
+	}
+
+	function getActiveChannelAvatar() {
+		if (activeChannelData.channel.type === 'direct') {
+			const userData = getTheOtherChannelMember(user?.userID)
+			if (userData && userData.avatar_url) {
+				return userData.avatar_url
+			} else {
+				return userDefaulAvatar.src
+			}
 		} else {
 			return 'todo'
 		}
@@ -170,10 +201,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				removeFriend,
 				createDirectChat,
 				closeChatSocket,
-				getChannelMsgs,
+				getChannelMessages,
+				sendMessageToChannel,
 				activeChannelData,
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
+				getActiveChannelAvatar,
 			}}
 		>
 			{children}

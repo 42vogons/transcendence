@@ -183,7 +183,7 @@ export const PageContainer = styled('div', {
 	marginLeft: 32,
 
 	'@bp1': {
-		marginLeft: 45,
+		marginLeft: 40,
 	},
 
 	'@bp3': {
