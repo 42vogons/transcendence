@@ -92,6 +92,7 @@ export class UsersRepository {
                 user_id: true,
                 username: true,
                 avatar_url: true,
+                status: true,
               },
             },
           },
@@ -103,6 +104,7 @@ export class UsersRepository {
                 user_id: true,
                 username: true,
                 avatar_url: true,
+                status: true,
               },
             },
           },
@@ -127,6 +129,7 @@ export class UsersRepository {
         user_id: id,
         username: friend.username,
         avatar_url: friend.avatar_url,
+        status: friend.status,
       };
     });
     return uniqueFriends;

@@ -30,6 +30,7 @@ interface ChatContextType {
 	channelList: iLastChannelMessage[]
 	addFriend: (userID: number) => void
 	removeFriend: (userID: number) => void
+	getFriends: () => void
 	createDirectChat: (userID: number) => void
 	getChannelMessages: (channel_id: number) => void
 	sendMessageToChannel: (channel_id: number, content: string) => void
@@ -214,6 +215,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				activeChannelData,
 				addFriend,
 				removeFriend,
+				getFriends,
 				createDirectChat,
 				closeChatSocket,
 				getChannelMessages,
