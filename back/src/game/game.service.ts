@@ -9,12 +9,14 @@ import { MatchHistoryEntity } from './entities/match-history';
 import { WsException } from '@nestjs/websockets';
 import { UsersRepository } from 'src/users/repositories/users.repository';
 import { UpdateUserGameStatisticDto } from 'src/users/dto/update-user-game-statistic';
+// import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Injectable()
 export class GameService {
   constructor(
     private readonly matchRepository: MatchHistoryRespository,
     private readonly usersRespository: UsersRepository,
+    // private readonly chatGateway: ChatGateway,
   ) {}
   private readonly logger = new Logger(GameService.name);
   private players: UserData[] = [];
@@ -748,7 +750,7 @@ export class GameService {
     }
   }
 
-  gameInProgress(
+  async gameInProgress(
     roomID: string,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
@@ -758,8 +760,9 @@ export class GameService {
       io.to(roomID).emit('end_match', matchResult);
       io.to(roomID).emit('status_changed', 'connected');
       io.socketsLeave(roomID);
-      this.updatePlayerStatus(io, match.player1.userID, 'online')
-      this.updatePlayerStatus(io, match.player2.userID, 'online')
+      await this.updatePlayerStatus(match.player1.userID, 'online');
+      await this.updatePlayerStatus(match.player2.userID, 'online');
+      io.emit('refresh_list', ``);
       this.removeMatchFromList(match);
       return;
     }
@@ -887,33 +890,13 @@ export class GameService {
     return await this.usersRespository.findFriends(userId);
   }
 
-  async notifyFriends(
-    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
-    userID: number,
-  ) {
-    const friends = await this.findFriends(userID);
-    friends.forEach(async friend => {
-      const myFriend = this.findPlayerByUserID(friend.user_id)
-      if (myFriend === undefined) {
-        return;
-      }
-      io.to(myFriend.socketID).emit('refresh_list', ``);
-    });
-  }
-
   async setStatus(userId: any, status: string) {
     return await this.usersRespository.setStatus(userId, status);
   }
 
-  async updatePlayerStatus(
-    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
-    userID: number,
-    status: string,
-  ) {
-    const user = await this.usersRespository.findOne(userID)
-    if (user.status === 'offline')
-      return;
-    this.setStatus(userID, status)
-    this.notifyFriends(io, userID)
+  async updatePlayerStatus(userID: number, status: string) {
+    const user = await this.usersRespository.findOne(userID);
+    if (user.status === 'offline') return;
+    await this.setStatus(userID, status);
   }
 }

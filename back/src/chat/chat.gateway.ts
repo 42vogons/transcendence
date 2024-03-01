@@ -140,7 +140,6 @@ export class ChatGateway
       username: friend.username,
       userStatus: this.users.has(friend.user_id) ? friend.status : 'offline',
     }));
-    console.log('new friendsList:', client.username, friendsList);
     client.emit('update_friend_list', friendsList);
   }
 
