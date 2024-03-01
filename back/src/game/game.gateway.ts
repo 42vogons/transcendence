@@ -102,6 +102,8 @@ export class GameGateway
     ) {
       const matchData = this.gameService.loadGame(room);
       this.io.to(room.ID).emit('status_changed', 'playing');
+      this.gameService.updatePlayerStatus(this.io, room.users[0].userID, 'playing')
+      this.gameService.updatePlayerStatus(this.io, room.users[1].userID, 'playing')
       this.gameService.gameInProgress(matchData.roomID, this.io);
     }
   }

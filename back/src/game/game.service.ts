@@ -726,6 +726,7 @@ export class GameService {
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
     const player = this.findPlayerByUserID(client.userID);
+    if (!player) return;
     if (player.waitingReconnect && player.isReconnect) {
       player.waitingReconnect = false;
       player.isReconnect = false;
@@ -756,8 +757,10 @@ export class GameService {
       const matchResult = this.endMatch(match);
       io.to(roomID).emit('end_match', matchResult);
       io.to(roomID).emit('status_changed', 'connected');
-      this.removeMatchFromList(match);
       io.socketsLeave(roomID);
+      this.updatePlayerStatus(io, match.player1.userID, 'online')
+      this.updatePlayerStatus(io, match.player2.userID, 'online')
+      this.removeMatchFromList(match);
       return;
     }
 
@@ -878,5 +881,39 @@ export class GameService {
     setTimeout(() => {
       this.notReadyInTime(room.ID, io);
     }, this.timeToBeReady);
+  }
+
+  async findFriends(userId: any): Promise<Friends[] | null> {
+    return await this.usersRespository.findFriends(userId);
+  }
+
+  async notifyFriends(
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+    userID: number,
+  ) {
+    const friends = await this.findFriends(userID);
+    friends.forEach(async friend => {
+      const myFriend = this.findPlayerByUserID(friend.user_id)
+      if (myFriend === undefined) {
+        return;
+      }
+      io.to(myFriend.socketID).emit('refresh_list', ``);
+    });
+  }
+
+  async setStatus(userId: any, status: string) {
+    return await this.usersRespository.setStatus(userId, status);
+  }
+
+  async updatePlayerStatus(
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+    userID: number,
+    status: string,
+  ) {
+    const user = await this.usersRespository.findOne(userID)
+    if (user.status === 'offline')
+      return;
+    this.setStatus(userID, status)
+    this.notifyFriends(io, userID)
   }
 }
