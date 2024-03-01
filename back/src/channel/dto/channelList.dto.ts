@@ -1,3 +1,4 @@
+import { channel_members } from '@prisma/client';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class channel_listDTO {
@@ -7,7 +8,7 @@ export class channel_listDTO {
 
   @IsNotEmpty()
   @IsString()
-  lastAvatar: string;
+  channelName: string;
 
   @IsNotEmpty()
   @IsString()
@@ -22,28 +23,21 @@ export class channel_listDTO {
   type: string;
   timestamp: any;
 
+  channelMembers: channel_members[];
+
   constructor(
     lastMessage: string,
-    lastAvatar: string,
+    channelName: string,
     userName: string,
     channelId: number,
     type: string,
+    channelMembers: channel_members[],
   ) {
     this.lastMessage = lastMessage;
-    this.lastAvatar = lastAvatar;
+    this.channelName = channelName;
     this.userName = userName;
     this.channelId = channelId;
+    this.channelMembers = channelMembers;
     this.type = type;
   }
-
-    //@SubscribeMessage('get_channel_list')
-  // mandar lista dos canais do usuário
-  // com a ultima mensagem do canal, - ok
-  // usuário que mandou nome do canal, - ok
-  //id do canal - ok
-  // e avatar - ok
-  // mensagem - ok
-  // ordenado pela ultima mensagem
-  // em lista de objetos
-  // e o tipo do canal - ok
 }
