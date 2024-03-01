@@ -5,7 +5,7 @@ export interface FriendListItem {
 	userID?: number
 	userAvatarSrc: string
 	username: string
-	userStatus: 'online' | 'offline' | 'ingame'
+	userStatus: 'online' | 'offline' | 'playing'
 }
 
 export interface ChatState {

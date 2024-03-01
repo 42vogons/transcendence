@@ -52,7 +52,7 @@ export const FriendAvatarContainer = styled('div', {
 					backgroundColor: '$green100',
 				},
 			},
-			ingame: {
+			playing: {
 				'.statusIndicator': {
 					backgroundColor: '$red',
 				},
@@ -84,7 +84,7 @@ export const FriendName = styled('h2', {
 			online: {
 				color: '$white',
 			},
-			ingame: {
+			playing: {
 				color: '$white',
 			},
 			offline: {

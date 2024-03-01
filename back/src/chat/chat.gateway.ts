@@ -104,7 +104,7 @@ export class ChatGateway
     this.logger.log(`Init: ${server}`);
   }
 
-  private async notifyFriends(userID) {
+  public async notifyFriends(userID) {
     const friends = await this.usersService.findFriends(userID);
     friends.forEach(async friend => {
       const myFriend = this.users.get(friend.user_id);
@@ -138,8 +138,9 @@ export class ChatGateway
       userID: friend.user_id,
       userAvatarSrc: friend.avatar_url,
       username: friend.username,
-      userStatus: this.users.has(friend.user_id) ? 'online' : 'offline',
+      userStatus: this.users.has(friend.user_id) ? friend.status : 'offline',
     }));
+    console.log('new friendsList:', client.username, friendsList);
     client.emit('update_friend_list', friendsList);
   }
 

@@ -19,6 +19,7 @@ import { toast } from 'react-toastify'
 import socketClient from 'socket.io-client'
 import { UserContext } from './UserContext'
 import { isDateExpired } from '@/reducers/User/Reducer'
+import { ChatContext } from './ChatContext'
 
 interface GameContextType {
 	status: string
@@ -61,6 +62,7 @@ export function GameProvider({ children }: GameProviderProps) {
 	})
 
 	const { user } = useContext(UserContext)
+	const { getFriends } = useContext(ChatContext)
 
 	const { status, match, matchResult, isMatchCompleted, gameRequest } = state
 
@@ -90,6 +92,9 @@ export function GameProvider({ children }: GameProviderProps) {
 		socket.on('end_match', (matchResult: MatchResult) => {
 			console.log('end_match: ', matchResult)
 			dispatch(endMatch(matchResult))
+		})
+		socket.on('refresh_list', () => {
+			getFriends()
 		})
 		socket.on('request_game_error', (err) => handleErrors(err))
 		socket.on('connect_error', (err) => handleErrors(err))
