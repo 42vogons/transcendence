@@ -19,7 +19,8 @@ import MatchCard from '@/components/matchCard'
 
 import userDefaulAvatar from '../../../public/assets/user.png'
 import Layout from '@/components/layout'
-import { ReactElement } from 'react'
+import { ReactElement, useEffect } from 'react'
+import { api } from '@/services/api'
 
 interface iPlayer {
 	username: string
@@ -43,6 +44,24 @@ export default function Profile() {
 	const matchHistory = [match1, match2, match2, match1, match1, match2]
 
 	const profileUser = router.query.userID ? router.query.userID : 'acarneir'
+
+	async function getUserData() {
+		try {
+			const { data: userData } = await api.get(
+				`/users/findUsersByUserID/${1}`,
+			)
+			console.log('user data:', userData)
+			const { data: matchHistoryData } = await api.get(
+				`/game/match_history/${1}`,
+			)
+			console.log('matchHistory data:', matchHistoryData)
+		} catch (error) {}
+	}
+
+	useEffect(() => {
+		getUserData()
+	}, [])
+
 	return (
 		<>
 			<Head>

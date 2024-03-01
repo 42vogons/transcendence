@@ -96,11 +96,14 @@ export class UsersService {
     );
   }
 
-  private mapToProfileDTO(user: UserEntity): Partial<ProfileDto> {
+  public mapToProfileDTO(user: UserEntity): Partial<ProfileDto> {
     const userDTO: Partial<ProfileDto> = {
       user_id: user.user_id,
       avatar_url: user.avatar_url,
       username: user.username,
+      total_wins: user.total_wins,
+      total_losses: user.total_losses,
+      total_games: user.total_games,
     };
     return userDTO;
   }

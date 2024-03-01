@@ -131,4 +131,11 @@ export class UsersController {
     }
     return { avatarUrl: user.avatar_url };
   }
+
+  @Get('/findUsersByUserID/:userId')
+  async findUsersByUserID(@Param('userId') userId: number) {
+    return this.usersService
+      .findOne(userId)
+      .then(user => this.usersService.mapToProfileDTO(user));
+  }
 }
