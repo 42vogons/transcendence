@@ -273,17 +273,23 @@ export class ChannelRepository {
           users_chat_messages_sender_idTousers: {
             select: { username: true, avatar_url: true },
           },
-          channels: { select: { type: true } },
+          channels: {
+            select: {
+              type: true,
+              name: true,
+              channel_members: true,
+            },
+          },
         },
       });
 
       if (lastMessage) {
         return {
           lastMessage: lastMessage.content,
-          lastAvatar:
-            lastMessage.users_chat_messages_sender_idTousers.avatar_url,
+          channelName: lastMessage.channels.name,
           userName: lastMessage.users_chat_messages_sender_idTousers.username,
           channelId: channelId,
+          channelMembers: lastMessage.channels.channel_members,
           type: lastMessage.channels.type,
           timestamp: lastMessage.timestamp, // Incluindo o timestamp
         } as channel_listDTO;
