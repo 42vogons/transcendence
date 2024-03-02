@@ -38,7 +38,8 @@ export interface iChannelData {
 
 export interface iLastChannelMessage {
 	channelId: number
-	lastAvatar: string
+	channelName: string
+	channelMembers: iChannelMember[]
 	lastMessage: string
 	timestamp: Date
 	type: 'direct' | 'public' | 'protected' | 'private'
