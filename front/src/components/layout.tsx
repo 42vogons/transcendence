@@ -331,7 +331,8 @@ export default function Layout({ children }: iLayoutProps) {
 											(channel: iLastChannelMessage) => (
 												<ChatListItem
 													key={channel.channelId}
-													userAvatarSrc={getActiveChannelAvatar(
+													channelType={channel.type}
+													avatarSrc={getActiveChannelAvatar(
 														channel.type,
 														channel.channelMembers,
 													)}
@@ -340,9 +341,10 @@ export default function Layout({ children }: iLayoutProps) {
 														channel.type,
 														channel.channelMembers,
 													)}
+													lastUsername={
+														channel.userName
+													}
 													lastMessage={
-														channel.userName +
-														': ' +
 														channel.lastMessage
 													}
 													isActive={

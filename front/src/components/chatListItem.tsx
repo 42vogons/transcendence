@@ -6,21 +6,24 @@ import {
 	ChatName,
 } from '@/styles/components/chatListItem'
 import Image from 'next/image'
-
-import userDefaulAvatar from '../../public/assets/user.png'
+import { FaUserAstronaut } from 'react-icons/fa6'
 
 export interface iChatListItem {
-	userAvatarSrc: string
+	avatarSrc: string
 	name: string
+	lastUsername: string
 	lastMessage: string
+	channelType: 'direct' | 'public' | 'protected' | 'private'
 	isActive?: boolean
 	handleOnClick?: () => Promise<boolean> | undefined
 }
 
 export function ChatListItem({
-	userAvatarSrc,
+	avatarSrc,
 	name,
+	lastUsername,
 	lastMessage,
+	channelType,
 	isActive,
 	handleOnClick,
 }: iChatListItem) {
@@ -38,7 +41,7 @@ export function ChatListItem({
 		>
 			<ChatAvatarContainer>
 				<Image
-					src={userAvatarSrc || userDefaulAvatar.src}
+					src={avatarSrc}
 					width={50}
 					height={50}
 					priority={true}
@@ -47,9 +50,12 @@ export function ChatListItem({
 			</ChatAvatarContainer>
 
 			<ChatInfoContainer>
-				<ChatName>{name}</ChatName>
+				<ChatName type={channelType} title={name}>
+					{name}
+				</ChatName>
 				<ChatLastMessage title={lastMessage} isActive={isActive}>
-					{lastMessage}
+					<FaUserAstronaut size={12} />
+					{` ${lastUsername}: ${lastMessage}`}
 				</ChatLastMessage>
 			</ChatInfoContainer>
 		</ChatListItemContainer>

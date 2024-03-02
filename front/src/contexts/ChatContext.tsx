@@ -23,6 +23,9 @@ import {
 	iLastChannelMessage,
 } from '@/reducers/Chat/Types'
 import userDefaulAvatar from '../../public/assets/user.png'
+import privateDefaulAvatar from '../../public/assets/private.png'
+import protectedDefaulAvatar from '../../public/assets/protected.png'
+import publicDefaulAvatar from '../../public/assets/public.png'
 
 interface ChatContextType {
 	friendList: FriendListItem[]
@@ -219,8 +222,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			} else {
 				return userDefaulAvatar.src
 			}
+		} else if (channelType === 'protected') {
+			return protectedDefaulAvatar.src
+		} else if (channelType === 'private') {
+			return privateDefaulAvatar.src
 		} else {
-			return 'todo'
+			return publicDefaulAvatar.src
 		}
 	}
 
