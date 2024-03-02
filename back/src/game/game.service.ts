@@ -9,14 +9,12 @@ import { MatchHistoryEntity } from './entities/match-history';
 import { WsException } from '@nestjs/websockets';
 import { UsersRepository } from 'src/users/repositories/users.repository';
 import { UpdateUserGameStatisticDto } from 'src/users/dto/update-user-game-statistic';
-// import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Injectable()
 export class GameService {
   constructor(
     private readonly matchRepository: MatchHistoryRespository,
     private readonly usersRespository: UsersRepository,
-    // private readonly chatGateway: ChatGateway,
   ) {}
   private readonly logger = new Logger(GameService.name);
   private players: UserData[] = [];
