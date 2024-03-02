@@ -19,11 +19,12 @@ import { ChannelDto } from 'src/channel/dto/channel.dto';
 import { CreateChannelDto } from 'src/channel/dto/create-channel.dto';
 import { MemberDto } from 'src/channel/dto/member.dto';
 import { LeaveDto } from 'src/channel/dto/leave.dto';
-import { ChannelMemberStatus } from '../channel/constants';
+import { AdminActionType, ChannelMemberStatus } from '../channel/constants';
 import { ChatService } from './chat.service';
 import { ChannelMessageDto } from 'src/channel/dto/channelMessage.dto.';
 import { BlockUserDto } from 'src/users/dto/blockUser.dto';
 import { AdminActionDto } from 'src/channel/dto/adminAction.dto';
+import { setTimeout } from 'timers/promises';
 
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway
@@ -42,9 +43,10 @@ export class ChatGateway
   ) {}
 
   private async notifyMembers(channel_id: number) {
+    await setTimeout(100);
     const members = await this.channelService.getChannelMembers(channel_id);
     members.forEach(async member => {
-      const memberId = this.users.get(member);
+      const memberId = this.users.get(member.user_id);
       this.server.to(memberId).emit('refresh_chat', { channelID: channel_id });
       const lastMessageChannel =
         await this.channelService.getLastChannelMessage(member.user_id);
@@ -58,7 +60,7 @@ export class ChatGateway
       chatDto.sender_id = client.userID;
       console.log('id ' + client.userID);
       await this.chatService.saveMessage(chatDto);
-      this.notifyMembers(chatDto.channel_id);
+      await this.notifyMembers(chatDto.channel_id);
       this.logger.log(
         `User ${client.userID} sent message on channel ${chatDto.channel_id}`,
       );
@@ -181,9 +183,10 @@ export class ChatGateway
         channelDto,
         client.userID,
       );
+      console.log('channel:', channel);
       this.logger.log(`User ${client.userID} Channel created ${channel}.`);
       await this.chatService.sendBroadCast(channel, `Channel created`);
-      this.notifyMembers(channel);
+      await this.notifyMembers(channel);
     } catch (error) {
       this.sendError(error);
     }
@@ -198,7 +201,7 @@ export class ChatGateway
       );
       this.logger.log(`User ${client.userID} Chat created ${channel}.`);
       await this.chatService.sendBroadCast(channel, `Chat created`);
-      this.notifyMembers(channel);
+      await this.notifyMembers(channel);
     } catch (error) {
       this.sendError(error);
     }
@@ -220,7 +223,7 @@ export class ChatGateway
         memberDto.channel_id,
         `A member was added`,
       );
-      this.notifyMembers(memberDto.channel_id);
+      await this.notifyMembers(memberDto.channel_id);
     } catch (error) {
       this.sendError(error);
     }
@@ -241,6 +244,13 @@ export class ChatGateway
   @SubscribeMessage('admin_action')
   async adminAction(client: SocketWithAuth, adminActionDto: AdminActionDto) {
     try {
+      if (adminActionDto.action !== AdminActionType.MUTED) {
+        await this.chatService.sendBroadCast(
+          adminActionDto.channel_id,
+          `The member ${adminActionDto.member_id} was ${adminActionDto.action}`,
+        );
+        await this.notifyMembers(adminActionDto.channel_id);
+      }
       await this.channelService.adminAction(adminActionDto, client.userID);
       this.logger.log(
         `User ${client.userID} ${adminActionDto.action} member ${adminActionDto.member_id} to ${adminActionDto.end_date} minutes`,
@@ -261,7 +271,7 @@ export class ChatGateway
         leaveDto.channel_id,
         `A member left the channel`,
       );
-      this.notifyMembers(leaveDto.channel_id);
+      await this.notifyMembers(leaveDto.channel_id);
     } catch (error) {
       this.sendError(error);
     }
@@ -278,7 +288,7 @@ export class ChatGateway
         channelDto.channel_id,
         `A member joined the channel`,
       );
-      this.notifyMembers(channelDto.channel_id);
+      await this.notifyMembers(channelDto.channel_id);
     } catch (error) {
       this.sendError(error);
     }
