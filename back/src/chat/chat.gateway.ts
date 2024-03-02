@@ -41,32 +41,27 @@ export class ChatGateway
     private readonly chatService: ChatService,
   ) {}
 
+  private async notifyMembers(channel_id: number) {
+    const members = await this.channelService.getChannelMembers(channel_id);
+    members.forEach(async member => {
+      const memberId = this.users.get(member);
+      this.server.to(memberId).emit('refresh_chat', { channelID: channel_id });
+      const lastMessageChannel =
+        await this.channelService.getLastChannelMessage(member.user_id);
+      this.server.to(memberId).emit('refresh_channel_list', lastMessageChannel);
+    });
+  }
+
   @SubscribeMessage('msg_to_server')
   async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
       chatDto.sender_id = client.userID;
       console.log('id ' + client.userID);
-      const members = await this.chatService.saveMessage(chatDto);
-      members.forEach(async member => {
-        const memberId = this.users.get(member);
-        console.log('member:', member);
-        this.server
-          .to(memberId)
-          .emit('refresh_chat', { channelID: chatDto.channel_id });
-        const lastMessageChannel =
-          await this.channelService.getLastChannelMessage(member);
-        this.server
-          .to(memberId)
-          .emit('refresh_channel_list', lastMessageChannel);
-      });
+      await this.chatService.saveMessage(chatDto);
+      this.notifyMembers(chatDto.channel_id);
       this.logger.log(
         `User ${client.userID} sent message on channel ${chatDto.channel_id}`,
       );
-      const lastMessageChannel =
-        await this.channelService.getLastChannelMessage(client.userID);
-      this.server
-        .to(this.users.get(client.userID))
-        .emit('refresh_channel_list', lastMessageChannel);
     } catch (error) {
       this.sendError(error);
     }
@@ -186,7 +181,9 @@ export class ChatGateway
         channelDto,
         client.userID,
       );
-      this.logger.log(`User ${client.userID} created Channel ${channel}.`);
+      this.logger.log(`User ${client.userID} Channel created ${channel}.`);
+      await this.chatService.sendBroadCast(channel, `Channel created`);
+      this.notifyMembers(channel);
     } catch (error) {
       this.sendError(error);
     }
@@ -199,7 +196,9 @@ export class ChatGateway
         channelDto,
         client.userID,
       );
-      this.logger.log(`User ${client.userID} created Channel ${channel}.`);
+      this.logger.log(`User ${client.userID} Chat created ${channel}.`);
+      await this.chatService.sendBroadCast(channel, `Chat created`);
+      this.notifyMembers(channel);
     } catch (error) {
       this.sendError(error);
     }
@@ -217,6 +216,11 @@ export class ChatGateway
       this.logger.log(
         `Member ${memberDto.member_id} added by ${client.userID} in channel ${memberDto.channel_id}.`,
       );
+      await this.chatService.sendBroadCast(
+        memberDto.channel_id,
+        `A member was added`,
+      );
+      this.notifyMembers(memberDto.channel_id);
     } catch (error) {
       this.sendError(error);
     }
@@ -253,6 +257,11 @@ export class ChatGateway
       this.logger.log(
         `User ${client.userID} leave channel ${leaveDto.channel_id}`,
       );
+      await this.chatService.sendBroadCast(
+        leaveDto.channel_id,
+        `A member left the channel`,
+      );
+      this.notifyMembers(leaveDto.channel_id);
     } catch (error) {
       this.sendError(error);
     }
@@ -265,6 +274,11 @@ export class ChatGateway
       this.logger.log(
         `User ${client.userID} joined the channel ${channelDto.channel_id}.`,
       );
+      await this.chatService.sendBroadCast(
+        channelDto.channel_id,
+        `A member joined the channel`,
+      );
+      this.notifyMembers(channelDto.channel_id);
     } catch (error) {
       this.sendError(error);
     }

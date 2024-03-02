@@ -15,12 +15,20 @@ export class ChatService {
     private readonly channelService: ChannelService,
   ) {}
 
+  async sendBroadCast(channel_id: number, msg: string) {
+    const chatDto = new ChatDto();
+    chatDto.channel_id = channel_id;
+    chatDto.sender_id = 0;
+    chatDto.content = msg;
+    await this.repository.saveMessage(chatDto);
+  }
+
   async saveMessage(chatDto: ChatDto): Promise<number[]> {
     const isMember = await this.channelRepository.checkMember(
       chatDto.sender_id,
       chatDto.channel_id,
     );
-    if (!isMember) {
+    if (!isMember && chatDto.sender_id != 0) {
       throw new NotFoundException('You are not a member of this channel.');
     }
     await this.channelService.checkMuted(chatDto.sender_id, chatDto.channel_id);

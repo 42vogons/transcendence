@@ -37,7 +37,7 @@ export class ChannelService {
   async createDirect(
     createChanneltDto: CreateChannelDto,
     user_id: number,
-  ): Promise<any> {
+  ): Promise<number> {
     if (
       !Object.values(ChannelType).includes(
         createChanneltDto.type as ChannelType,
