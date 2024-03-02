@@ -151,8 +151,14 @@ export default function Layout({ children }: iLayoutProps) {
 	]
 
 	const { user } = useContext(UserContext)
-	const { friendList, activeChannelData, channelList, closeChatSocket } =
-		useContext(ChatContext)
+	const {
+		friendList,
+		activeChannelData,
+		channelList,
+		getActiveChannelName,
+		getActiveChannelAvatar,
+		closeChatSocket,
+	} = useContext(ChatContext)
 	const { closeGameSocket } = useContext(GameContext)
 
 	useEffect(() => {
@@ -325,13 +331,20 @@ export default function Layout({ children }: iLayoutProps) {
 											(channel: iLastChannelMessage) => (
 												<ChatListItem
 													key={channel.channelId}
-													userAvatarSrc={
-														channel.lastAvatar
+													channelType={channel.type}
+													avatarSrc={getActiveChannelAvatar(
+														channel.type,
+														channel.channelMembers,
+													)}
+													name={getActiveChannelName(
+														channel.channelName,
+														channel.type,
+														channel.channelMembers,
+													)}
+													lastUsername={
+														channel.userName
 													}
-													name={channel.userName}
 													lastMessage={
-														channel.userName +
-														': ' +
 														channel.lastMessage
 													}
 													isActive={

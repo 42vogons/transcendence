@@ -52,9 +52,24 @@ export const ChatInfoContainer = styled('div', {
 })
 
 export const ChatName = styled('h2', {
+	width: '100%',
 	fontSize: '$md',
-	fontFamily: 'monospace',
-	fontVariantNnumeric: 'slashed-zero',
+	textAlign: 'start',
+	whiteSpace: 'nowrap',
+	overflow: 'hidden',
+	textOverflow: 'ellipsis',
+
+	variants: {
+		type: {
+			direct: {
+				fontFamily: 'monospace',
+				fontVariantNnumeric: 'slashed-zero',
+			},
+			public: {},
+			protected: {},
+			private: {},
+		},
+	},
 })
 
 export const ChatLastMessage = styled('p', {

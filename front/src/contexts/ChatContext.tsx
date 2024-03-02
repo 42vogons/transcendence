@@ -23,6 +23,9 @@ import {
 	iLastChannelMessage,
 } from '@/reducers/Chat/Types'
 import userDefaulAvatar from '../../public/assets/user.png'
+import privateDefaulAvatar from '../../public/assets/private.png'
+import protectedDefaulAvatar from '../../public/assets/protected.png'
+import publicDefaulAvatar from '../../public/assets/public.png'
 
 interface ChatContextType {
 	friendList: FriendListItem[]
@@ -35,8 +38,15 @@ interface ChatContextType {
 	getChannelMessages: (channel_id: number) => void
 	sendMessageToChannel: (channel_id: number, content: string) => void
 	getUsernameFromChannelMembers: (userID: number) => string
-	getActiveChannelName: () => string
-	getActiveChannelAvatar: () => string
+	getActiveChannelName: (
+		channelName: string,
+		channelType: 'direct' | 'public' | 'protected' | 'private',
+		channelMembers: iChannelMember[],
+	) => string
+	getActiveChannelAvatar: (
+		channelType: 'direct' | 'public' | 'protected' | 'private',
+		channelMembers: iChannelMember[],
+	) => string
 	closeChatSocket: () => void
 }
 
@@ -170,36 +180,54 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
 	function getTheOtherChannelMember(
 		userID: number | undefined,
+		channelMembers: iChannelMember[],
 	): iChannelMember['users'] | undefined {
-		const member = (activeChannelData as iChannelData)?.channelMembers.find(
+		const member = channelMembers.find(
 			(member) => member.user_id !== userID,
 		)
 		return member ? member.users : undefined
 	}
 
-	function getActiveChannelName(): string {
-		if (activeChannelData.channel.type === 'direct') {
-			const userData = getTheOtherChannelMember(user?.userID)
+	function getActiveChannelName(
+		channelName: string,
+		channelType: 'direct' | 'public' | 'protected' | 'private',
+		channelMembers: iChannelMember[],
+	): string {
+		if (channelType === 'direct') {
+			const userData = getTheOtherChannelMember(
+				user?.userID,
+				channelMembers,
+			)
 			if (userData) {
 				return userData.username
 			} else {
-				return 'error'
+				return channelName
 			}
 		} else {
-			return activeChannelData.channel.name
+			return channelName
 		}
 	}
 
-	function getActiveChannelAvatar() {
-		if (activeChannelData.channel.type === 'direct') {
-			const userData = getTheOtherChannelMember(user?.userID)
+	function getActiveChannelAvatar(
+		channelType: 'direct' | 'public' | 'protected' | 'private',
+		channelMembers: iChannelMember[],
+	) {
+		if (channelType === 'direct') {
+			const userData = getTheOtherChannelMember(
+				user?.userID,
+				channelMembers,
+			)
 			if (userData && userData.avatar_url) {
 				return userData.avatar_url
 			} else {
 				return userDefaulAvatar.src
 			}
+		} else if (channelType === 'protected') {
+			return protectedDefaulAvatar.src
+		} else if (channelType === 'private') {
+			return privateDefaulAvatar.src
 		} else {
-			return 'todo'
+			return publicDefaulAvatar.src
 		}
 	}
 

@@ -277,7 +277,13 @@ export class ChannelRepository {
             select: {
               type: true,
               name: true,
-              channel_members: true,
+              channel_members: {
+                include: {
+                  users: {
+                    select: { username: true, user_id: true, avatar_url: true },
+                  },
+                },
+              },
             },
           },
         },

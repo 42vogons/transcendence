@@ -146,6 +146,7 @@ export const ChatMessage = styled('div', {
 	flexDirection: 'column',
 	backgroundColor: '$blue600',
 	gap: 4,
+	width: 'fit-content',
 	maxWidth: '80%',
 	fontSize: '$lg',
 	lineHeight: 1.25,

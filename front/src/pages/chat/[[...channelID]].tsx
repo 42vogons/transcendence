@@ -92,13 +92,22 @@ export default function Chat() {
 						<ChatHeader>
 							<ChatHeaderTextContainer>
 								<Image
-									src={getActiveChannelAvatar()}
+									src={getActiveChannelAvatar(
+										activeChannelData.channel.type,
+										activeChannelData.channelMembers,
+									)}
 									width={40}
 									height={40}
 									priority={true}
 									alt="user"
 								/>
-								<ChatTitle>{getActiveChannelName()}</ChatTitle>
+								<ChatTitle>
+									{getActiveChannelName(
+										activeChannelData.channel.name,
+										activeChannelData.channel.type,
+										activeChannelData.channelMembers,
+									)}
+								</ChatTitle>
 								{/* <ChatSubTitle>online</ChatSubTitle> */}
 							</ChatHeaderTextContainer>
 							<ChatMenuWrapper>
