@@ -10,7 +10,13 @@ import { UsersRepository } from 'src/users/repositories/users.repository';
 @Module({
   imports: [ConfigModule],
   controllers: [GameController],
-  providers: [GameService, GameGateway, PrismaService, MatchHistoryRespository, UsersRepository],
-  exports: [PrismaService, MatchHistoryRespository]
+  providers: [
+    GameService,
+    GameGateway,
+    PrismaService,
+    MatchHistoryRespository,
+    UsersRepository,
+  ],
+  exports: [PrismaService, MatchHistoryRespository],
 })
 export class GameModule {}

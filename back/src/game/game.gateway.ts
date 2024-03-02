@@ -84,7 +84,7 @@ export class GameGateway
   }
 
   @SubscribeMessage('playing')
-  handlePlayingEvent(client: SocketWithAuth) {
+  async handlePlayingEvent(client: SocketWithAuth) {
     const player = this.gameService.findPlayerByUserID(client.userID);
     const room = this.gameService.findRoomByRoomID(player.roomID);
     room.IsReady = true;
@@ -102,6 +102,15 @@ export class GameGateway
     ) {
       const matchData = this.gameService.loadGame(room);
       this.io.to(room.ID).emit('status_changed', 'playing');
+      await this.gameService.updatePlayerStatus(
+        room.users[0].userID,
+        'playing',
+      );
+      await this.gameService.updatePlayerStatus(
+        room.users[1].userID,
+        'playing',
+      );
+      this.io.emit('refresh_list', ``);
       this.gameService.gameInProgress(matchData.roomID, this.io);
     }
   }

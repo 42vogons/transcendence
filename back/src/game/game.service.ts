@@ -726,6 +726,7 @@ export class GameService {
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
     const player = this.findPlayerByUserID(client.userID);
+    if (!player) return;
     if (player.waitingReconnect && player.isReconnect) {
       player.waitingReconnect = false;
       player.isReconnect = false;
@@ -747,7 +748,7 @@ export class GameService {
     }
   }
 
-  gameInProgress(
+  async gameInProgress(
     roomID: string,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
@@ -756,8 +757,11 @@ export class GameService {
       const matchResult = this.endMatch(match);
       io.to(roomID).emit('end_match', matchResult);
       io.to(roomID).emit('status_changed', 'connected');
-      this.removeMatchFromList(match);
       io.socketsLeave(roomID);
+      await this.updatePlayerStatus(match.player1.userID, 'online');
+      await this.updatePlayerStatus(match.player2.userID, 'online');
+      io.emit('refresh_list', ``);
+      this.removeMatchFromList(match);
       return;
     }
 
@@ -878,5 +882,19 @@ export class GameService {
     setTimeout(() => {
       this.notReadyInTime(room.ID, io);
     }, this.timeToBeReady);
+  }
+
+  async findFriends(userId: any): Promise<Friends[] | null> {
+    return await this.usersRespository.findFriends(userId);
+  }
+
+  async setStatus(userId: any, status: string) {
+    return await this.usersRespository.setStatus(userId, status);
+  }
+
+  async updatePlayerStatus(userID: number, status: string) {
+    const user = await this.usersRespository.findOne(userID);
+    if (user.status === 'offline') return;
+    await this.setStatus(userID, status);
   }
 }
