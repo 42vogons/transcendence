@@ -14,6 +14,7 @@ import {
 import {
 	ApplicationContainer,
 	LayoutContainer,
+	LoadingContainer,
 	PageContainer,
 	SidePanelContainer,
 	SidebarContainer,
@@ -36,6 +37,7 @@ import { IoSearchSharp } from 'react-icons/io5'
 import SearchChannelModal from './searchChannelModal'
 import NewChannelModal from './newChannelModal'
 import { iLastChannelMessage } from '@/reducers/Chat/Types'
+import Loading from './loading'
 
 type activePanelType = 'menu' | 'friends' | 'chat'
 
@@ -392,5 +394,9 @@ export default function Layout({ children }: iLayoutProps) {
 				showSearchChannelModal={showSearchChannelModal}
 			/>
 		</LayoutContainer>
-	) : null
+	) : (
+		<LoadingContainer>
+			<Loading size={200} />
+		</LoadingContainer>
+	)
 }
