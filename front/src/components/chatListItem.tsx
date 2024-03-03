@@ -11,6 +11,7 @@ import { FaUserAstronaut } from 'react-icons/fa6'
 export interface iChatListItem {
 	avatarSrc: string
 	name: string
+	lastUserID: number
 	lastUsername: string
 	lastMessage: string
 	channelType: 'direct' | 'public' | 'protected' | 'private'
@@ -21,6 +22,7 @@ export interface iChatListItem {
 export function ChatListItem({
 	avatarSrc,
 	name,
+	lastUserID,
 	lastUsername,
 	lastMessage,
 	channelType,
@@ -53,9 +55,16 @@ export function ChatListItem({
 				<ChatName type={channelType} title={name}>
 					{name}
 				</ChatName>
+
 				<ChatLastMessage title={lastMessage} isActive={isActive}>
-					<FaUserAstronaut size={12} />
-					{` ${lastUsername}: ${lastMessage}`}
+					{lastUserID === 0 ? (
+						`${lastMessage}`
+					) : (
+						<>
+							<FaUserAstronaut size={12} />
+							{` ${lastUsername}: ${lastMessage}`}
+						</>
+					)}
 				</ChatLastMessage>
 			</ChatInfoContainer>
 		</ChatListItemContainer>

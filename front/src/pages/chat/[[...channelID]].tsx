@@ -146,60 +146,72 @@ export default function Chat() {
 								messages.map((message: iChannelMessage) => (
 									<ChatMessage
 										key={message.message_id}
-										isLoggedUser={
+										userType={
 											message.sender_id === loggedUserID
+												? 'logged'
+												: message.sender_id === 0
+												  ? 'broadcast'
+												  : 'other'
 										}
 									>
-										{message.sender_id !== loggedUserID && (
-											<SenderMenuWrapper>
-												<SenderMenu>
-													<FaUserAstronaut
-														size={28}
-													/>
-													{getUsernameFromChannelMembers(
-														message.sender_id,
-													)}
-												</SenderMenu>
-												<MenuContent>
-													<MenuArrow />
-													<MenuItem>
-														<MenuAction
-															onClick={() => {
-																console.log(
-																	'play',
-																)
-															}}
-														>
-															<FaGamepad
-																size={
-																	menuIconSize
-																}
-															/>{' '}
-															Play
-														</MenuAction>
-													</MenuItem>
-													<MenuItem>
-														<MenuAction
-															onClick={() => {
-																console.log(
-																	'profile',
-																)
-															}}
-														>
-															<FaUserAstronaut
-																size={
-																	menuIconSize
-																}
-															/>{' '}
-															Profile
-														</MenuAction>
-													</MenuItem>
-												</MenuContent>
-											</SenderMenuWrapper>
-										)}
+										{message.sender_id !== 0 &&
+											message.sender_id !==
+												loggedUserID && (
+												<SenderMenuWrapper>
+													<SenderMenu>
+														<FaUserAstronaut
+															size={28}
+														/>
+														{getUsernameFromChannelMembers(
+															message.sender_id,
+														)}
+													</SenderMenu>
+													<MenuContent>
+														<MenuArrow />
+														<MenuItem>
+															<MenuAction
+																onClick={() => {
+																	console.log(
+																		'play',
+																	)
+																}}
+															>
+																<FaGamepad
+																	size={
+																		menuIconSize
+																	}
+																/>{' '}
+																Play
+															</MenuAction>
+														</MenuItem>
+														<MenuItem>
+															<MenuAction
+																onClick={() => {
+																	console.log(
+																		'profile',
+																	)
+																}}
+															>
+																<FaUserAstronaut
+																	size={
+																		menuIconSize
+																	}
+																/>{' '}
+																Profile
+															</MenuAction>
+														</MenuItem>
+													</MenuContent>
+												</SenderMenuWrapper>
+											)}
 										<p>{message.content}</p>
-										<ChatMessageTimestamp>
-											{new Date(message.timestamp)
+										<ChatMessageTimestamp
+											userType={
+												message.sender_id !== 0
+													? 'user'
+													: 'broadcast'
+											}
+										>
+											{`@ ${new Date(message.timestamp)
 												.toLocaleString('en-CA', {
 													hourCycle: 'h23',
 													hour: '2-digit',
@@ -209,7 +221,7 @@ export default function Chat() {
 													month: '2-digit',
 													day: '2-digit',
 												})
-												.replace(',', ' ')}
+												.replace(',', ' ')}`}
 										</ChatMessageTimestamp>
 									</ChatMessage>
 								))

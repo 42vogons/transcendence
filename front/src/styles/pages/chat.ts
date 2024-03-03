@@ -51,8 +51,9 @@ export const ChatTitle = styled('h2', {
 export const ChatSubTitle = styled('p', {})
 
 export const ChatMessageContainer = styled('div', {
-	minHeight: '75%',
+	minHeight: '79%',
 	maxHeight: '78vh',
+	height: '100%',
 	display: 'flex',
 	flexDirection: 'column',
 	padding: '1rem 1rem',
@@ -74,7 +75,7 @@ export const ChatMessageContainer = styled('div', {
 			width: 4,
 		},
 	},
-	'@bp3': {
+	'@bp2': {
 		minHeight: '77%',
 	},
 })
@@ -144,7 +145,7 @@ export const ChatMessage = styled('div', {
 	marginTop: '1.5rem',
 	display: 'flex',
 	flexDirection: 'column',
-	backgroundColor: '$blue600',
+	// backgroundColor: '$blue600',
 	gap: 4,
 	width: 'fit-content',
 	maxWidth: '80%',
@@ -155,10 +156,20 @@ export const ChatMessage = styled('div', {
 	color: '$white',
 
 	variants: {
-		isLoggedUser: {
-			true: {
+		userType: {
+			logged: {
 				backgroundColor: '$green500',
 				alignSelf: 'end',
+			},
+			broadcast: {
+				color: '$gray300',
+				alignSelf: 'center',
+				fontSize: 16,
+				fontWeight: '300',
+				textAlign: 'center',
+			},
+			other: {
+				backgroundColor: '$blue600',
 			},
 		},
 	},
@@ -172,11 +183,26 @@ export const ChatMessage = styled('div', {
 export const ChatMessageTimestamp = styled('div', {
 	width: 120,
 	position: 'absolute',
-	bottom: -16,
-	right: 16,
+	// bottom: -16,
+	// right: 16,
 	textAlign: 'end',
 	fontSize: 10,
 	fontWeight: '300',
+
+	variants: {
+		userType: {
+			user: {
+				bottom: -16,
+				right: 16,
+			},
+			broadcast: {
+				top: '100%',
+				left: '50%',
+				transform: 'translate(-50%, -50%)',
+				textAlign: 'center',
+			},
+		},
+	},
 })
 export const SenderMenuWrapper = styled(DropdownMenu.Root, {})
 

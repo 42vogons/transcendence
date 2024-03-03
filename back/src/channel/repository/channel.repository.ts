@@ -271,7 +271,7 @@ export class ChannelRepository {
         orderBy: { timestamp: 'desc' },
         include: {
           users_chat_messages_sender_idTousers: {
-            select: { username: true, avatar_url: true },
+            select: { username: true, avatar_url: true, user_id: true },
           },
           channels: {
             select: {
@@ -298,6 +298,7 @@ export class ChannelRepository {
           channelMembers: lastMessage.channels.channel_members,
           type: lastMessage.channels.type,
           timestamp: lastMessage.timestamp, // Incluindo o timestamp
+          user_id: lastMessage.users_chat_messages_sender_idTousers.user_id,
         } as channel_listDTO;
       }
     });

@@ -341,6 +341,7 @@ export default function Layout({ children }: iLayoutProps) {
 														channel.type,
 														channel.channelMembers,
 													)}
+													lastUserID={channel.user_id}
 													lastUsername={
 														channel.userName
 													}

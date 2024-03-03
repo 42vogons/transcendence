@@ -25,6 +25,8 @@ export class channel_listDTO {
 
   channelMembers: channel_members[];
 
+  user_id: number;
+
   constructor(
     lastMessage: string,
     channelName: string,
@@ -32,6 +34,7 @@ export class channel_listDTO {
     channelId: number,
     type: string,
     channelMembers: channel_members[],
+    user_id: number,
   ) {
     this.lastMessage = lastMessage;
     this.channelName = channelName;
@@ -39,5 +42,6 @@ export class channel_listDTO {
     this.channelId = channelId;
     this.channelMembers = channelMembers;
     this.type = type;
+    this.user_id = user_id;
   }
 }

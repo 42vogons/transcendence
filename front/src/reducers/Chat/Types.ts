@@ -44,4 +44,5 @@ export interface iLastChannelMessage {
 	timestamp: Date
 	type: 'direct' | 'public' | 'protected' | 'private'
 	userName: string
+	user_id: number
 }
