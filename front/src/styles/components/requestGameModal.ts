@@ -1,6 +1,15 @@
 import { styled } from '..'
 
 export const RequestGameModalContainer = styled('div', {
+	overflowY: 'auto',
+
+	'&::-webkit-scrollbar': {
+		width: 4,
+	},
+	'&::-webkit-scrollbar-thumb': {
+		borderRadius: 32,
+		background: '$blue100',
+	},
 	height: '100%',
 	width: '100%',
 	// backgroundColor: 'red',
@@ -8,19 +17,27 @@ export const RequestGameModalContainer = styled('div', {
 	flexDirection: 'column',
 	justifyContent: 'space-between',
 	alignItems: 'center',
-	gap: 64,
+	gap: 32,
 	h3: {
-		fontSize: '$3xl',
-		// color: '$blue100',
+		fontSize: '$2xl',
 		textAlign: 'center',
+
+		'@bp2': {
+			fontSize: '$3xl',
+		},
 	},
 
 	'.buttonsContainer': {
 		width: '100%',
 		display: 'flex',
-		flexDirection: 'row',
+		flexDirection: 'column',
 		justifyContent: 'space-between',
 		alignItems: 'center',
+		gap: 16,
+
+		'@bp2': {
+			flexDirection: 'row',
+		},
 	},
 })
 
@@ -32,8 +49,12 @@ export const UserInfo = styled('div', {
 	gap: 32,
 
 	h2: {
-		fontSize: '48px',
+		fontSize: '$2xl',
 		fontFamily: 'monospace',
 		fontVariantNnumeric: 'slashed-zero',
+
+		'@bp2': {
+			fontSize: '$3xl',
+		},
 	},
 })

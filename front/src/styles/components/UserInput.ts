@@ -6,7 +6,7 @@ export const UserInputContainer = styled('div', {
 	display: 'flex',
 	flexDirection: 'column',
 	borderRadius: 16,
-	border: '1px solid $gray300',
+	// border: '1px solid $gray300',
 
 	label: {
 		fontSize: '$3xl',
@@ -18,12 +18,16 @@ export const UserInputContainer = styled('div', {
 		width: '100%',
 		borderRadius: '16px',
 		border: '2px solid $gray300',
-		fontSize: '$2xl',
+		fontSize: '$xl',
 		fontFamily: 'monospace',
 		fontVariantNnumeric: 'slashed-zero',
 		padding: '8px 14px 8px 50px',
 		'&:focus::placeholder': {
 			color: 'transparent',
+		},
+
+		'@bp2': {
+			fontSize: '$2xl',
 		},
 	},
 
@@ -40,20 +44,26 @@ export const UserInputContainer = styled('div', {
 
 	'.icon': {
 		position: 'absolute',
-		top: 12,
+		top: 6,
 		left: 14,
+
+		'@bp2': {
+			top: 12,
+			left: 14,
+		},
 	},
 })
 
 export const UserList = styled('ul', {
 	position: 'absolute',
-	top: 56,
+	top: 48,
 	maxHeight: 140,
 	width: '100%',
 	overflowY: 'auto',
 	border: '1px solid $gray300',
 	borderTop: 'none',
 	borderRadius: '0 0 16px 16px ',
+	backgroundColor: '$white',
 
 	'&::-webkit-scrollbar': {
 		width: 4,
@@ -61,6 +71,10 @@ export const UserList = styled('ul', {
 	'&::-webkit-scrollbar-thumb': {
 		borderRadius: 32,
 		background: '$blue100',
+	},
+
+	'@bp2': {
+		top: 56,
 	},
 })
 export const UserListItem = styled('li', {
@@ -90,7 +104,11 @@ export const LoadingContainer = styled('div', {
 	justifyContent: 'center',
 	alignItems: 'center',
 	gap: 16,
-	fontSize: '$2xl',
+	fontSize: '$xl',
+
+	'@bp2': {
+		fontSize: '$2xl',
+	},
 })
 
 export const UserAvatarContainer = styled('div', {
@@ -108,7 +126,11 @@ export const UserAvatarContainer = styled('div', {
 })
 
 export const Username = styled('p', {
-	fontSize: '$2xl',
+	fontSize: '$xl',
 	fontFamily: 'monospace',
 	fontVariantNnumeric: 'slashed-zero',
+
+	'@bp2': {
+		fontSize: '$2xl',
+	},
 })

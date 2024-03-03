@@ -15,12 +15,18 @@ export const ModalContainer = styled('div', {
 
 export const ModalContent = styled('div', {
 	backgroundColor: '$white',
-	padding: '4rem 1rem',
+	padding: '1rem',
 	borderRadius: 16,
 	height: 800,
 	width: 600,
+	maxHeight: '80vh',
+	maxWidth: '86vw',
 	color: '$gray900',
 	display: 'flex',
 	justifyContent: 'center',
 	alignItems: 'center',
+
+	'@bp2': {
+		padding: '4rem 1rem',
+	},
 })

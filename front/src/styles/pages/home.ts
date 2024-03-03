@@ -121,25 +121,42 @@ export const LoadingContainer = styled('div', {
 })
 
 export const PauseModal = styled('div', {
+	overflowY: 'auto',
+
+	'&::-webkit-scrollbar': {
+		width: 4,
+	},
+	'&::-webkit-scrollbar-thumb': {
+		borderRadius: 32,
+		background: '$blue100',
+	},
 	height: '100%',
 	width: '100%',
-	// backgroundColor: 'red',
 	display: 'flex',
 	flexDirection: 'column',
 	justifyContent: 'center',
 	alignItems: 'center',
-	gap: 64,
+	gap: 32,
 	h2: {
-		fontSize: 80,
+		fontSize: '$2xl',
 		color: '$red',
 		textAlign: 'center',
+
+		'@bp2': {
+			fontSize: 80,
+		},
 	},
 
 	'.buttonsContainer': {
 		width: '100%',
 		display: 'flex',
-		flexDirection: 'row',
+		flexDirection: 'column',
 		justifyContent: 'space-between',
 		alignItems: 'center',
+		gap: 16,
+
+		'@bp2': {
+			flexDirection: 'row',
+		},
 	},
 })

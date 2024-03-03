@@ -1,9 +1,9 @@
 import { styled } from '..'
 
 export const ButtonContainer = styled('button', {
-	width: 230,
+	width: '100%',
 	display: 'flex',
-	justifyContent: 'space-between',
+	justifyContent: 'space-around',
 	alignItems: 'center',
 	gap: 32,
 	color: '$white',
@@ -18,6 +18,11 @@ export const ButtonContainer = styled('button', {
 	'&:disabled': {
 		opacity: '40%',
 		cursor: 'not-allowed',
+	},
+
+	'@bp2': {
+		width: 230,
+		justifyContent: 'space-between',
 	},
 
 	variants: {
