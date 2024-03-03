@@ -13,6 +13,7 @@ import {
 	// ChatSubTitle,
 	ChatTitle,
 	MenuAction,
+	MenuPortal,
 	SenderMenu,
 	SenderMenuWrapper,
 } from '@/styles/pages/chat'
@@ -33,17 +34,19 @@ import { useRouter } from 'next/router'
 import { ChatContext } from '@/contexts/ChatContext'
 import { iChannelMessage } from '@/reducers/Chat/Types'
 import ChatInput from '@/components/ChatInput'
+import MessageContainer from '@/components/messageContainer'
 
 export default function Chat() {
 	const messagesEndRef = useRef(null)
 	const menuIconSize = 26
 	const { user } = useContext(UserContext)
 	const {
-		getChannelMessages,
+		activeChannel,
 		activeChannelData,
 		getUsernameFromChannelMembers,
 		getActiveChannelName,
 		getActiveChannelAvatar,
+		setActiveChannel,
 	} = useContext(ChatContext)
 
 	const messages = activeChannelData?.msgs
@@ -60,10 +63,8 @@ export default function Chat() {
 
 	useEffect(() => {
 		const { channelID } = router.query
-		console.log('channelID:', channelID)
-		if (channelID) {
-			getChannelMessages(Number(channelID))
-		}
+		setActiveChannel(Number(channelID))
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [router.query])
 
 	useEffect(() => {
@@ -114,31 +115,39 @@ export default function Chat() {
 								<ChatMenu>
 									<SlOptionsVertical size={28} />
 								</ChatMenu>
-								<MenuContent>
-									<MenuArrow />
-									<MenuItem>
-										<MenuAction
-											onClick={() => {
-												console.log('play')
-											}}
-										>
-											<FaGamepad size={menuIconSize} />{' '}
-											Play
-										</MenuAction>
-									</MenuItem>
-									<MenuItem>
-										<MenuAction
-											onClick={() => {
-												console.log('play')
-											}}
-										>
-											<BsChatSquareTextFill
-												size={menuIconSize}
-											/>{' '}
-											Chat
-										</MenuAction>
-									</MenuItem>
-								</MenuContent>
+								<MenuPortal>
+									<MenuContent
+										style={{
+											zIndex: 1,
+										}}
+									>
+										<MenuArrow />
+										<MenuItem>
+											<MenuAction
+												onClick={() => {
+													console.log('play')
+												}}
+											>
+												<FaGamepad
+													size={menuIconSize}
+												/>{' '}
+												Play
+											</MenuAction>
+										</MenuItem>
+										<MenuItem>
+											<MenuAction
+												onClick={() => {
+													console.log('play')
+												}}
+											>
+												<BsChatSquareTextFill
+													size={menuIconSize}
+												/>{' '}
+												Chat
+											</MenuAction>
+										</MenuItem>
+									</MenuContent>
+								</MenuPortal>
 							</ChatMenuWrapper>
 						</ChatHeader>
 						<ChatMessageContainer>
@@ -166,41 +175,47 @@ export default function Chat() {
 															message.sender_id,
 														)}
 													</SenderMenu>
-													<MenuContent>
-														<MenuArrow />
-														<MenuItem>
-															<MenuAction
-																onClick={() => {
-																	console.log(
-																		'play',
-																	)
-																}}
-															>
-																<FaGamepad
-																	size={
-																		menuIconSize
-																	}
-																/>{' '}
-																Play
-															</MenuAction>
-														</MenuItem>
-														<MenuItem>
-															<MenuAction
-																onClick={() => {
-																	console.log(
-																		'profile',
-																	)
-																}}
-															>
-																<FaUserAstronaut
-																	size={
-																		menuIconSize
-																	}
-																/>{' '}
-																Profile
-															</MenuAction>
-														</MenuItem>
-													</MenuContent>
+													<MenuPortal>
+														<MenuContent
+															style={{
+																zIndex: 1,
+															}}
+														>
+															<MenuArrow />
+															<MenuItem>
+																<MenuAction
+																	onClick={() => {
+																		console.log(
+																			'play',
+																		)
+																	}}
+																>
+																	<FaGamepad
+																		size={
+																			menuIconSize
+																		}
+																	/>{' '}
+																	Play
+																</MenuAction>
+															</MenuItem>
+															<MenuItem>
+																<MenuAction
+																	onClick={() => {
+																		console.log(
+																			'profile',
+																		)
+																	}}
+																>
+																	<FaUserAstronaut
+																		size={
+																			menuIconSize
+																		}
+																	/>{' '}
+																	Profile
+																</MenuAction>
+															</MenuItem>
+														</MenuContent>
+													</MenuPortal>
 												</SenderMenuWrapper>
 											)}
 										<p>{message.content}</p>
@@ -226,7 +241,7 @@ export default function Chat() {
 									</ChatMessage>
 								))
 							) : (
-								<>vazio</>
+								<>vazio todo</>
 							)}
 							<div ref={messagesEndRef} />
 						</ChatMessageContainer>
@@ -235,7 +250,13 @@ export default function Chat() {
 						/>
 					</>
 				) : (
-					<>activeChannel vazio</>
+					<MessageContainer>
+						{!activeChannel ? (
+							<h2>Select a channel</h2>
+						) : (
+							<h2>Invalid channel</h2>
+						)}
+					</MessageContainer>
 				)}
 			</ChatContainer>
 		</>

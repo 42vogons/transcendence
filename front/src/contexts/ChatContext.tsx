@@ -13,6 +13,7 @@ import { UserContext } from './UserContext'
 import { isDateExpired } from '@/reducers/User/Reducer'
 import { ChatReducer, FriendListItem } from '@/reducers/Chat/Reducer'
 import {
+	updateActiveChannel,
 	updateChannel,
 	updateChannelList,
 	updateFriendList,
@@ -29,6 +30,7 @@ import publicDefaulAvatar from '../../public/assets/public.png'
 
 interface ChatContextType {
 	friendList: FriendListItem[]
+	activeChannel: number | undefined
 	activeChannelData: iChannelData | undefined
 	channelList: iLastChannelMessage[]
 	addFriend: (userID: number) => void
@@ -38,6 +40,7 @@ interface ChatContextType {
 	getChannelMessages: (channel_id: number) => void
 	sendMessageToChannel: (channel_id: number, content: string) => void
 	getUsernameFromChannelMembers: (userID: number) => string
+	setActiveChannel: (channel_id: number) => void
 	getActiveChannelName: (
 		channelName: string,
 		channelType: 'direct' | 'public' | 'protected' | 'private',
@@ -68,11 +71,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		friendList: [],
 		activeChannelData: undefined,
 		channelList: [],
+		activeChannel: undefined,
 	})
 
 	const { user } = useContext(UserContext)
 
-	const { friendList, activeChannelData, channelList } = state
+	const { friendList, activeChannelData, channelList, activeChannel } = state
 
 	const router = useRouter()
 
@@ -156,11 +160,24 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		})
 	}
 
+	async function setActiveChannel(channel_id: number) {
+		let value
+		if (isNaN(channel_id)) {
+			value = undefined
+		} else {
+			value = channel_id
+		}
+		await dispatch(updateActiveChannel(value))
+		if (value) {
+			getChannelMessages(Number(value))
+		}
+	}
+
 	function getChannelMessages(channel_id: number) {
-		console.log('refreshChat channelID:', channel_id)
-		emitSocketIfUserIsNotExpired('get_channel_msg', {
-			channel_id,
-		})
+		if (activeChannel && activeChannel === channel_id)
+			emitSocketIfUserIsNotExpired('get_channel_msg', {
+				channel_id,
+			})
 	}
 
 	function sendMessageToChannel(channel_id: number, content: string) {
@@ -235,11 +252,19 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		socket.close()
 	}
 
+	useEffect(() => {
+		if (activeChannel) {
+			getChannelMessages(activeChannel)
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [activeChannel])
+
 	return (
 		<ChatContext.Provider
 			value={{
 				friendList,
 				channelList,
+				activeChannel,
 				activeChannelData,
 				addFriend,
 				removeFriend,
@@ -251,6 +276,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
 				getActiveChannelAvatar,
+				setActiveChannel,
 			}}
 		>
 			{children}

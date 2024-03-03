@@ -42,13 +42,7 @@ export function ChatListItem({
 			isActive={isActive}
 		>
 			<ChatAvatarContainer>
-				<Image
-					src={avatarSrc}
-					width={50}
-					height={50}
-					priority={true}
-					alt="user"
-				/>
+				<Image src={avatarSrc} width={50} height={50} alt="user" />
 			</ChatAvatarContainer>
 
 			<ChatInfoContainer>

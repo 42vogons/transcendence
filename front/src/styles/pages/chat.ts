@@ -145,7 +145,6 @@ export const ChatMessage = styled('div', {
 	marginTop: '1.5rem',
 	display: 'flex',
 	flexDirection: 'column',
-	// backgroundColor: '$blue600',
 	gap: 4,
 	width: 'fit-content',
 	maxWidth: '80%',
@@ -183,8 +182,6 @@ export const ChatMessage = styled('div', {
 export const ChatMessageTimestamp = styled('div', {
 	width: 120,
 	position: 'absolute',
-	// bottom: -16,
-	// right: 16,
 	textAlign: 'end',
 	fontSize: 10,
 	fontWeight: '300',
@@ -228,3 +225,5 @@ export const SenderMenu = styled(DropdownMenu.Trigger, {
 		backgroundColor: '$blue100',
 	},
 })
+
+export const MenuPortal = styled(DropdownMenu.Portal, {})
