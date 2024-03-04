@@ -6,6 +6,7 @@ import {
 	LoadingContainer,
 	MatchCardsContainer,
 	MatchHistoryContainer,
+	MessageContainer,
 	PageContainer,
 	ProfileContainer,
 	ProfileDataContainer,
@@ -76,17 +77,21 @@ export default function Profile() {
 		}
 	}
 
+	const { userID } = router.query
 	useEffect(() => {
-		const { userID } = router.query
-		console.log('profile userID:', userID)
-		console.log('profile user:', user)
-		if (!isNaN(Number(userID))) {
+		if (isNaN(Number(userID)) && typeof userID === undefined) {
+			getUserData(Number(user?.userID))
+		} else if (!isNaN(Number(userID))) {
 			getUserData(Number(userID))
 		} else {
-			getUserData(Number(user?.userID))
+			if (userID) {
+				toast('Invalid user id', {
+					type: 'error',
+				})
+			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [router.query])
+	}, [userID])
 
 	return (
 		<>
@@ -115,6 +120,7 @@ export default function Profile() {
 									width={180}
 									height={180}
 									alt="user"
+									priority
 								/>
 							</ProfileImageContainer>
 							<TitleContainer>
@@ -143,10 +149,14 @@ export default function Profile() {
 						</MatchCardsContainer>
 					</MatchHistoryContainer>
 				</PageContainer>
-			) : (
+			) : typeof userID === undefined ? (
 				<LoadingContainer>
 					<Loading size={200} />
 				</LoadingContainer>
+			) : (
+				<MessageContainer>
+					<h2>User not found</h2>
+				</MessageContainer>
 			)}
 		</>
 	)

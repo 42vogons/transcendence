@@ -68,7 +68,6 @@ export default function MatchCard({ players, winnerID }: MatchProps) {
 							src={userDefaulAvatar.src}
 							width={imgSize}
 							height={imgSize}
-							priority
 							alt="user"
 						/>
 					</UserImageContainer>

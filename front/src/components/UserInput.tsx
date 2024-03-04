@@ -81,7 +81,6 @@ export default function UserInput({
 						src={selectedUser.avatar_url || userDefaulAvatar.src}
 						width={32}
 						height={32}
-						// priority={true}
 						alt="user"
 					/>
 				</UserAvatarContainer>
@@ -120,7 +119,6 @@ export default function UserInput({
 										}
 										width={32}
 										height={32}
-										// priority={true}
 										alt="user"
 									/>
 								</UserAvatarContainer>

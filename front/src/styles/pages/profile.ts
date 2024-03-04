@@ -151,3 +151,12 @@ export const MatchCardsContainer = styled('div', {
 		padding: '0 2rem',
 	},
 })
+
+export const MessageContainer = styled('main', {
+	width: '100%',
+	height: '100%',
+	backgroundColor: '$blue800',
+	display: 'flex',
+	justifyContent: 'center',
+	alignItems: 'center',
+})

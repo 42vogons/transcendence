@@ -13,7 +13,7 @@ export default function Loading({ size }: iLoadingProps) {
 				width={size}
 				height={size}
 				alt="loading..."
-				priority={true}
+				priority
 			/>
 		</LoadingContainer>
 	)
