@@ -317,10 +317,13 @@ export class ChatGateway
     }
   }
 
-  /*@SubscribeMessage('last_message')
+  @SubscribeMessage('update_channel_list')
   async getLastChannelMessage(client: SocketWithAuth){
-    await this.channelService.getLastChannelMessage(client.userID);
-  }*/
+    const lastMessageChannel = await this.channelService.getLastChannelMessage(
+      client.userID,
+    );
+    client.emit('refresh_channel_list', lastMessageChannel);
+  }
 
   @SubscribeMessage('un_block_user')
   async unBlockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
