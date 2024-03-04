@@ -1,28 +1,38 @@
 import { styled } from '..'
 
-export const UserInputContainer = styled('div', {
-	position: 'relative',
+export const JoinChannelModalContainer = styled('div', {
+	overflowY: 'auto',
+
+	'&::-webkit-scrollbar': {
+		width: 4,
+	},
+	'&::-webkit-scrollbar-thumb': {
+		borderRadius: 32,
+		background: '$blue100',
+	},
+	height: '100%',
 	width: '100%',
 	display: 'flex',
 	flexDirection: 'column',
+	justifyContent: 'space-between',
 	alignItems: 'center',
-	borderRadius: 16,
-	// border: '1px solid $gray300',
-
-	label: {
-		fontSize: '$3xl',
+	gap: 32,
+	h2: {
+		fontSize: '$2xl',
 		color: '$blue100',
-		fontWeight: 'bold',
+		textAlign: 'center',
+
+		'@bp2': {
+			fontSize: '$3xl',
+		},
 	},
 
-	input: {
+	'input,select': {
 		width: '98%',
 		borderRadius: '16px',
 		border: '2px solid $gray300',
 		fontSize: '$xl',
-		fontFamily: 'monospace',
-		fontVariantNnumeric: 'slashed-zero',
-		padding: '8px 14px 8px 50px',
+		padding: '8px 14px',
 		'&:focus::placeholder': {
 			color: 'transparent',
 		},
@@ -30,6 +40,32 @@ export const UserInputContainer = styled('div', {
 		'@bp2': {
 			fontSize: '$2xl',
 		},
+	},
+
+	'.buttonsContainer': {
+		width: '100%',
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		gap: 16,
+
+		'@bp2': {
+			flexDirection: 'row',
+		},
+	},
+})
+
+export const ChannelInputContainer = styled('div', {
+	position: 'relative',
+	width: '100%',
+	display: 'flex',
+	flexDirection: 'column',
+	alignItems: 'center',
+	borderRadius: 16,
+
+	'input,select': {
+		padding: '8px 14px 8px 50px !important',
 	},
 
 	variants: {
@@ -45,17 +81,17 @@ export const UserInputContainer = styled('div', {
 
 	'.icon': {
 		position: 'absolute',
-		top: 6,
-		left: 14,
+		top: 8,
+		left: 20,
 
 		'@bp2': {
 			top: 12,
-			left: 14,
+			left: 20,
 		},
 	},
 })
 
-export const UserList = styled('ul', {
+export const ChannelList = styled('ul', {
 	position: 'absolute',
 	top: 48,
 	maxHeight: 140,
@@ -78,7 +114,8 @@ export const UserList = styled('ul', {
 		top: 56,
 	},
 })
-export const UserListItem = styled('li', {
+
+export const ChannelListItem = styled('li', {
 	display: 'flex',
 	alignItems: 'center',
 	gap: 4,
@@ -98,6 +135,7 @@ export const UserListItem = styled('li', {
 		borderRadius: '0 0 0 16px',
 	},
 })
+
 export const LoadingContainer = styled('div', {
 	paddingTop: 8,
 	display: 'flex',
@@ -112,7 +150,7 @@ export const LoadingContainer = styled('div', {
 	},
 })
 
-export const UserAvatarContainer = styled('div', {
+export const ChannelAvatarContainer = styled('div', {
 	position: 'relative',
 	borderRadius: '50%',
 	display: 'flex',
@@ -126,10 +164,8 @@ export const UserAvatarContainer = styled('div', {
 	},
 })
 
-export const Username = styled('p', {
+export const ChannelName = styled('p', {
 	fontSize: '$xl',
-	fontFamily: 'monospace',
-	fontVariantNnumeric: 'slashed-zero',
 
 	'@bp2': {
 		fontSize: '$2xl',
