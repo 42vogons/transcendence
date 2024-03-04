@@ -39,6 +39,7 @@ interface ChatContextType {
 	createDirectChat: (userID: number) => void
 	getChannelMessages: (channel_id: number) => void
 	sendMessageToChannel: (channel_id: number, content: string) => void
+	getChannelList: () => void
 	getUsernameFromChannelMembers: (userID: number) => string
 	setActiveChannel: (channel_id: number) => void
 	getActiveChannelName: (
@@ -191,6 +192,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		getChannelMessages(channel_id)
 	}
 
+	function getChannelList() {
+		emitSocketIfUserIsNotExpired('update_channel_list', '')
+	}
+
 	function getUsernameFromChannelMembers(userID: number) {
 		const member = (activeChannelData as iChannelData)?.channelMembers.find(
 			(member) => member.user_id === userID,
@@ -276,6 +281,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				closeChatSocket,
 				getChannelMessages,
 				sendMessageToChannel,
+				getChannelList,
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
 				getActiveChannelAvatar,

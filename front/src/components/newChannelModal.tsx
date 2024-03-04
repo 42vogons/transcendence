@@ -8,6 +8,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { api } from '@/services/api'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
+import { ChatContext } from '@/contexts/ChatContext'
+import { useContext } from 'react'
 
 interface iNewChannelModal {
 	showNewChannelModal: boolean
@@ -44,6 +46,7 @@ export default function NewChannelModal({
 	setShowNewChannelModal,
 }: iNewChannelModal) {
 	const router = useRouter()
+	const { getChannelList } = useContext(ChatContext)
 
 	const {
 		register,
@@ -65,6 +68,7 @@ export default function NewChannelModal({
 			const { data } = await api.post('/channel/create-channel', formData)
 			reset()
 			setShowNewChannelModal(false)
+			getChannelList()
 			router.push('/chat/' + data)
 		} catch (error: any) {
 			console.log('error:', error)
