@@ -39,6 +39,7 @@ import MessageContainer from '@/components/messageContainer'
 export default function Chat() {
 	const messagesEndRef = useRef(null)
 	const menuIconSize = 26
+	const broadCastID = 1
 	const { user } = useContext(UserContext)
 	const {
 		activeChannel,
@@ -157,7 +158,8 @@ export default function Chat() {
 										userType={
 											message.sender_id === loggedUserID
 												? 'logged'
-												: message.sender_id === 0
+												: message.sender_id ===
+												    broadCastID
 												  ? 'broadcast'
 												  : 'other'
 										}

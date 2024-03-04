@@ -42,7 +42,11 @@ export default function Stats({ total_games, total_wins }: iStatsProps) {
 						<FaPercent size={28} />
 						<h2>Win</h2>
 					</div>
-					<p>{((100 * total_wins) / total_games).toFixed(2)}%</p>
+					{total_games !== 0 ? (
+						<p>{((100 * total_wins) / total_games).toFixed(2)}%</p>
+					) : (
+						<p>0%</p>
+					)}
 				</StatsPanel>
 			</StatsPanelContainer>
 		</StatsContainer>
