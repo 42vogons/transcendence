@@ -18,7 +18,7 @@ export class ChatService {
   async sendBroadCast(channel_id: number, msg: string) {
     const chatDto = new ChatDto();
     chatDto.channel_id = channel_id;
-    chatDto.sender_id = 0;
+    chatDto.sender_id = 1;
     chatDto.content = msg;
     await this.repository.saveMessage(chatDto);
   }

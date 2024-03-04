@@ -164,7 +164,7 @@ export default function Chat() {
 												  : 'other'
 										}
 									>
-										{message.sender_id !== 0 &&
+										{message.sender_id !== broadCastID &&
 											message.sender_id !==
 												loggedUserID && (
 												<SenderMenuWrapper>
@@ -222,7 +222,8 @@ export default function Chat() {
 										<p>{message.content}</p>
 										<ChatMessageTimestamp
 											userType={
-												message.sender_id !== 0
+												message.sender_id !==
+												broadCastID
 													? 'user'
 													: 'broadcast'
 											}

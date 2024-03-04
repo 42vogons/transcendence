@@ -14,9 +14,9 @@ export default function ChatInput({ channel_id }: ChatInputProps) {
 
 	function handleSubmit(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault()
-		console.log(e)
-		console.log('channel_id:', channel_id)
-		console.log(content)
+		// console.log(e)
+		// console.log('channel_id:', channel_id)
+		// console.log(content)
 		sendMessageToChannel(channel_id, content)
 		setContent('')
 	}

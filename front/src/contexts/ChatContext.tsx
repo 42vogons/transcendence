@@ -174,6 +174,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	}
 
 	function getChannelMessages(channel_id: number) {
+		// console.log('channel_id::', channel_id)
+		// console.log('activeChannel:', activeChannel)
 		if (activeChannel && activeChannel === channel_id)
 			emitSocketIfUserIsNotExpired('get_channel_msg', {
 				channel_id,
@@ -181,11 +183,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	}
 
 	function sendMessageToChannel(channel_id: number, content: string) {
-		console.log('sendMessageToChannel:', channel_id, content)
 		emitSocketIfUserIsNotExpired('msg_to_server', {
 			channel_id,
 			content,
 		})
+
+		getChannelMessages(channel_id)
 	}
 
 	function getUsernameFromChannelMembers(userID: number) {

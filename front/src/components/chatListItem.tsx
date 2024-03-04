@@ -29,6 +29,7 @@ export function ChatListItem({
 	isActive,
 	handleOnClick,
 }: iChatListItem) {
+	const broadCastID = 1
 	return (
 		<ChatListItemContainer
 			onClick={
@@ -51,7 +52,7 @@ export function ChatListItem({
 				</ChatName>
 
 				<ChatLastMessage title={lastMessage} isActive={isActive}>
-					{lastUserID === 0 ? (
+					{lastUserID === broadCastID ? (
 						`${lastMessage}`
 					) : (
 						<>
