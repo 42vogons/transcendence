@@ -44,7 +44,6 @@ CREATE TABLE "channels" (
 CREATE TABLE "chat_messages" (
     "message_id" SERIAL NOT NULL,
     "sender_id" INTEGER NOT NULL,
-    "receiver_id" INTEGER,
     "channel_id" INTEGER,
     "content" TEXT NOT NULL,
     "timestamp" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
@@ -86,11 +85,15 @@ CREATE TABLE "games" (
 -- CreateTable
 CREATE TABLE "match_history" (
     "history_id" SERIAL NOT NULL,
-    "user_id" INTEGER NOT NULL,
-    "game_id" INTEGER NOT NULL,
-    "result" VARCHAR(10) NOT NULL,
-    "game_type" VARCHAR(50),
-    "game_duration" INTEGER,
+    "player1_user_id" INTEGER NOT NULL,
+    "player1_username" VARCHAR(50) NOT NULL,
+    "player1_score" INTEGER NOT NULL,
+    "player2_user_id" INTEGER NOT NULL,
+    "player2_username" VARCHAR(50) NOT NULL,
+    "player2_score" INTEGER NOT NULL,
+    "winner_id" INTEGER NOT NULL,
+    "looser_id" INTEGER NOT NULL,
+    "ended_at" TIMESTAMP(6) NOT NULL,
 
     CONSTRAINT "match_history_pkey" PRIMARY KEY ("history_id")
 );
@@ -109,7 +112,9 @@ CREATE TABLE "users" (
     "user_id" SERIAL NOT NULL,
     "username" VARCHAR(50) NOT NULL,
     "email" VARCHAR(100),
-    "password_hash" VARCHAR(255) NOT NULL,
+    "token" VARCHAR(255),
+    "token_secret" VARCHAR(255),
+    "user_id_42" VARCHAR(255),
     "avatar_url" VARCHAR(255),
     "status" VARCHAR(20) DEFAULT 'offline',
     "two_factor_enabled" BOOLEAN DEFAULT false,
@@ -120,6 +125,25 @@ CREATE TABLE "users" (
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("user_id")
 );
+
+-- CreateTable
+CREATE TABLE "blocklist" (
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "memberId" INTEGER NOT NULL,
+    "blockedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "blocklist_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "blocklist_userId_memberId_key" ON "blocklist"("userId", "memberId");
 
 -- AddForeignKey
 ALTER TABLE "admin_actions" ADD CONSTRAINT "admin_actions_channel_id_fkey" FOREIGN KEY ("channel_id") REFERENCES "channels"("channel_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
@@ -143,9 +167,6 @@ ALTER TABLE "channels" ADD CONSTRAINT "channels_owner_id_fkey" FOREIGN KEY ("own
 ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_channel_id_fkey" FOREIGN KEY ("channel_id") REFERENCES "channels"("channel_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_receiver_id_fkey" FOREIGN KEY ("receiver_id") REFERENCES "users"("user_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
 ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_sender_id_fkey" FOREIGN KEY ("sender_id") REFERENCES "users"("user_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
@@ -164,14 +185,15 @@ ALTER TABLE "games" ADD CONSTRAINT "games_player1_id_fkey" FOREIGN KEY ("player1
 ALTER TABLE "games" ADD CONSTRAINT "games_player2_id_fkey" FOREIGN KEY ("player2_id") REFERENCES "users"("user_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "match_history" ADD CONSTRAINT "match_history_game_id_fkey" FOREIGN KEY ("game_id") REFERENCES "games"("game_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE "match_history" ADD CONSTRAINT "match_history_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
 ALTER TABLE "user_achievements" ADD CONSTRAINT "user_achievements_achievement_id_fkey" FOREIGN KEY ("achievement_id") REFERENCES "achievements"("achievement_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "user_achievements" ADD CONSTRAINT "user_achievements_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
+-- AddForeignKey
+ALTER TABLE "blocklist" ADD CONSTRAINT "blocklist_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "blocklist" ADD CONSTRAINT "blocklist_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+INSERT INTO users (username) VALUES (' ');
