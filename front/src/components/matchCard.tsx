@@ -44,10 +44,12 @@ export default function MatchCard({ players, winnerID }: MatchProps) {
 				<UserContainer>
 					<UserImageContainer>
 						<Image
-							src={userDefaulAvatar.src}
+							src={userDefaulAvatar}
 							width={imgSize}
 							height={imgSize}
 							alt="user"
+							placeholder="blur"
+							blurDataURL={userDefaulAvatar.src}
 						/>
 					</UserImageContainer>
 					<UsernameContainer className="user">
@@ -65,10 +67,12 @@ export default function MatchCard({ players, winnerID }: MatchProps) {
 				<UserContainer>
 					<UserImageContainer>
 						<Image
-							src={userDefaulAvatar.src}
+							src={userDefaulAvatar}
 							width={imgSize}
 							height={imgSize}
 							alt="user"
+							placeholder="blur"
+							blurDataURL={userDefaulAvatar.src}
 						/>
 					</UserImageContainer>
 					<UsernameContainer className="user">

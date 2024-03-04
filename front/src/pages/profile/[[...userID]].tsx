@@ -54,12 +54,17 @@ interface MatchHistoryData {
 export default function Profile() {
 	const router = useRouter()
 	const { user } = useContext(UserContext)
+	const [isLoading, setIsLoading] = useState(true)
 
-	const [profileData, setProfileData] = useState<ProfileData>()
-	const [matchHistoryData, setMatchHistoryData] =
-		useState<MatchHistoryData[]>()
+	const [profileData, setProfileData] = useState<ProfileData | undefined>(
+		undefined,
+	)
+	const [matchHistoryData, setMatchHistoryData] = useState<
+		MatchHistoryData[] | undefined
+	>(undefined)
 
 	async function getUserData(userID: number) {
+		setIsLoading(true)
 		try {
 			const { data: userData } = await api.get(
 				`/users/findUsersByUserID/${userID}`,
@@ -69,9 +74,13 @@ export default function Profile() {
 				`/game/match_history/${userID}`,
 			)
 			setMatchHistoryData(matchData)
+			setIsLoading(false)
 		} catch (error: any) {
 			console.log('error:', error)
-			toast(error.message ? error.message : error, {
+			setProfileData(undefined)
+			setMatchHistoryData(undefined)
+			setIsLoading(false)
+			toast('Invalid user id', {
 				type: 'error',
 			})
 		}
@@ -79,19 +88,24 @@ export default function Profile() {
 
 	const { userID } = router.query
 	useEffect(() => {
-		if (isNaN(Number(userID)) && typeof userID === undefined) {
-			getUserData(Number(user?.userID))
-		} else if (!isNaN(Number(userID))) {
-			getUserData(Number(userID))
-		} else {
-			if (userID) {
+		if (router.isReady) {
+			if (isNaN(Number(userID)) && typeof userID === 'undefined') {
+				getUserData(Number(user?.userID))
+			} else if (
+				typeof userID !== 'undefined' &&
+				!isNaN(Number(userID))
+			) {
+				getUserData(Number(userID))
+			} else {
+				setIsLoading(false)
 				toast('Invalid user id', {
 					type: 'error',
 				})
 			}
 		}
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [userID])
+	}, [userID, router.isReady])
 
 	return (
 		<>
@@ -120,7 +134,8 @@ export default function Profile() {
 									width={180}
 									height={180}
 									alt="user"
-									priority
+									placeholder="blur"
+									blurDataURL={userDefaulAvatar.src}
 								/>
 							</ProfileImageContainer>
 							<TitleContainer>
@@ -149,7 +164,11 @@ export default function Profile() {
 						</MatchCardsContainer>
 					</MatchHistoryContainer>
 				</PageContainer>
-			) : typeof userID === undefined ? (
+			) : !router.isReady ? (
+				<LoadingContainer>
+					<Loading size={200} />
+				</LoadingContainer>
+			) : isLoading ? (
 				<LoadingContainer>
 					<Loading size={200} />
 				</LoadingContainer>
