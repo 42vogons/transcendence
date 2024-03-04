@@ -34,7 +34,7 @@ import NewChatModal from './newChatModal'
 import { ChatContext } from '@/contexts/ChatContext'
 import NewFriendModal from './newFriendModal'
 import { IoSearchSharp } from 'react-icons/io5'
-import SearchChannelModal from './searchChannelModal'
+import JoinChannelModal from './joinChannelModal'
 import NewChannelModal from './newChannelModal'
 import { iLastChannelMessage } from '@/reducers/Chat/Types'
 import Loading from './loading'
@@ -64,7 +64,7 @@ export default function Layout({ children }: iLayoutProps) {
 	const [showNewChatModal, setShowNewChatModal] = useState(false)
 	const [showNewFriendModal, setShowNewFriendModal] = useState(false)
 	const [showNewChannelModal, setShowNewChannelModal] = useState(false)
-	const [showSearchChannelModal, setShowSearchChannelModal] = useState(false)
+	const [showJoinChannelModal, setShowJoinChannelModal] = useState(false)
 
 	useEffect(() => {
 		setCurrentPath(router.asPath)
@@ -316,10 +316,8 @@ export default function Layout({ children }: iLayoutProps) {
 											</IconButton>
 											<IconButton
 												handleOnClick={() => {
-													console.log(
-														'search channel',
-													)
-													setShowSearchChannelModal(
+													console.log('join channel')
+													setShowJoinChannelModal(
 														true,
 													)
 												}}
@@ -389,9 +387,9 @@ export default function Layout({ children }: iLayoutProps) {
 				setShowNewChannelModal={setShowNewChannelModal}
 				showNewChannelModal={showNewChannelModal}
 			/>
-			<SearchChannelModal
-				setShowSearchChannelModal={setShowSearchChannelModal}
-				showSearchChannelModal={showSearchChannelModal}
+			<JoinChannelModal
+				setShowJoinChannelModal={setShowJoinChannelModal}
+				showJoinChannelModal={showJoinChannelModal}
 			/>
 		</LayoutContainer>
 	) : (
