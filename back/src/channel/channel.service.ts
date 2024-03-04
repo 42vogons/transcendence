@@ -260,6 +260,7 @@ export class ChannelService {
         channelDto.channel_id,
         ChannelMemberStatus.MEMBER,
       );
+      this.sendBroadCast(channelDto.channel_id, 'Joined the channel');
       return 'Joined the channel.';
     } else {
       throw new UnauthorizedException('Unable to join the channel.');
