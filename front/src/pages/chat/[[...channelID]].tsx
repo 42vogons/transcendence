@@ -99,7 +99,6 @@ export default function Chat() {
 									)}
 									width={40}
 									height={40}
-									priority={true}
 									alt="user"
 								/>
 								<ChatTitle>
@@ -241,7 +240,9 @@ export default function Chat() {
 									</ChatMessage>
 								))
 							) : (
-								<>vazio todo</>
+								<MessageContainer>
+									<h2>No messages yet</h2>
+								</MessageContainer>
 							)}
 							<div ref={messagesEndRef} />
 						</ChatMessageContainer>

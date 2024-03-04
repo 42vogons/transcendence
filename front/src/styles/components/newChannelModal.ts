@@ -1,6 +1,6 @@
 import { styled } from '..'
 
-export const NewChannelModalContainer = styled('div', {
+export const NewChannelModalForm = styled('form', {
 	overflowY: 'auto',
 
 	'&::-webkit-scrollbar': {
@@ -29,6 +29,7 @@ export const NewChannelModalContainer = styled('div', {
 	},
 
 	'input,select': {
+		// outline: 'none',
 		width: '100%',
 		borderRadius: '16px',
 		border: '2px solid $gray300',
@@ -43,6 +44,10 @@ export const NewChannelModalContainer = styled('div', {
 		},
 	},
 
+	'.hasError': {
+		border: '2px solid $red !important',
+	},
+
 	'.buttonsContainer': {
 		width: '100%',
 		display: 'flex',
@@ -53,6 +58,20 @@ export const NewChannelModalContainer = styled('div', {
 
 		'@bp2': {
 			flexDirection: 'row',
+		},
+	},
+
+	'.inputContainer': {
+		width: '100%',
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 8,
+		textAlign: 'center',
+		color: '$red',
+		fontWeight: 'bold',
+
+		'@bp2': {
+			fontSize: '$xl',
 		},
 	},
 })

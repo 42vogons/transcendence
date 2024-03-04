@@ -91,7 +91,7 @@ export default function Auth() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<AuthContainer>
-				{isLoading && <Loading size={120} />}
+				{isLoading && <Loading size={200} />}
 				{request2FA && <TwoFAInput sendTwoFA={sendCode} />}
 
 				{/* <button

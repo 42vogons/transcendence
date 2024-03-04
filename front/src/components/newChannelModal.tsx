@@ -1,94 +1,147 @@
-import { useContext, useEffect, useState } from 'react'
 import Modal from './modal'
 import Button from './button'
 import { MdClose, MdGroupAdd } from 'react-icons/md'
-import { ChatContext } from '@/contexts/ChatContext'
-import { NewChannelModalContainer } from '@/styles/components/newChannelModal'
+import { NewChannelModalForm } from '@/styles/components/newChannelModal'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { api } from '@/services/api'
+import { toast } from 'react-toastify'
+import { useRouter } from 'next/router'
 
 interface iNewChannelModal {
 	showNewChannelModal: boolean
 	setShowNewChannelModal: (state: boolean) => void
 }
+
+const newChannelSchema = z.discriminatedUnion(
+	'type',
+	[
+		z.object({
+			type: z.enum(['public', 'private']),
+			name: z.string().min(1, '*Required'),
+		}),
+		z.object({
+			type: z.enum(['protected']),
+			name: z.string().min(1, '*Required'),
+			password: z.string().min(1, '*Required'),
+		}),
+	],
+	{
+		errorMap: (issue, ctx) => {
+			if (issue.code === z.ZodIssueCode.invalid_union_discriminator) {
+				return { message: '*Select a value' }
+			}
+			return { message: ctx.defaultError }
+		},
+	},
+)
+
+type NewChannelSchema = z.infer<typeof newChannelSchema>
+
 export default function NewChannelModal({
 	showNewChannelModal,
 	setShowNewChannelModal,
 }: iNewChannelModal) {
-	const { createDirectChat } = useContext(ChatContext)
+	const router = useRouter()
 
-	const [channelType, setChannelType] = useState('')
-	const [channelName, setChannelName] = useState('')
-	const [channelPassword, setChannelPassword] = useState('')
+	const {
+		register,
+		handleSubmit,
+		watch,
+		reset,
+		formState: { errors, isSubmitting },
+	} = useForm<NewChannelSchema>({
+		resolver: zodResolver(newChannelSchema),
+	})
 
 	function handleClose() {
-		console.log('close')
+		reset()
 		setShowNewChannelModal(false)
 	}
 
-	function handleCreateNewChannel() {
-		console.log('CreateNewChannel:')
-		console.log('channelType:', channelType)
-		console.log('channelName:', channelName)
-		console.log('channelPassword:', channelPassword)
-		// if (selectedUser) {
-		// 	createDirectChat(selectedUser.user_id)
-		// }
-		// setShowNewChannelModal(false)
+	async function handleCreateNewChannel(formData: NewChannelSchema) {
+		try {
+			const { data } = await api.post('/channel/create-channel', formData)
+			reset()
+			setShowNewChannelModal(false)
+			router.push('/chat/' + data)
+		} catch (error: any) {
+			console.log('error:', error)
+			toast(error.message ? error.message : error, {
+				type: 'error',
+			})
+		}
 	}
 
-	useEffect(() => {
-		if (showNewChannelModal === false) {
-			setChannelType('')
-			setChannelName('')
-			setChannelPassword('')
-		}
-	}, [showNewChannelModal])
+	const type = watch('type')
 
 	return (
 		<Modal isOpen={showNewChannelModal}>
-			<NewChannelModalContainer>
+			<NewChannelModalForm
+				onSubmit={handleSubmit(handleCreateNewChannel)}
+			>
 				<h2>New Channel</h2>
+				<div className="inputContainer">
+					<select
+						{...register('type')}
+						className={errors.type ? 'hasError' : ''}
+						defaultValue=""
+					>
+						<option value="public">Public</option>
+						<option value="protected">Protected</option>
+						<option value="private"> Private</option>
+						<option value="" hidden>
+							Channel Type
+						</option>
+					</select>
+					{errors.type && <span>{errors.type.message}</span>}
+				</div>
 
-				<select
-					name="channelType"
-					value={channelType}
-					onChange={(e) => setChannelType(e.target.value)}
-				>
-					<option value="public">public</option>
-					<option value="protected">protected</option>
-					<option value="private"> private</option>
-					<option value="" hidden>
-						Channel Type
-					</option>
-				</select>
-				<input
-					type="text"
-					placeholder="Channel Name"
-					value={channelName}
-					onChange={(e) => setChannelName(e.target.value)}
-				/>
-				{channelType === 'protected' && (
+				<div className="inputContainer">
 					<input
 						type="text"
-						placeholder="Channel Password"
-						value={channelPassword}
-						onChange={(e) => setChannelPassword(e.target.value)}
+						className={errors.name ? 'hasError' : ''}
+						placeholder="Channel Name"
+						{...register('name')}
 					/>
+					{errors.name && <span>{errors.name.message}</span>}
+				</div>
+				{type === 'protected' && (
+					<div className="inputContainer">
+						<input
+							type="text"
+							className={
+								(errors as any).password ? 'hasError' : ''
+							}
+							placeholder="Channel Password"
+							{...register('password')}
+						/>
+						{(errors as any).password && (
+							<span>{(errors as any).password.message}</span>
+						)}
+					</div>
 				)}
 
 				<div className="buttonsContainer">
-					<Button buttonType="cancel" onClick={handleClose}>
+					<Button
+						type="button"
+						buttonType="cancel"
+						onClick={handleClose}
+					>
 						<MdClose size={40} />
 						Cancel
 					</Button>
 					<Button
+						type="submit"
 						buttonType="accept"
-						onClick={handleCreateNewChannel}
+						disabled={isSubmitting}
 					>
 						<MdGroupAdd size={40} />
 						Create
 					</Button>
 				</div>
-			</NewChannelModalContainer>
+			</NewChannelModalForm>
 		</Modal>
 	)
 }
