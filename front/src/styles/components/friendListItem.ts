@@ -120,7 +120,7 @@ export const FriendAction = styled('button', {
 	display: 'flex',
 	justifyContent: 'space-between',
 	alignItems: 'center',
-	padding: '0.5rem 1rem',
+	padding: '0.5rem 12px',
 	backgroundColor: '$white',
 	color: '$blue100',
 	fontSize: 18,

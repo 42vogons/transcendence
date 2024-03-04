@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import {
 	TitleContainer,
 	StatsContainer,
@@ -10,13 +11,11 @@ import { IoStatsChartSharp } from 'react-icons/io5'
 import { FaTrophy, FaPercent } from 'react-icons/fa'
 
 export interface iStatsProps {
-	stats: {
-		gamesPlayed: number
-		wins: number
-	}
+	total_games: number
+	total_wins: number
 }
 
-export default function Stats({ stats }: iStatsProps) {
+export default function Stats({ total_games, total_wins }: iStatsProps) {
 	return (
 		<StatsContainer>
 			<TitleContainer>
@@ -29,21 +28,21 @@ export default function Stats({ stats }: iStatsProps) {
 						<FaGamepad size={40} />
 						<h2>Games</h2>
 					</div>
-					<p>{stats.gamesPlayed}</p>
+					<p>{total_games}</p>
 				</StatsPanel>
 				<StatsPanel>
 					<div>
 						<FaTrophy size={28} />
 						<h2>Wins</h2>
 					</div>
-					<p>{stats.wins}</p>
+					<p>{total_wins}</p>
 				</StatsPanel>
 				<StatsPanel>
 					<div>
 						<FaPercent size={28} />
 						<h2>Win</h2>
 					</div>
-					<p>{(100 * stats.wins) / stats.gamesPlayed}%</p>
+					<p>{((100 * total_wins) / total_games).toFixed(2)}%</p>
 				</StatsPanel>
 			</StatsPanelContainer>
 		</StatsContainer>

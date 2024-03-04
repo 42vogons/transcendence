@@ -25,9 +25,9 @@ export const MatchCardContainer = styled('div', {
 	},
 })
 
-export const Card = styled('div', {
-	minHeight: 240,
-	maxHeight: 240,
+export const Card = styled('button', {
+	minHeight: 250,
+	maxHeight: 250,
 	// width: '100%',
 	margin: '0.5rem',
 	flex: '0 0 100%',
@@ -37,17 +37,31 @@ export const Card = styled('div', {
 	alignItems: 'center',
 	justifyContent: 'space-between',
 	borderRadius: '12px 12px 32px 32px',
-	padding: '0.5rem 0',
+	padding: '0.5rem',
 
 	variants: {
 		isWinner: {
 			true: {
 				border: '4px solid $white',
-				backgroundColor: '$green500',
+				backgroundColor: '$green400',
+
+				'&:hover .user': {
+					transition: '0.2s',
+					border: '1px solid $white',
+					backgroundColor: '$white',
+					color: '$green400',
+				},
 			},
 			false: {
 				border: 'none',
 				backgroundColor: '$red',
+
+				'&:hover .user': {
+					transition: '0.2s',
+					border: '1px solid $white',
+					backgroundColor: '$white',
+					color: '$red',
+				},
 			},
 		},
 	},
@@ -75,6 +89,10 @@ export const Card = styled('div', {
 			borderRadius: '32px 12px 12px 32px',
 		},
 	},
+
+	'&:hover': {
+		cursor: 'pointer',
+	},
 })
 
 export const UserContainer = styled('div', {
@@ -82,6 +100,7 @@ export const UserContainer = styled('div', {
 	flexDirection: 'column',
 	justifyContent: 'space-between',
 	alignItems: 'center',
+	gap: 12,
 
 	'@bp1': {
 		flexDirection: 'column',
@@ -105,11 +124,19 @@ export const UsernameContainer = styled('div', {
 	color: '$white',
 
 	padding: '8px 12px',
-	borderBottom: '2px solid $white',
 	borderRadius: 24,
+	border: '1px solid transparent',
+	fontFamily: 'monospace',
+	fontVariantNnumeric: 'slashed-zero',
 	h2: {
 		textAlign: 'center',
-		fontSize: '$xl',
+		fontSize: '$md',
+	},
+
+	'@bp1': {
+		h2: {
+			fontSize: '$xl',
+		},
 	},
 })
 

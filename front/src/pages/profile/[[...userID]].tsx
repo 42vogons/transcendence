@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Image from 'next/image'
 
 import {
+	LoadingContainer,
 	MatchCardsContainer,
 	MatchHistoryContainer,
 	PageContainer,
@@ -19,48 +20,73 @@ import MatchCard from '@/components/matchCard'
 
 import userDefaulAvatar from '../../../public/assets/user.png'
 import Layout from '@/components/layout'
-import { ReactElement, useEffect } from 'react'
+import { ReactElement, useContext, useEffect, useState } from 'react'
 import { api } from '@/services/api'
+import { toast } from 'react-toastify'
+import Loading from '@/components/loading'
+import { UserContext } from '@/contexts/UserContext'
 
-interface iPlayer {
+interface Player {
+	userID: number
 	username: string
 	score: number
-	winner?: boolean
+}
+
+interface ProfileData {
+	user_id: number
+	username: string
+	avatar_url: string
+	total_games: number
+	total_losses: number
+	total_wins: number
+}
+
+interface MatchHistoryData {
+	endedAt: Date
+	id: number
+	looserID: number
+	player1: Player
+	player2: Player
+	winnerID: number
 }
 
 export default function Profile() {
 	const router = useRouter()
-	console.log('router:', router)
+	const { user } = useContext(UserContext)
 
-	const gamesPlayed = 10
-	const wins = 4
-	const stats = { gamesPlayed, wins }
+	const [profileData, setProfileData] = useState<ProfileData>()
+	const [matchHistoryData, setMatchHistoryData] =
+		useState<MatchHistoryData[]>()
 
-	const player1: iPlayer = { username: 'acarneir', score: 3 }
-	const player2: iPlayer = { username: 'rfelipe-', score: 2 }
-
-	const match1 = [player1, player2]
-	const match2 = [player2, player1]
-	const matchHistory = [match1, match2, match2, match1, match1, match2]
-
-	const profileUser = router.query.userID ? router.query.userID : 'acarneir'
-
-	async function getUserData() {
+	async function getUserData(userID: number) {
 		try {
 			const { data: userData } = await api.get(
-				`/users/findUsersByUserID/${1}`,
+				`/users/findUsersByUserID/${userID}`,
 			)
-			console.log('user data:', userData)
-			const { data: matchHistoryData } = await api.get(
-				`/game/match_history/${1}`,
+			setProfileData(userData)
+			const { data: matchData } = await api.get(
+				`/game/match_history/${userID}`,
 			)
-			console.log('matchHistory data:', matchHistoryData)
-		} catch (error) {}
+			setMatchHistoryData(matchData)
+		} catch (error: any) {
+			console.log('error:', error)
+			toast(error.message ? error.message : error, {
+				type: 'error',
+			})
+		}
 	}
 
 	useEffect(() => {
-		getUserData()
-	}, [])
+		const { userID } = router.query
+		console.log('profile userID:', userID)
+		console.log('profile user:', user)
+		if (!isNaN(Number(userID))) {
+			getUserData(Number(userID))
+		} else {
+			getUserData(Number(user?.userID))
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [router.query])
 
 	return (
 		<>
@@ -76,42 +102,52 @@ export default function Profile() {
 				/>
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			<PageContainer>
-				<ProfileDataContainer>
-					<ProfileContainer>
-						<ProfileImageContainer>
-							<Image
-								src={userDefaulAvatar.src}
-								width={180}
-								height={180}
-								priority={true}
-								alt="user"
-							/>
-						</ProfileImageContainer>
-						<TitleContainer
-							css={{
-								borderBottom: '2px solid $white',
-								borderRadius: 24,
-							}}
-						>
-							<FaUserAstronaut size={40} />
-							<h2>{profileUser}</h2>
+			{profileData && matchHistoryData ? (
+				<PageContainer>
+					<ProfileDataContainer>
+						<ProfileContainer>
+							<ProfileImageContainer>
+								<Image
+									src={
+										profileData?.avatar_url ||
+										userDefaulAvatar.src
+									}
+									width={180}
+									height={180}
+									alt="user"
+								/>
+							</ProfileImageContainer>
+							<TitleContainer>
+								<FaUserAstronaut size={40} />
+								<h2>{profileData?.username}</h2>
+							</TitleContainer>
+						</ProfileContainer>
+						<Stats
+							total_games={profileData?.total_games}
+							total_wins={profileData?.total_wins}
+						/>
+					</ProfileDataContainer>
+					<MatchHistoryContainer>
+						<TitleContainer>
+							<MdViewList size={56} />
+							<h2>Match History</h2>
 						</TitleContainer>
-					</ProfileContainer>
-					<Stats stats={stats} />
-				</ProfileDataContainer>
-				<MatchHistoryContainer>
-					<TitleContainer>
-						<MdViewList size={56} />
-						<h2>Match History</h2>
-					</TitleContainer>
-					<MatchCardsContainer>
-						{matchHistory.map((match, i) => (
-							<MatchCard key={i} players={match} />
-						))}
-					</MatchCardsContainer>
-				</MatchHistoryContainer>
-			</PageContainer>
+						<MatchCardsContainer>
+							{matchHistoryData.map((match: MatchHistoryData) => (
+								<MatchCard
+									key={match.id}
+									players={[match.player1, match.player2]}
+									winnerID={match.winnerID}
+								/>
+							))}
+						</MatchCardsContainer>
+					</MatchHistoryContainer>
+				</PageContainer>
+			) : (
+				<LoadingContainer>
+					<Loading size={200} />
+				</LoadingContainer>
+			)}
 		</>
 	)
 }

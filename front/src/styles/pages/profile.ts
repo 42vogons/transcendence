@@ -1,5 +1,14 @@
 import { styled } from '..'
 
+export const LoadingContainer = styled('main', {
+	width: '100%',
+	height: '100%',
+	display: 'flex',
+	justifyContent: 'center',
+	alignItems: 'center',
+	backgroundColor: '$blue800',
+})
+
 export const PageContainer = styled('main', {
 	minHeight: '100%',
 	maxHeight: '100%',
@@ -78,7 +87,9 @@ export const TitleContainer = styled('div', {
 	padding: '8px 24px',
 	h2: {
 		textAlign: 'center',
-		fontSize: '$2xl',
+		fontSize: '$xl',
+		fontFamily: 'monospace',
+		fontVariantNnumeric: 'slashed-zero',
 	},
 
 	'@bp1': {

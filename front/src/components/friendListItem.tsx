@@ -17,7 +17,8 @@ import Image from 'next/image'
 import userDefaulAvatar from '../../public/assets/user.png'
 import { useContext } from 'react'
 import { BsChatSquareTextFill } from 'react-icons/bs'
-import { FaGamepad, FaUserMinus } from 'react-icons/fa6'
+import { FaGamepad, FaUserAstronaut, FaUserMinus } from 'react-icons/fa6'
+import { useRouter } from 'next/router'
 
 export function FriendListItem({
 	userID,
@@ -27,6 +28,7 @@ export function FriendListItem({
 }: iFriendListItem) {
 	const { removeFriend } = useContext(ChatContext)
 	const { requestMatch } = useContext(GameContext)
+	const router = useRouter()
 
 	const iconSize = 26
 
@@ -41,6 +43,11 @@ export function FriendListItem({
 		}
 	}
 
+	function handleProfileOnClick() {
+		console.log('profile', username)
+		router.push('/profile/' + userID)
+	}
+
 	function handleRemoveOnClick() {
 		removeFriend(Number(userID))
 	}
@@ -53,7 +60,6 @@ export function FriendListItem({
 						src={userAvatarSrc || userDefaulAvatar.src}
 						width={50}
 						height={50}
-						priority={true}
 						alt="user"
 					/>
 					{userStatus !== 'offline' && (
@@ -71,6 +77,11 @@ export function FriendListItem({
 				<MenuItem>
 					<FriendAction onClick={handleGameOnClick}>
 						<FaGamepad size={iconSize} /> Play
+					</FriendAction>
+				</MenuItem>
+				<MenuItem>
+					<FriendAction onClick={handleProfileOnClick}>
+						<FaUserAstronaut size={iconSize} /> Profile
 					</FriendAction>
 				</MenuItem>
 				<MenuItem>

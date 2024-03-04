@@ -45,7 +45,7 @@ export const StatsPanelContainer = styled('div', {
 export const StatsPanel = styled('div', {
 	flex: '1 0 31%',
 	display: 'flex',
-	flexDirection: 'row',
+	flexDirection: 'column',
 	justifyContent: 'space-between',
 	alignItems: 'center',
 	border: '4px solid $white',
@@ -78,6 +78,7 @@ export const StatsPanel = styled('div', {
 	},
 
 	'@bp1': {
+		flexDirection: 'row',
 		p: {
 			fontSize: '$2xl',
 		},
