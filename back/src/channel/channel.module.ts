@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ChannelRepository } from './repository/channel.repository';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersRepository } from 'src/users/repositories/users.repository';
+import { ChatRepository } from 'src/chat/repository/chat.repository';
 
 @Module({
   controllers: [ChannelController],
@@ -14,6 +15,7 @@ import { UsersRepository } from 'src/users/repositories/users.repository';
     ChannelRepository,
     PrismaService,
     UsersRepository,
+    ChatRepository,
   ],
   exports: [ChannelService, PrismaService, ChannelRepository, UsersRepository],
 })

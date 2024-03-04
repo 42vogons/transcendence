@@ -16,12 +16,15 @@ import { LeaveDto } from './dto/leave.dto';
 import { ChannelDto } from './dto/channel.dto';
 import { ChannelType, ChannelMemberStatus, AdminActionType } from './constants';
 import { channel_listDTO } from './dto/channelList.dto';
+import { ChatDto } from 'src/chat/dto/chat.dto';
+import { ChatRepository } from 'src/chat/repository/chat.repository';
 
 @Injectable()
 export class ChannelService {
   constructor(
     private readonly repository: ChannelRepository,
     private readonly userRepository: UsersRepository,
+    private readonly chatRepository: ChatRepository,
   ) {}
 
   async hashPassword(password: string): Promise<string> {
@@ -88,6 +91,7 @@ export class ChannelService {
       createChanneltDto,
       userId,
     );
+    this.sendBroadCast(channel.channel_id, 'Channel created');
     const member = new MemberDto();
     member.channel_id = channel.channel_id;
     member.status = ChannelMemberStatus.ADMIN;
@@ -316,5 +320,13 @@ export class ChannelService {
 
   async getChannelMembers(channel_id: number) {
     return await this.repository.listMembers(channel_id);
+  }
+
+  async sendBroadCast(channel_id: number, msg: string) {
+    const chatDto = new ChatDto();
+    chatDto.channel_id = channel_id;
+    chatDto.sender_id = 1;
+    chatDto.content = msg;
+    await this.chatRepository.saveMessage(chatDto);
   }
 }
