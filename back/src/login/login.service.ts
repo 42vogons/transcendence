@@ -15,12 +15,13 @@ export class LoginService {
     private readonly twoFactorAutenticateService: TwoFactorAutenticateService,
   ) {}
 
-  async getToken(authorizationCode: string): Promise<string> {
-    const clientId = process.env.CLIENT_ID;
-    const clientSecret = process.env.CLIENT_SECRET;
-    const redirectUri = process.env.REDIRECT_URI;
-    Logger.log('Client' + clientId);
-
+  async getToken(
+    authorizationCode: string,
+    clientId: string,
+    clientSecret: string,
+    redirectUri: string,
+    urlToken: string,
+  ): Promise<string> {
     try {
       const formData = new FormData();
       formData.append('grant_type', 'authorization_code');
@@ -28,15 +29,11 @@ export class LoginService {
       formData.append('client_secret', clientSecret);
       formData.append('code', authorizationCode);
       formData.append('redirect_uri', redirectUri);
-      const response = await axios.post(
-        'https://api.intra.42.fr/oauth/token',
-        formData,
-        {
-          headers: {
-            ...formData.getHeaders(),
-          },
+      const response = await axios.post(urlToken, formData, {
+        headers: {
+          ...formData.getHeaders(),
         },
-      );
+      });
       if (response.data && response.data.access_token) {
         return response.data.access_token;
       } else {
@@ -49,10 +46,9 @@ export class LoginService {
     }
   }
 
-  async getInfo(token: string): Promise<any> {
+  async getInfo(token: string, urlInfo: string): Promise<any> {
     try {
-      Logger.log('token ' + token);
-      return await axios.get('https://api.intra.42.fr/v2/me', {
+      return await axios.get(urlInfo, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -109,8 +105,36 @@ export class LoginService {
 
   async login(@Body() body: any, @Response() res) {
     Logger.log('body:', body);
-    const token = await this.getToken(body.code);
-    const profile = await this.getInfo(token);
+    const type = 'Google';
+    let urlInfo = '';
+    let token = '';
+    if (type === 'Google') {
+      token = await this.getToken(
+        body.code,
+        process.env.CLIENT_ID_GOOGLE,
+        process.env.CLIENT_SECRET_GOOGLE,
+        process.env.REDIRECT_URI_GOOGLE,
+        process.env.URL_TOKEN_GOOGLE,
+      );
+      urlInfo = process.env.URL_INFO_GOOGLE;
+    } else {
+      token = await this.getToken(
+        body.code,
+        process.env.CLIENT_ID,
+        process.env.CLIENT_SECRET,
+        process.env.REDIRECT_URI,
+        process.env.URL_TOKEN,
+      );
+      urlInfo = process.env.URL_INFO;
+    }
+
+    //TODO caso o login seja feito pelo google, precisa auterar o tipo do recebimento do dado para o exemplo abaixo
+    //const token = await this.getToken(body.code);
+    //console.log('profile ' + profile.data.names[0].givenName);
+    //console.log('firstName ' + profile.data.names[0].familyName);
+    //console.log('Email ' + profile.data.emailAddresses[0].value);
+
+    const profile = await this.getInfo(token, urlInfo);
     const user = await this.checkUser(profile);
     const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
     await this.insertToken(user, expiresAt, res);

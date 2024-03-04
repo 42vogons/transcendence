@@ -33,6 +33,7 @@ export class LoginController {
   @Post('/auth/user')
   @HttpCode(200)
   async getToken(@Body() body: any, @Response() res): Promise<Response> {
+    console.log('body google' + body);
     return await this.loginService.login(body, res);
   }
 
