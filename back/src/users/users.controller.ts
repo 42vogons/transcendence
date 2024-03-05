@@ -146,4 +146,10 @@ export class UsersController {
       .findOne(userId)
       .then(user => this.usersService.mapToProfileDTO(user));
   }
+
+  @Get('/findUsernameByUserID/:userId')
+  async findUsernameByUserID(@Param('userId') userId: number) {
+    const username = await this.usersService.findUsernameByUserID(userId);
+    return { username: username };
+  }
 }

@@ -36,6 +36,18 @@ export class UsersRepository {
     });
   }
 
+  async findUsernameByUserID(user_id: number): Promise<string | null> {
+    const user = await this.prisma.users.findUnique({
+      where: {
+        user_id: user_id,
+      },
+      select: {
+        username: true,
+      },
+    });
+    return user ? user.username : null;
+  }
+
   async findByUserName(userName: string): Promise<number | null> {
     const user = await this.prisma.users.findFirst({
       where: {
