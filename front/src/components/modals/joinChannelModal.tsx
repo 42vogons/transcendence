@@ -1,7 +1,8 @@
+/* eslint-disable camelcase */
 import { ChangeEvent, useContext, useEffect, useState } from 'react'
 import Modal from './modal'
-import Button from './button'
-import { MdClose, MdGroup, MdGroupAdd } from 'react-icons/md'
+import Button from '../button'
+import { MdClose, MdGroup } from 'react-icons/md'
 import { ChatContext } from '@/contexts/ChatContext'
 import {
 	ChannelInputContainer,
@@ -11,16 +12,31 @@ import {
 	ChannelListItem,
 	ChannelName,
 	ChannelAvatarContainer,
-} from '@/styles/components/joinChannelModal'
+} from '../../styles/components/joinChannelModal'
 import { api } from '@/services/api'
-import Loading from './loading'
+import Loading from '../loading'
 import { toast } from 'react-toastify'
 import Image from 'next/image'
-
-import privateDefaulAvatar from '../../public/assets/private.png'
-import protectedDefaulAvatar from '../../public/assets/protected.png'
-import publicDefaulAvatar from '../../public/assets/public.png'
 import { IoSearchSharp } from 'react-icons/io5'
+import { z } from 'zod'
+
+import privateDefaulAvatar from '../../../public/assets/private.png'
+import protectedDefaulAvatar from '../../../public/assets/protected.png'
+import publicDefaulAvatar from '../../../public/assets/public.png'
+import { useRouter } from 'next/router'
+
+const passwordSchema = z
+	.string()
+	.min(6, 'The password must contain at least 6 character(s)')
+	.refine((pwd) => /[0-9]/.test(pwd), {
+		message: 'The password must have a number.',
+	})
+	.refine((pwd) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd), {
+		message: 'The password must have a special character.',
+	})
+	.refine((pwd) => /[A-Z]/.test(pwd), {
+		message: 'The password must have an Upper case letter.',
+	})
 
 interface iChannel {
 	channel_id: number
@@ -36,7 +52,12 @@ export default function JoinChannelModal({
 	showJoinChannelModal,
 	setShowJoinChannelModal,
 }: iJoinChannelModal) {
+	const router = useRouter()
+	const { getChannelList } = useContext(ChatContext)
+
 	const [channelName, setChannelName] = useState('')
+	const [password, setPassword] = useState('')
+	const [error, setError] = useState('')
 	const [selectedChannel, setSelectedChannel] = useState<
 		iChannel | undefined
 	>(undefined)
@@ -87,18 +108,53 @@ export default function JoinChannelModal({
 		setChannelName(channel.name)
 	}
 
-	function handleJoinChannel() {
+	async function handleJoinChannel() {
 		console.log('CreateJoinChannel:')
-		console.log('channelName:', channelName)
-		// if (selectedChannel) {
-		// 	createDirectChat(selectedChannel.Channel_id)
-		// }
-		// setShowJoinChannelModal(false)
+		console.log('channelName:', channelName, selectedChannel, password)
+
+		let formData
+
+		if (selectedChannel) {
+			const { channel_id } = selectedChannel
+
+			if (selectedChannel?.type === 'protected') {
+				const validatePassword = passwordSchema.safeParse(password)
+				if (!validatePassword.success) {
+					const errors = (validatePassword as any).error.format()
+						._errors
+					setError(errors[0])
+					return
+				} else {
+					setError('')
+					formData = { channel_id, password }
+				}
+			} else {
+				formData = { channel_id }
+			}
+			try {
+				await api.post('/channel/joinChannel', formData)
+				await new Promise((resolve) => setTimeout(resolve, 500))
+				getChannelList()
+				setShowJoinChannelModal(false)
+				router.push('/chat/' + channel_id)
+			} catch (error: any) {
+				console.log('error:', error)
+				toast(error.message ? error.message : error, {
+					type: 'error',
+				})
+			}
+		}
 	}
 
 	useEffect(() => {
 		if (showJoinChannelModal === false) {
 			setChannelName('')
+			setPassword('')
+			setError('')
+			setSelectedChannel(undefined)
+			setChannelList([])
+			setFilteredChannelList([])
+			setIsOptionsLoading(false)
 		} else {
 			getAllChannels()
 		}
@@ -107,10 +163,13 @@ export default function JoinChannelModal({
 	useEffect(() => {
 		function filterChannelsByName(name: string) {
 			return name
-				? channelList.filter((channel) => channel.name.startsWith(name))
+				? channelList.filter((channel) =>
+						channel.name
+							.toLowerCase()
+							.startsWith(name.toLowerCase()),
+				  )
 				: channelList
 		}
-		// if (channelName) {
 		setIsOptionsLoading(true)
 		setFilteredChannelList(filterChannelsByName(channelName))
 		setIsOptionsLoading(false)
@@ -118,7 +177,6 @@ export default function JoinChannelModal({
 			'filterChannelsByName(channelName):',
 			filterChannelsByName(channelName),
 		)
-		// }
 	}, [channelName, channelList])
 
 	return (
@@ -188,7 +246,16 @@ export default function JoinChannelModal({
 						)}
 				</ChannelInputContainer>
 				{selectedChannel && selectedChannel.type === 'protected' && (
-					<input type="text" placeholder="Channel Password" />
+					<div className="inputContainer">
+						<input
+							type="text"
+							placeholder="Channel Password"
+							className={error ? 'hasError' : ''}
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+						/>
+						<span>{error}</span>
+					</div>
 				)}
 
 				<div className="buttonsContainer">
@@ -196,7 +263,11 @@ export default function JoinChannelModal({
 						<MdClose size={40} />
 						Cancel
 					</Button>
-					<Button buttonType="accept" onClick={handleJoinChannel}>
+					<Button
+						buttonType="accept"
+						disabled={!selectedChannel}
+						onClick={handleJoinChannel}
+					>
 						<MdGroup size={40} />
 						Join
 					</Button>

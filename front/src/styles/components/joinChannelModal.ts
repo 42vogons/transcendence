@@ -28,6 +28,7 @@ export const JoinChannelModalContainer = styled('div', {
 	},
 
 	'input,select': {
+		margin: '0 auto',
 		width: '98%',
 		borderRadius: '16px',
 		border: '2px solid $gray300',
@@ -42,6 +43,10 @@ export const JoinChannelModalContainer = styled('div', {
 		},
 	},
 
+	'.hasError': {
+		border: '2px solid $red !important',
+	},
+
 	'.buttonsContainer': {
 		width: '100%',
 		display: 'flex',
@@ -52,6 +57,21 @@ export const JoinChannelModalContainer = styled('div', {
 
 		'@bp2': {
 			flexDirection: 'row',
+		},
+	},
+
+	'.inputContainer': {
+		width: '100%',
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		gap: 8,
+		textAlign: 'center',
+		color: '$red',
+		fontWeight: 'bold',
+
+		'@bp2': {
+			fontSize: '$xl',
 		},
 	},
 })

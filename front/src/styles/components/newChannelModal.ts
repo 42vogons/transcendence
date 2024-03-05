@@ -65,6 +65,7 @@ export const NewChannelModalForm = styled('form', {
 		width: '100%',
 		display: 'flex',
 		flexDirection: 'column',
+		alignItems: 'center',
 		gap: 8,
 		textAlign: 'center',
 		color: '$red',

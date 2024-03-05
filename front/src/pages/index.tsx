@@ -14,7 +14,7 @@ import Game from '@/components/game'
 import { GameContext } from '@/contexts/GameContext'
 import Loading from '@/components/loading'
 import { UserContext } from '@/contexts/UserContext'
-import Modal from '@/components/modal'
+import Modal from '@/components/modals/modal'
 import Button from '@/components/button'
 import { MdClose } from 'react-icons/md'
 

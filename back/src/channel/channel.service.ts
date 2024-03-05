@@ -78,6 +78,8 @@ export class ChannelService {
     createChanneltDto: CreateChannelDto,
     userId: number,
   ): Promise<any> {
+    console.log('userId:', userId);
+    console.log('createChanneltDto:', createChanneltDto);
     if (
       !Object.values(ChannelType).includes(
         createChanneltDto.type as ChannelType,
@@ -86,10 +88,10 @@ export class ChannelService {
       throw new Error('Invalid channel type.');
     }
     if (createChanneltDto.type === 'protected') {
+      this.checkValidPassword(createChanneltDto.password);
       const hashPassword = await this.hashPassword(createChanneltDto.password);
       createChanneltDto.password = hashPassword;
     }
-    this.checkValidPassword(createChanneltDto.password);
 
     const channel = await this.repository.createChannel(
       createChanneltDto,
@@ -259,7 +261,7 @@ export class ChannelService {
       (validPassword || channel.type === ChannelType.PUBLIC) &&
       channel.type !== ChannelType.PRIVATE
     ) {
-      await this.repository.addUserToChannel(
+      const channnel_id = await this.repository.addUserToChannel(
         userId,
         channelDto.channel_id,
         ChannelMemberStatus.MEMBER,
@@ -345,6 +347,7 @@ export class ChannelService {
       .refine(pwd => /[A-Z]/.test(pwd));
 
     const result = passwordSchema.safeParse(password);
+    console.log('result:', result);
     if (!result.success) {
       throw new BadRequestException(
         'The password must contain 6 characters, including 1 special character and 1 numeric character.',
