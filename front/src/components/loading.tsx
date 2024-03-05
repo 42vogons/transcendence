@@ -13,6 +13,8 @@ export default function Loading({ size }: iLoadingProps) {
 				width={size}
 				height={size}
 				alt="loading..."
+				placeholder="blur"
+				blurDataURL="/assets/loading.gif"
 			/>
 		</LoadingContainer>
 	)

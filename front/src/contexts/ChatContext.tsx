@@ -51,6 +51,7 @@ interface ChatContextType {
 		channelType: 'direct' | 'public' | 'protected' | 'private',
 		channelMembers: iChannelMember[],
 	) => string
+	hasAdminPriveleges: (userID: number) => boolean
 	closeChatSocket: () => void
 }
 
@@ -256,6 +257,16 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		}
 	}
 
+	function hasAdminPriveleges(userID: number) {
+		const allowedRoles = ['owner', 'admin']
+		const member = (activeChannelData as iChannelData).channelMembers.find(
+			(member) => member.user_id === userID,
+		)
+		return (
+			!!member && !!member.status && allowedRoles.includes(member?.status)
+		)
+	}
+
 	function closeChatSocket() {
 		socket.close()
 	}
@@ -286,6 +297,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				getActiveChannelName,
 				getActiveChannelAvatar,
 				setActiveChannel,
+				hasAdminPriveleges,
 			}}
 		>
 			{children}

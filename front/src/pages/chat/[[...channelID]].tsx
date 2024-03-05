@@ -51,6 +51,7 @@ export default function Chat() {
 		getActiveChannelName,
 		getActiveChannelAvatar,
 		setActiveChannel,
+		hasAdminPriveleges,
 	} = useContext(ChatContext)
 
 	const messages = activeChannelData?.msgs
@@ -123,56 +124,76 @@ export default function Chat() {
 								</ChatTitle>
 								{/* <ChatSubTitle>online</ChatSubTitle> */}
 							</ChatHeaderTextContainer>
-							<ChatMenuWrapper>
-								<ChatMenu>
-									<SlOptionsVertical size={28} />
-								</ChatMenu>
-								<MenuPortal>
-									<MenuContent
-										style={{
-											zIndex: 1,
-										}}
-									>
-										<MenuArrow />
-										<MenuItem>
-											<MenuAction
-												onClick={() => {
-													console.log('leave channel')
-												}}
-											>
-												<BiExit size={menuIconSize} />
-												Channel
-											</MenuAction>
-										</MenuItem>
-										<MenuItem>
-											<MenuAction
-												isAdmin="true"
-												onClick={() => {
-													console.log('Add user')
-												}}
-											>
-												<FaUserPlus
-													size={menuIconSize}
-												/>
-												Member
-											</MenuAction>
-										</MenuItem>
-										<MenuItem>
-											<MenuAction
-												isAdmin="true"
-												onClick={() => {
-													console.log(
-														'change password',
-													)
-												}}
-											>
-												<GrUpdate size={menuIconSize} />{' '}
-												Password
-											</MenuAction>
-										</MenuItem>
-									</MenuContent>
-								</MenuPortal>
-							</ChatMenuWrapper>
+							{activeChannelData.channel.type !== 'direct' && (
+								<ChatMenuWrapper>
+									<ChatMenu>
+										<SlOptionsVertical size={28} />
+									</ChatMenu>
+									<MenuPortal>
+										<MenuContent
+											style={{
+												zIndex: 1,
+											}}
+										>
+											<MenuArrow />
+											<MenuItem>
+												<MenuAction
+													onClick={() => {
+														console.log(
+															'leave channel',
+														)
+													}}
+												>
+													<BiExit
+														size={menuIconSize}
+													/>
+													Channel
+												</MenuAction>
+											</MenuItem>
+											{hasAdminPriveleges(
+												Number(user?.userID),
+											) && (
+												<>
+													<MenuItem>
+														<MenuAction
+															isAdmin="true"
+															onClick={() => {
+																console.log(
+																	'Add user',
+																)
+															}}
+														>
+															<FaUserPlus
+																size={
+																	menuIconSize
+																}
+															/>
+															Member
+														</MenuAction>
+													</MenuItem>
+													<MenuItem>
+														<MenuAction
+															isAdmin="true"
+															onClick={() => {
+																console.log(
+																	'change password',
+																)
+															}}
+														>
+															<GrUpdate
+																size={
+																	menuIconSize
+																}
+															/>{' '}
+															Password
+														</MenuAction>
+													</MenuItem>
+												</>
+											)}
+										</MenuContent>
+									</MenuPortal>
+								</ChatMenuWrapper>
+							)}
 						</ChatHeader>
 						<ChatMessageContainer>
 							{messages && messages?.length > 0 ? (
@@ -255,58 +276,70 @@ export default function Chat() {
 																	Mute
 																</MenuAction>
 															</MenuItem>
-															<MenuItem>
-																<MenuAction
-																	isAdmin="true"
-																	onClick={() => {
-																		console.log(
-																			'promote to admi',
-																		)
-																	}}
-																>
-																	<BiShieldPlus
-																		size={
-																			menuIconSize
-																		}
-																	/>
-																	Promote
-																</MenuAction>
-															</MenuItem>
+															{activeChannelData
+																.channel
+																.type !==
+																'direct' &&
+																hasAdminPriveleges(
+																	Number(
+																		user?.userID,
+																	),
+																) && (
+																	<>
+																		<MenuItem>
+																			<MenuAction
+																				isAdmin="true"
+																				onClick={() => {
+																					console.log(
+																						'promote to admi',
+																					)
+																				}}
+																			>
+																				<BiShieldPlus
+																					size={
+																						menuIconSize
+																					}
+																				/>
+																				Promote
+																			</MenuAction>
+																		</MenuItem>
 
-															<MenuItem>
-																<MenuAction
-																	isAdmin="true"
-																	onClick={() => {
-																		console.log(
-																			'kick',
-																		)
-																	}}
-																>
-																	<BiLogOut
-																		size={
-																			menuIconSize
-																		}
-																	/>{' '}
-																	Kick
-																</MenuAction>
-															</MenuItem>
-															<MenuItem>
-																<MenuAction
-																	isAdmin="true"
-																	onClick={() => {
-																		console.log(
-																			'ban',
-																		)
-																	}}
-																>
-																	<MdBlock
-																		size={
-																			menuIconSize
-																		}
-																	/>{' '}
-																	Ban
-																</MenuAction>
-															</MenuItem>
+																		<MenuItem>
+																			<MenuAction
+																				isAdmin="true"
+																				onClick={() => {
+																					console.log(
+																						'kick',
+																					)
+																				}}
+																			>
+																				<BiLogOut
+																					size={
+																						menuIconSize
+																					}
+																				/>
+																				Kick
+																			</MenuAction>
+																		</MenuItem>
+																		<MenuItem>
+																			<MenuAction
+																				isAdmin="true"
+																				onClick={() => {
+																					console.log(
+																						'ban',
+																					)
+																				}}
+																			>
+																				<MdBlock
+																					size={
+																						menuIconSize
+																					}
+																				/>
+																				Ban
+																			</MenuAction>
+																		</MenuItem>
+																	</>
+																)}
 														</MenuContent>
 													</MenuPortal>
 												</SenderMenuWrapper>
