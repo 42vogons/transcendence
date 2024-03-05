@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import Modal from './modal'
-import Button from './button'
+import Button from '../button'
 import { MdClose } from 'react-icons/md'
 import { FaUserAstronaut, FaUserPlus } from 'react-icons/fa6'
 import {

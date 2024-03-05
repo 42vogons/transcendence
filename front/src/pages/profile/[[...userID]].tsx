@@ -63,6 +63,8 @@ export default function Profile() {
 		MatchHistoryData[] | undefined
 	>(undefined)
 
+	const userNotAllowed = 1
+
 	async function getUserData(userID: number) {
 		setIsLoading(true)
 		try {
@@ -95,7 +97,14 @@ export default function Profile() {
 				typeof userID !== 'undefined' &&
 				!isNaN(Number(userID))
 			) {
-				getUserData(Number(userID))
+				if (Number(userID) === userNotAllowed) {
+					setIsLoading(false)
+					toast('This profile is private', {
+						type: 'error',
+					})
+				} else {
+					getUserData(Number(userID))
+				}
 			} else {
 				setIsLoading(false)
 				toast('Invalid user id', {
@@ -172,6 +181,10 @@ export default function Profile() {
 				<LoadingContainer>
 					<Loading size={200} />
 				</LoadingContainer>
+			) : Number(userID) === userNotAllowed ? (
+				<MessageContainer>
+					<h2>This profile is private</h2>
+				</MessageContainer>
 			) : (
 				<MessageContainer>
 					<h2>User not found</h2>

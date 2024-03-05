@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -18,6 +19,7 @@ import { ChannelType, ChannelMemberStatus, AdminActionType } from './constants';
 import { channel_listDTO } from './dto/channelList.dto';
 import { ChatDto } from 'src/chat/dto/chat.dto';
 import { ChatRepository } from 'src/chat/repository/chat.repository';
+import { z } from 'zod';
 
 @Injectable()
 export class ChannelService {
@@ -76,6 +78,8 @@ export class ChannelService {
     createChanneltDto: CreateChannelDto,
     userId: number,
   ): Promise<any> {
+    console.log('userId:', userId);
+    console.log('createChanneltDto:', createChanneltDto);
     if (
       !Object.values(ChannelType).includes(
         createChanneltDto.type as ChannelType,
@@ -84,9 +88,11 @@ export class ChannelService {
       throw new Error('Invalid channel type.');
     }
     if (createChanneltDto.type === 'protected') {
+      this.checkValidPassword(createChanneltDto.password);
       const hashPassword = await this.hashPassword(createChanneltDto.password);
       createChanneltDto.password = hashPassword;
     }
+
     const channel = await this.repository.createChannel(
       createChanneltDto,
       userId,
@@ -255,7 +261,7 @@ export class ChannelService {
       (validPassword || channel.type === ChannelType.PUBLIC) &&
       channel.type !== ChannelType.PRIVATE
     ) {
-      await this.repository.addUserToChannel(
+      const channnel_id = await this.repository.addUserToChannel(
         userId,
         channelDto.channel_id,
         ChannelMemberStatus.MEMBER,
@@ -273,6 +279,7 @@ export class ChannelService {
       userId,
     );
     if (isOwner) {
+      this.checkValidPassword(channelDto.password);
       const hashPassword = await this.hashPassword(channelDto.password);
       channelDto.password = hashPassword;
       await this.repository.changePassword(channelDto);
@@ -329,5 +336,22 @@ export class ChannelService {
     chatDto.sender_id = 1;
     chatDto.content = msg;
     await this.chatRepository.saveMessage(chatDto);
+  }
+
+  private checkValidPassword(password: string) {
+    const passwordSchema = z
+      .string()
+      .min(6)
+      .refine(pwd => /[0-9]/.test(pwd))
+      .refine(pwd => /[!@#$%^&*(),.?":{}|<>]/.test(pwd))
+      .refine(pwd => /[A-Z]/.test(pwd));
+
+    const result = passwordSchema.safeParse(password);
+    console.log('result:', result);
+    if (!result.success) {
+      throw new BadRequestException(
+        'The password must contain 6 characters, including 1 special character and 1 numeric character.',
+      );
+    }
   }
 }

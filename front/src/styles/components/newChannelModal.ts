@@ -30,7 +30,7 @@ export const NewChannelModalForm = styled('form', {
 
 	'input,select': {
 		// outline: 'none',
-		width: '100%',
+		width: '98%',
 		borderRadius: '16px',
 		border: '2px solid $gray300',
 		fontSize: '$xl',
@@ -65,6 +65,7 @@ export const NewChannelModalForm = styled('form', {
 		width: '100%',
 		display: 'flex',
 		flexDirection: 'column',
+		alignItems: 'center',
 		gap: 8,
 		textAlign: 'center',
 		color: '$red',

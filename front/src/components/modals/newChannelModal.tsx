@@ -1,5 +1,5 @@
 import Modal from './modal'
-import Button from './button'
+import Button from '../button'
 import { MdClose, MdGroupAdd } from 'react-icons/md'
 import { NewChannelModalForm } from '@/styles/components/newChannelModal'
 import { useForm } from 'react-hook-form'
@@ -66,9 +66,10 @@ export default function NewChannelModal({
 	async function handleCreateNewChannel(formData: NewChannelSchema) {
 		try {
 			const { data } = await api.post('/channel/create-channel', formData)
+			await new Promise((resolve) => setTimeout(resolve, 500))
+			getChannelList()
 			reset()
 			setShowNewChannelModal(false)
-			getChannelList()
 			router.push('/chat/' + data)
 		} catch (error: any) {
 			console.log('error:', error)

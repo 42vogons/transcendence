@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { FaGamepad, FaUserAstronaut, FaUserPlus } from 'react-icons/fa6'
 import { FaUserFriends } from 'react-icons/fa'
 import { BsChatSquareTextFill } from 'react-icons/bs'
-import { RiLogoutBoxFill } from 'react-icons/ri'
+import { BiLogOut } from 'react-icons/bi'
 import {
 	MdOutlineMenu,
 	MdOutlineArrowBackIos,
@@ -30,12 +30,12 @@ import { UserContext } from '@/contexts/UserContext'
 import { toast } from 'react-toastify'
 import { isDateExpired } from '@/reducers/User/Reducer'
 import { GameContext } from '@/contexts/GameContext'
-import NewChatModal from './newChatModal'
+import NewChatModal from './modals/newChatModal'
 import { ChatContext } from '@/contexts/ChatContext'
-import NewFriendModal from './newFriendModal'
+import NewFriendModal from './modals/newFriendModal'
 import { IoSearchSharp } from 'react-icons/io5'
-import SearchChannelModal from './searchChannelModal'
-import NewChannelModal from './newChannelModal'
+import JoinChannelModal from './modals/joinChannelModal'
+import NewChannelModal from './modals/newChannelModal'
 import { iLastChannelMessage } from '@/reducers/Chat/Types'
 import Loading from './loading'
 
@@ -64,7 +64,7 @@ export default function Layout({ children }: iLayoutProps) {
 	const [showNewChatModal, setShowNewChatModal] = useState(false)
 	const [showNewFriendModal, setShowNewFriendModal] = useState(false)
 	const [showNewChannelModal, setShowNewChannelModal] = useState(false)
-	const [showSearchChannelModal, setShowSearchChannelModal] = useState(false)
+	const [showJoinChannelModal, setShowJoinChannelModal] = useState(false)
 
 	useEffect(() => {
 		setCurrentPath(router.asPath)
@@ -144,7 +144,7 @@ export default function Layout({ children }: iLayoutProps) {
 			},
 		},
 		{
-			icon: <RiLogoutBoxFill size={iconSize} />,
+			icon: <BiLogOut size={iconSize} />,
 			title: 'Logout',
 			handleOnClick: () => {
 				console.log('logout')
@@ -316,10 +316,8 @@ export default function Layout({ children }: iLayoutProps) {
 											</IconButton>
 											<IconButton
 												handleOnClick={() => {
-													console.log(
-														'search channel',
-													)
-													setShowSearchChannelModal(
+													console.log('join channel')
+													setShowJoinChannelModal(
 														true,
 													)
 												}}
@@ -389,9 +387,9 @@ export default function Layout({ children }: iLayoutProps) {
 				setShowNewChannelModal={setShowNewChannelModal}
 				showNewChannelModal={showNewChannelModal}
 			/>
-			<SearchChannelModal
-				setShowSearchChannelModal={setShowSearchChannelModal}
-				showSearchChannelModal={showSearchChannelModal}
+			<JoinChannelModal
+				setShowJoinChannelModal={setShowJoinChannelModal}
+				showJoinChannelModal={showJoinChannelModal}
 			/>
 		</LayoutContainer>
 	) : (

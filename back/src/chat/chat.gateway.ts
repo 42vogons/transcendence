@@ -318,7 +318,7 @@ export class ChatGateway
   }
 
   @SubscribeMessage('update_channel_list')
-  async getLastChannelMessage(client: SocketWithAuth){
+  async getLastChannelMessage(client: SocketWithAuth) {
     const lastMessageChannel = await this.channelService.getLastChannelMessage(
       client.userID,
     );

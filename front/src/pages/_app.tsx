@@ -9,7 +9,7 @@ import { ReactElement, ReactNode } from 'react'
 import { GameProvider } from '@/contexts/GameContext'
 import { UserProvider } from '@/contexts/UserContext'
 import { ChatProvider } from '@/contexts/ChatContext'
-import RequestGameModal from '@/components/requestGameModal'
+import RequestGameModal from '@/components/modals/requestGameModal'
 
 globalStyles()
 
