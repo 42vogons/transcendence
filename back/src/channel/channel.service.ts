@@ -48,10 +48,12 @@ export class ChannelService {
         createChanneltDto.type as ChannelType,
       )
     ) {
-      throw new Error('Invalid channel type.');
+      throw new BadRequestException('Invalid channel type.');
     }
     if (user_id === createChanneltDto.member_id) {
-      throw new Error('You can not create a channel with yourself.');
+      throw new BadRequestException(
+        'You can not create a channel with yourself.',
+      );
     }
     const existChannel = await this.repository.directChannelExists(
       user_id,
@@ -78,14 +80,12 @@ export class ChannelService {
     createChanneltDto: CreateChannelDto,
     userId: number,
   ): Promise<any> {
-    console.log('userId:', userId);
-    console.log('createChanneltDto:', createChanneltDto);
     if (
       !Object.values(ChannelType).includes(
         createChanneltDto.type as ChannelType,
       )
     ) {
-      throw new Error('Invalid channel type.');
+      throw new BadRequestException('Invalid channel type.');
     }
     if (createChanneltDto.type === 'protected') {
       this.checkValidPassword(createChanneltDto.password);
@@ -261,7 +261,7 @@ export class ChannelService {
       (validPassword || channel.type === ChannelType.PUBLIC) &&
       channel.type !== ChannelType.PRIVATE
     ) {
-      const channnel_id = await this.repository.addUserToChannel(
+      await this.repository.addUserToChannel(
         userId,
         channelDto.channel_id,
         ChannelMemberStatus.MEMBER,
@@ -347,10 +347,9 @@ export class ChannelService {
       .refine(pwd => /[A-Z]/.test(pwd));
 
     const result = passwordSchema.safeParse(password);
-    console.log('result:', result);
     if (!result.success) {
       throw new BadRequestException(
-        'The password must contain 6 characters, including 1 special character and 1 numeric character.',
+        'The password must contain 6 characters, including 1 special character, 1 numeric character and 1 upper',
       );
     }
   }
