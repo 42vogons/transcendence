@@ -4,9 +4,10 @@ import {
   Body,
   Req,
   Get,
-  //Delete,
   Patch,
   UseGuards,
+  BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { MemberDto } from './dto/member.dto';
@@ -20,10 +21,20 @@ import { AuthGuard } from 'src/login/auth.guard';
 export class ChannelController {
   jwtService: any;
   constructor(private readonly channelService: ChannelService) {}
+  private logger: Logger = new Logger('AppGateway');
 
   @Post('/create-channel')
-  create(@Req() request, @Body() createChatDto: CreateChannelDto) {
-    return this.channelService.create(createChatDto, request.user.id);
+  async create(@Req() request, @Body() createChatDto: CreateChannelDto) {
+    try {
+      const channel_id = await this.channelService.create(
+        createChatDto,
+        request.user.id,
+      );
+      this.logger.log(`Channel created by id ${channel_id}.`);
+    } catch (error) {
+      this.logger.error(error.response.message);
+      throw new BadRequestException(error.response);
+    }
   }
 
   @Post('/addMember')
@@ -31,10 +42,6 @@ export class ChannelController {
     return this.channelService.addMember(member, request.user.id);
   }
 
-  /*@Delete('/removeMember')
-  removeMember(@Req() request, @Body() member: RemoveMemberDto) {
-    return this.channelService.adminAction(member, request.user.id);
-  }*/
   @Patch('/changeMemberStatus')
   changeMemberStatus(@Req() request, @Body() member: MemberDto) {
     return this.channelService.changeMemberStatus(member, request.user.id);
@@ -56,32 +63,24 @@ export class ChannelController {
   }
 
   @Post('/joinChannel')
-  joinChannel(@Req() request, @Body() channel: ChannelDto) {
-    return this.channelService.joinChannel(channel, request.user.id);
+  async joinChannel(@Req() request, @Body() channel: ChannelDto) {
+    try {
+      await this.channelService.joinChannel(channel, request.user.id);
+      this.logger.log(`Joined on changed ${channel.channel_id}.`);
+    } catch (error) {
+      this.logger.error(error.response.message);
+      throw new BadRequestException(error.response);
+    }
   }
 
   @Patch('/changePassword')
   async changePassword(@Req() request, @Body() channel: ChannelDto) {
-    return await this.channelService.changePassword(channel, request.user.id);
+    try {
+      await this.channelService.changePassword(channel, request.user.id);
+      this.logger.log(`Password was changed ${channel.channel_id}.`);
+    } catch (error) {
+      this.logger.error(error.response.message);
+      throw new BadRequestException(error.response);
+    }
   }
-
-  /*@Get()
-  findAll() {
-    return this.chatService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.chatService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateChatDto: UpdateChatDto) {
-    return this.chatService.update(+id, updateChatDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.chatService.remove(+id);
-  }*/
 }
