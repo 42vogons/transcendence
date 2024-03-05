@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -28,6 +29,8 @@ export class ChannelService {
     private readonly userRepository: UsersRepository,
     private readonly chatRepository: ChatRepository,
   ) {}
+
+  private logger: Logger = new Logger('AppGateway');
 
   async hashPassword(password: string): Promise<string> {
     const saltOrRounds = 10;
@@ -97,7 +100,11 @@ export class ChannelService {
       createChanneltDto,
       userId,
     );
-    this.sendBroadCast(channel.channel_id, 'Channel created');
+
+    const userName = this.userRepository.findUsernameByUserID(userId);
+    const msg = `Channel created by ${userName}`;
+    this.logger.log(msg);
+    this.sendBroadCast(channel.channel_id, msg);
     const member = new MemberDto();
     member.channel_id = channel.channel_id;
     member.status = ChannelMemberStatus.ADMIN;
@@ -266,7 +273,11 @@ export class ChannelService {
         channelDto.channel_id,
         ChannelMemberStatus.MEMBER,
       );
-      this.sendBroadCast(channelDto.channel_id, 'Joined the channel');
+
+      const memberName = this.userRepository.findUsernameByUserID(userId);
+      const msg = `${memberName} joined`;
+      this.logger.log(msg + ' on channel ' + channelDto.channel_id);
+      await this.sendBroadCast(channelDto.channel_id, msg);
       return 'Joined the channel.';
     } else {
       throw new UnauthorizedException('Unable to join the channel.');
@@ -283,6 +294,10 @@ export class ChannelService {
       const hashPassword = await this.hashPassword(channelDto.password);
       channelDto.password = hashPassword;
       await this.repository.changePassword(channelDto);
+      const memberName = this.userRepository.findUsernameByUserID(userId);
+      const msg = `${memberName} changed password`;
+      this.logger.log(msg + ' on channel ' + channelDto.channel_id);
+      await this.sendBroadCast(channelDto.channel_id, msg);
       return 'Password changed.';
     } else {
       throw new UnauthorizedException('You are not an owner of this channel.');

@@ -42,23 +42,37 @@ export class ChatGateway
     private readonly chatService: ChatService,
   ) {}
 
-  private async notifyMembers(channel_id: number) {
-    await setTimeout(100);
-    const members = await this.channelService.getChannelMembers(channel_id);
-    members.forEach(async member => {
-      const memberId = this.users.get(member.user_id);
-      this.server.to(memberId).emit('refresh_chat', { channelID: channel_id });
-      const lastMessageChannel =
-        await this.channelService.getLastChannelMessage(member.user_id);
-      this.server.to(memberId).emit('refresh_channel_list', lastMessageChannel);
-    });
+  afterInit(server: Server) {
+    this.logger.log(`Init: ${server}`);
+  }
+
+  async handleConnection(client: SocketWithAuth) {
+    this.logger.log(`Client connected: ${client.id}`);
+    this.logger.log(`Client user: ${client.username}`);
+    this.logger.log(`Client id: ${client.userID}`);
+    this.users.set(client.userID, client.id);
+
+    this.notifyFriends(client.userID);
+
+    await this.usersService.setStatus(client.userID, 'online');
+    await this.listFriends(client);
+    const lastMessageChannel = await this.channelService.getLastChannelMessage(
+      client.userID,
+    );
+    client.emit('refresh_channel_list', lastMessageChannel);
+  }
+
+  async handleDisconnect(client: SocketWithAuth) {
+    this.logger.log(`Client disconnected: ${client.id}`);
+    await this.usersService.setStatus(client.userID, 'offline');
+    this.users.delete(client.userID);
+    this.notifyFriends(client.userID);
   }
 
   @SubscribeMessage('msg_to_server')
   async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
       chatDto.sender_id = client.userID;
-      console.log('id ' + client.userID);
       await this.chatService.saveMessage(chatDto);
       await this.notifyMembers(chatDto.channel_id);
       this.logger.log(
@@ -97,37 +111,6 @@ export class ChatGateway
     }
   }
 
-  afterInit(server: Server) {
-    this.logger.log(`Init: ${server}`);
-  }
-
-  public async notifyFriends(userID) {
-    const friends = await this.usersService.findFriends(userID);
-    friends.forEach(async friend => {
-      const myFriend = this.users.get(friend.user_id);
-      if (myFriend == null) {
-        return;
-      }
-      this.server.to(myFriend).emit('refresh_list', ``);
-    });
-  }
-
-  async handleConnection(client: SocketWithAuth) {
-    this.logger.log(`Client connected: ${client.id}`);
-    this.logger.log(`Client user: ${client.username}`);
-    this.logger.log(`Client id: ${client.userID}`);
-    this.users.set(client.userID, client.id);
-
-    this.notifyFriends(client.userID);
-
-    await this.usersService.setStatus(client.userID, 'online');
-    await this.listFriends(client);
-    const lastMessageChannel = await this.channelService.getLastChannelMessage(
-      client.userID,
-    );
-    client.emit('refresh_channel_list', lastMessageChannel);
-  }
-
   @SubscribeMessage('get_friends')
   async listFriends(client: SocketWithAuth): Promise<void> {
     const friends = await this.usersService.findFriends(client.userID);
@@ -138,13 +121,6 @@ export class ChatGateway
       userStatus: this.users.has(friend.user_id) ? friend.status : 'offline',
     }));
     client.emit('update_friend_list', friendsList);
-  }
-
-  async handleDisconnect(client: SocketWithAuth) {
-    this.logger.log(`Client disconnected: ${client.id}`);
-    await this.usersService.setStatus(client.userID, 'offline');
-    this.users.delete(client.userID);
-    this.notifyFriends(client.userID);
   }
 
   @SubscribeMessage('add_friend')
@@ -176,21 +152,22 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('create_channel')
+  /*@SubscribeMessage('create_channel')
   async createChannel(client: SocketWithAuth, channelDto: CreateChannelDto) {
     try {
       const channel = await this.channelService.create(
         channelDto,
         client.userID,
       );
-      console.log('channel:', channel);
-      this.logger.log(`User ${client.userID} Channel created ${channel}.`);
-      await this.chatService.sendBroadCast(channel, `Channel created`);
+      const userName = this.usersService.findUsernameByUserID(client.userID);
+      const msg = `Channel created by ${userName}`;
+      this.logger.log(msg);
+      await this.chatService.sendBroadCast(channel, msg);
       await this.notifyMembers(channel);
     } catch (error) {
       this.sendError(error);
     }
-  }
+  }*/
   @SubscribeMessage('create_direct')
   async createDirect(client: SocketWithAuth, channelDto: CreateChannelDto) {
     channelDto.name = `direct_${client.userID}_${channelDto.member_id}`;
@@ -199,8 +176,10 @@ export class ChatGateway
         channelDto,
         client.userID,
       );
-      this.logger.log(`User ${client.userID} Chat created ${channel}.`);
-      await this.chatService.sendBroadCast(channel, `Chat created`);
+      const userName = this.usersService.findUsernameByUserID(client.userID);
+      const msg = `Chat created by ${userName}`;
+      this.logger.log(msg);
+      await this.chatService.sendBroadCast(channel, msg);
       await this.notifyMembers(channel);
     } catch (error) {
       this.sendError(error);
@@ -216,13 +195,14 @@ export class ChatGateway
         memberDto.channel_id,
       );
       await this.channelService.addMember(memberDto, client.userID);
-      this.logger.log(
-        `Member ${memberDto.member_id} added by ${client.userID} in channel ${memberDto.channel_id}.`,
+
+      const adminName = this.usersService.findUsernameByUserID(client.userID);
+      const memberName = this.usersService.findUsernameByUserID(
+        memberDto.member_id,
       );
-      await this.chatService.sendBroadCast(
-        memberDto.channel_id,
-        `A member was added`,
-      );
+      const msg = `${adminName} added ${memberName} on channel`;
+      this.logger.log(msg);
+      await this.chatService.sendBroadCast(memberDto.channel_id, msg);
       await this.notifyMembers(memberDto.channel_id);
     } catch (error) {
       this.sendError(error);
@@ -233,9 +213,13 @@ export class ChatGateway
   async changeMemberStatus(client: SocketWithAuth, memberDto: MemberDto) {
     try {
       await this.channelService.changeMemberStatus(memberDto, client.userID);
-      this.logger.log(
-        `Member ${memberDto.member_id} have changed status to ${memberDto.status} by ${client.userID} in channel ${memberDto.channel_id}.`,
+      const adminName = this.usersService.findUsernameByUserID(client.userID);
+      const memberName = this.usersService.findUsernameByUserID(
+        memberDto.member_id,
       );
+      const msg = `${adminName}  changed ${memberName}'s status to ${memberDto.status}`;
+      this.logger.log(msg + 'on channel' + memberDto.channel_id);
+      await this.chatService.sendBroadCast(memberDto.channel_id, msg);
     } catch (error) {
       this.sendError(error);
     }
@@ -244,17 +228,18 @@ export class ChatGateway
   @SubscribeMessage('admin_action')
   async adminAction(client: SocketWithAuth, adminActionDto: AdminActionDto) {
     try {
-      if (adminActionDto.action !== AdminActionType.MUTED) {
-        await this.chatService.sendBroadCast(
-          adminActionDto.channel_id,
-          `The member ${adminActionDto.member_id} was ${adminActionDto.action}`,
-        );
-        await this.notifyMembers(adminActionDto.channel_id);
-      }
-      await this.channelService.adminAction(adminActionDto, client.userID);
-      this.logger.log(
-        `User ${client.userID} ${adminActionDto.action} member ${adminActionDto.member_id} to ${adminActionDto.end_date} minutes`,
+      const adminName = this.usersService.findUsernameByUserID(client.userID);
+      const memberName = this.usersService.findUsernameByUserID(
+        adminActionDto.member_id,
       );
+      let msg = `${adminName} ${adminActionDto.action} ${memberName}`;
+      if (adminActionDto.action === AdminActionType.MUTED) {
+        msg += ` for ${adminActionDto.end_date} minutes`;
+      }
+      this.logger.log(msg + 'on channel' + adminActionDto.channel_id);
+      await this.chatService.sendBroadCast(adminActionDto.channel_id, msg);
+      await this.notifyMembers(adminActionDto.channel_id);
+      await this.channelService.adminAction(adminActionDto, client.userID);
     } catch (error) {
       this.sendError(error);
     }
@@ -263,38 +248,34 @@ export class ChatGateway
   @SubscribeMessage('leave_channel')
   async leaveChannel(client: SocketWithAuth, leaveDto: LeaveDto) {
     try {
+      client.emit('You left channel');
       await this.channelService.leaveChannel(leaveDto, client.userID);
-      this.logger.log(
-        `User ${client.userID} leave channel ${leaveDto.channel_id}`,
-      );
-      await this.chatService.sendBroadCast(
-        leaveDto.channel_id,
-        `A member left the channel`,
-      );
+      const memberName = this.usersService.findUsernameByUserID(client.userID);
+      const msg = `${memberName} left channel`;
+      this.logger.log(msg + 'on channel' + leaveDto.channel_id);
+      await this.chatService.sendBroadCast(leaveDto.channel_id, msg);
       await this.notifyMembers(leaveDto.channel_id);
     } catch (error) {
       this.sendError(error);
     }
   }
 
+  /*
   @SubscribeMessage('join_channel')
   async joinChannel(client: SocketWithAuth, channelDto: ChannelDto) {
     try {
       await this.channelService.joinChannel(channelDto, client.userID);
-      this.logger.log(
-        `User ${client.userID} joined the channel ${channelDto.channel_id}.`,
-      );
-      await this.chatService.sendBroadCast(
-        channelDto.channel_id,
-        `A member joined the channel`,
-      );
+      const memberName = this.usersService.findUsernameByUserID(client.userID);
+      const msg = `${memberName} joined the channel`;
+      this.logger.log(msg + 'on channel' + channelDto.channel_id);
+      await this.chatService.sendBroadCast(channelDto.channel_id, msg);
       await this.notifyMembers(channelDto.channel_id);
     } catch (error) {
       this.sendError(error);
     }
-  }
+  }*/
 
-  @SubscribeMessage('change_password')
+  /*@SubscribeMessage('change_password')
   async changePassword(client: SocketWithAuth, channelDto: ChannelDto) {
     try {
       await this.channelService.changePassword(channelDto, client.userID);
@@ -304,7 +285,7 @@ export class ChatGateway
     } catch (error) {
       this.sendError(error);
     }
-  }
+  }*/
 
   @SubscribeMessage('block_user')
   async blockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
@@ -336,6 +317,29 @@ export class ChatGateway
     } catch (error) {
       this.sendError(error);
     }
+  }
+
+  public async notifyFriends(userID) {
+    const friends = await this.usersService.findFriends(userID);
+    friends.forEach(async friend => {
+      const myFriend = this.users.get(friend.user_id);
+      if (myFriend == null) {
+        return;
+      }
+      this.server.to(myFriend).emit('refresh_list', ``);
+    });
+  }
+
+  private async notifyMembers(channel_id: number) {
+    await setTimeout(100);
+    const members = await this.channelService.getChannelMembers(channel_id);
+    members.forEach(async member => {
+      const memberId = this.users.get(member.user_id);
+      this.server.to(memberId).emit('refresh_chat', { channelID: channel_id });
+      const lastMessageChannel =
+        await this.channelService.getLastChannelMessage(member.user_id);
+      this.server.to(memberId).emit('refresh_channel_list', lastMessageChannel);
+    });
   }
 
   private sendError(error: any) {
