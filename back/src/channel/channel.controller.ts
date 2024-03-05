@@ -59,7 +59,7 @@ export class ChannelController {
 
   @Get('/channels')
   listChannels() {
-    return this.channelService.listAllChannels();
+    return this.channelService.listAllChannels(3);
   }
 
   @Post('/joinChannel')
