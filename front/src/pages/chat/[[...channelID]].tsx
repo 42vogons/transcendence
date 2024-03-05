@@ -27,8 +27,8 @@ import {
 	MenuContent,
 	MenuItem,
 } from '@/styles/components/friendListItem'
-import { FaGamepad, FaUserAstronaut } from 'react-icons/fa6'
-import { BsChatSquareTextFill } from 'react-icons/bs'
+import { FaGamepad, FaUserAstronaut, FaUserPlus } from 'react-icons/fa6'
+import { GrUpdate } from 'react-icons/gr'
 import { UserContext } from '@/contexts/UserContext'
 import { useRouter } from 'next/router'
 import { ChatContext } from '@/contexts/ChatContext'
@@ -36,6 +36,8 @@ import { iChannelMessage } from '@/reducers/Chat/Types'
 import ChatInput from '@/components/ChatInput'
 import MessageContainer from '@/components/messageContainer'
 import { toast } from 'react-toastify'
+import { BiExit, BiLogOut, BiShieldPlus, BiVolumeMute } from 'react-icons/bi'
+import { MdBlock } from 'react-icons/md'
 
 export default function Chat() {
 	const messagesEndRef = useRef(null)
@@ -135,25 +137,37 @@ export default function Chat() {
 										<MenuItem>
 											<MenuAction
 												onClick={() => {
-													console.log('play')
+													console.log('leave channel')
 												}}
 											>
-												<FaGamepad
-													size={menuIconSize}
-												/>{' '}
-												Play
+												<BiExit size={menuIconSize} />
+												Channel
 											</MenuAction>
 										</MenuItem>
 										<MenuItem>
 											<MenuAction
+												isAdmin="true"
 												onClick={() => {
-													console.log('play')
+													console.log('Add user')
 												}}
 											>
-												<BsChatSquareTextFill
+												<FaUserPlus
 													size={menuIconSize}
-												/>{' '}
-												Chat
+												/>
+												Member
+											</MenuAction>
+										</MenuItem>
+										<MenuItem>
+											<MenuAction
+												isAdmin="true"
+												onClick={() => {
+													console.log(
+														'change password',
+													)
+												}}
+											>
+												<GrUpdate size={menuIconSize} />{' '}
+												Password
 											</MenuAction>
 										</MenuItem>
 									</MenuContent>
@@ -223,6 +237,74 @@ export default function Chat() {
 																		}
 																	/>{' '}
 																	Profile
+																</MenuAction>
+															</MenuItem>
+															<MenuItem>
+																<MenuAction
+																	onClick={() => {
+																		console.log(
+																			'mute',
+																		)
+																	}}
+																>
+																	<BiVolumeMute
+																		size={
+																			menuIconSize
+																		}
+																	/>
+																	Mute
+																</MenuAction>
+															</MenuItem>
+															<MenuItem>
+																<MenuAction
+																	isAdmin="true"
+																	onClick={() => {
+																		console.log(
+																			'promote to admi',
+																		)
+																	}}
+																>
+																	<BiShieldPlus
+																		size={
+																			menuIconSize
+																		}
+																	/>
+																	Promote
+																</MenuAction>
+															</MenuItem>
+
+															<MenuItem>
+																<MenuAction
+																	isAdmin="true"
+																	onClick={() => {
+																		console.log(
+																			'kick',
+																		)
+																	}}
+																>
+																	<BiLogOut
+																		size={
+																			menuIconSize
+																		}
+																	/>{' '}
+																	Kick
+																</MenuAction>
+															</MenuItem>
+															<MenuItem>
+																<MenuAction
+																	isAdmin="true"
+																	onClick={() => {
+																		console.log(
+																			'ban',
+																		)
+																	}}
+																>
+																	<MdBlock
+																		size={
+																			menuIconSize
+																		}
+																	/>{' '}
+																	Ban
 																</MenuAction>
 															</MenuItem>
 														</MenuContent>

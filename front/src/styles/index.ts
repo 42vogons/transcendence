@@ -35,6 +35,8 @@ export const {
 			blue200: '#003A61',
 			blue100: '#00a7ff',
 
+			orange: '#F15025',
+
 			red: '#DE3C4B',
 		},
 		fontSizes: {

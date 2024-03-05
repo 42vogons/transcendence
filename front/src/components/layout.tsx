@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { FaGamepad, FaUserAstronaut, FaUserPlus } from 'react-icons/fa6'
 import { FaUserFriends } from 'react-icons/fa'
 import { BsChatSquareTextFill } from 'react-icons/bs'
-import { RiLogoutBoxFill } from 'react-icons/ri'
+import { BiLogOut } from 'react-icons/bi'
 import {
 	MdOutlineMenu,
 	MdOutlineArrowBackIos,
@@ -144,7 +144,7 @@ export default function Layout({ children }: iLayoutProps) {
 			},
 		},
 		{
-			icon: <RiLogoutBoxFill size={iconSize} />,
+			icon: <BiLogOut size={iconSize} />,
 			title: 'Logout',
 			handleOnClick: () => {
 				console.log('logout')

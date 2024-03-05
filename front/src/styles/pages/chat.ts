@@ -120,7 +120,7 @@ export const MenuItem = styled(DropdownMenu.Item, {
 })
 
 export const MenuAction = styled('button', {
-	width: 140,
+	width: 160,
 	display: 'flex',
 	justifyContent: 'space-between',
 	alignItems: 'center',
@@ -137,6 +137,20 @@ export const MenuAction = styled('button', {
 	'&:hover': {
 		backgroundColor: '$blue100',
 		color: '$white',
+	},
+
+	variants: {
+		isAdmin: {
+			true: {
+				backgroundColor: '$white',
+				color: '$orange',
+				borderBottom: '1px solid $orange',
+				'&:hover': {
+					backgroundColor: '$orange',
+					color: '$white',
+				},
+			},
+		},
 	},
 })
 
