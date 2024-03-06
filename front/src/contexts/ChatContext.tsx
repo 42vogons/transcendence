@@ -129,7 +129,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	}, [user])
 
 	function emitSocketIfUserIsNotExpired(ev: string, ...args: any[]) {
-		if (user && !isDateExpired(user?.expiresAt as Date)) {
+		if (typeof user === 'undefined') {
+			/* empty */
+		} else if (user && !isDateExpired(user?.expiresAt as Date)) {
 			socket.emit(ev, ...args)
 		} else {
 			socket.close()
