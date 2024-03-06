@@ -51,40 +51,6 @@ export default function Game() {
 		}
 	}, [sendKey])
 
-	// const moveBall = (ball: Ball) => {
-	// 	const xpos = ball.x + ball.xSpeed * ball.xDirection
-	// 	const ypos = ball.y + ball.ySpeed * ball.yDirection
-
-	// 	setBall({ ...ball, x: xpos, y: ypos })
-	// }
-
-	// useEffect(() => {
-	// 	const checkCollision = () => {
-	// 		if (ball.y > height - 30) {
-	// 			setBall({ ...ball, y: height - 30, yDirection: -1 })
-	// 		}
-
-	// 		if (ball.y < 0) {
-	// 			setBall({ ...ball, y: 0, yDirection: 1 })
-	// 		}
-
-	// 		if (ball.x < 0 || ball.x > width - 30) {
-	// 			const direction = ball.xDirection * -1
-	// 			setBall({
-	// 				...ball,
-	// 				xDirection: direction,
-	// 				x: ball.x + ball.xSpeed * direction,
-	// 			})
-	// 		}
-	// 	}
-	// 	const play = setTimeout(() => {
-	// 		moveBall(ball)
-	// 		checkCollision()
-	// 		// console.log(ball)
-	// 	}, 1000 / 60)
-	// 	return () => clearTimeout(play)
-	// }, [ball])
-
 	return (
 		<CourtContainer css={{ height, width }}>
 			<Score>

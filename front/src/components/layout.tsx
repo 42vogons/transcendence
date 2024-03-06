@@ -1,4 +1,4 @@
-import { ReactNode, useContext, useEffect, useState } from 'react'
+import { ReactNode, useContext, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { FaGamepad, FaUserAstronaut, FaUserPlus } from 'react-icons/fa6'
 import { FaUserFriends } from 'react-icons/fa'
@@ -84,8 +84,20 @@ export default function Layout({ children }: iLayoutProps) {
 
 	const ref = useOutsideMenuClick(closeSidePanel)
 
+	const PageContainerRef = useRef(null)
+
 	useEffect(() => {
 		function handleResize() {
+			if (PageContainerRef) {
+				// console.log(
+				// 	'PageContainerRef:',
+				// 	(PageContainerRef.current as unknown as HTMLElement)
+				// 		?.offsetWidth,
+				// 	(PageContainerRef.current as unknown as HTMLElement)
+				// 		?.offsetHeight,
+				// )
+			}
+
 			if (window.innerWidth < 1024) {
 				setShowSidePanel(false)
 				setActivePanel('menu')
@@ -370,6 +382,7 @@ export default function Layout({ children }: iLayoutProps) {
 				)}
 				<PageContainer
 					className="pageContainer"
+					ref={PageContainerRef}
 					isSidePanelActive={showSidePanel}
 				>
 					{children}
