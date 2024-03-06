@@ -24,6 +24,7 @@ import protectedDefaulAvatar from '../../../public/assets/protected.png'
 import publicDefaulAvatar from '../../../public/assets/public.png'
 import { useRouter } from 'next/router'
 import ModalWithCloseOutside from './modalWithCloseOutside'
+import { delayMs } from '@/utils/delay'
 
 const passwordSchema = z
 	.string()
@@ -133,7 +134,7 @@ export default function JoinChannelModal({
 			}
 			try {
 				await api.post('/channel/joinChannel', formData)
-				await new Promise((resolve) => setTimeout(resolve, 500))
+				await delayMs(500)
 				getChannelList()
 				setShowJoinChannelModal(false)
 				router.push('/chat/' + channel_id)

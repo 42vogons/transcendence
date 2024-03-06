@@ -15,7 +15,6 @@ import { UsersService } from 'src/users/users.service';
 import { FriendsService } from 'src/friends/friends.service';
 import { FriendDto } from 'src/friends/dto/create-friend.dto';
 import { ChannelService } from 'src/channel/channel.service';
-import { ChannelDto } from 'src/channel/dto/channel.dto';
 import { CreateChannelDto } from 'src/channel/dto/create-channel.dto';
 import { MemberDto } from 'src/channel/dto/member.dto';
 import { LeaveDto } from 'src/channel/dto/leave.dto';
@@ -196,8 +195,10 @@ export class ChatGateway
       );
       await this.channelService.addMember(memberDto, client.userID);
 
-      const adminName = this.usersService.findUsernameByUserID(client.userID);
-      const memberName = this.usersService.findUsernameByUserID(
+      const adminName = await this.usersService.findUsernameByUserID(
+        client.userID,
+      );
+      const memberName = await this.usersService.findUsernameByUserID(
         memberDto.member_id,
       );
       const msg = `${adminName} added ${memberName} on channel`;
@@ -248,13 +249,15 @@ export class ChatGateway
   @SubscribeMessage('leave_channel')
   async leaveChannel(client: SocketWithAuth, leaveDto: LeaveDto) {
     try {
-      client.emit('You left channel');
       await this.channelService.leaveChannel(leaveDto, client.userID);
-      const memberName = this.usersService.findUsernameByUserID(client.userID);
-      const msg = `${memberName} left channel`;
+      const memberName = await this.usersService.findUsernameByUserID(
+        client.userID,
+      );
+      const msg = `${memberName} left the channel`;
       this.logger.log(msg + 'on channel' + leaveDto.channel_id);
       await this.chatService.sendBroadCast(leaveDto.channel_id, msg);
       await this.notifyMembers(leaveDto.channel_id);
+      client.emit('left_the_channel');
     } catch (error) {
       this.sendError(error);
     }

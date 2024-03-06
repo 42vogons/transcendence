@@ -27,6 +27,7 @@ import userDefaulAvatar from '../../public/assets/user.png'
 import privateDefaulAvatar from '../../public/assets/private.png'
 import protectedDefaulAvatar from '../../public/assets/protected.png'
 import publicDefaulAvatar from '../../public/assets/public.png'
+import { delayMs } from '@/utils/delay'
 
 interface ChatContextType {
 	friendList: FriendListItem[]
@@ -40,6 +41,8 @@ interface ChatContextType {
 	getChannelMessages: (channel_id: number) => void
 	sendMessageToChannel: (channel_id: number, content: string) => void
 	getChannelList: () => void
+	addMemberToChannel: (member_id: number, channel_id: number) => void
+	leaveChannel: (channel_id: number) => Promise<void>
 	getUsernameFromChannelMembers: (userID: number) => string
 	setActiveChannel: (channel_id: number) => void
 	getActiveChannelName: (
@@ -51,7 +54,7 @@ interface ChatContextType {
 		channelType: 'direct' | 'public' | 'protected' | 'private',
 		channelMembers: iChannelMember[],
 	) => string
-	hasAdminPriveleges: (userID: number) => boolean
+	hasPriveleges: (userID: number, allowedRoles: string[]) => boolean
 	closeChatSocket: () => void
 }
 
@@ -115,6 +118,15 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				dispatch(updateChannelList(channelList))
 			},
 		)
+
+		socket.on('left_the_channel', () => {
+			toast('You left the channel.', {
+				type: 'info',
+			})
+			getChannelList()
+			dispatch(updateChannel(undefined))
+			router.push('/chat')
+		})
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
 		socket.on('exception', (err) => handleErrors(err))
@@ -199,6 +211,24 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		emitSocketIfUserIsNotExpired('update_channel_list', '')
 	}
 
+	function addMemberToChannel(member_id: number, channel_id: number) {
+		const status = 'member'
+		console.log('addMemmberToChannel:', member_id, channel_id, status)
+		emitSocketIfUserIsNotExpired('add_member', {
+			member_id,
+			channel_id,
+			status,
+		})
+	}
+
+	async function leaveChannel(channel_id: number) {
+		emitSocketIfUserIsNotExpired('leave_channel', {
+			channel_id,
+		})
+		console.log('leaveChannel:', channel_id)
+		await delayMs(500)
+	}
+
 	function getUsernameFromChannelMembers(userID: number) {
 		const member = (activeChannelData as iChannelData)?.channelMembers.find(
 			(member) => member.user_id === userID,
@@ -259,8 +289,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		}
 	}
 
-	function hasAdminPriveleges(userID: number) {
-		const allowedRoles = ['owner', 'admin']
+	function hasPriveleges(userID: number, allowedRoles: string[]) {
 		const member = (activeChannelData as iChannelData).channelMembers.find(
 			(member) => member.user_id === userID,
 		)
@@ -295,11 +324,13 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				getChannelMessages,
 				sendMessageToChannel,
 				getChannelList,
+				addMemberToChannel,
+				leaveChannel,
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
 				getActiveChannelAvatar,
 				setActiveChannel,
-				hasAdminPriveleges,
+				hasPriveleges,
 			}}
 		>
 			{children}
