@@ -117,6 +117,15 @@ export class ChannelRepository {
   }
 
   async changeOwner(new_ownder: number, channel_id: number) {
+    await this.prisma.channel_members.updateMany({
+      where: {
+        channel_id: channel_id,
+        user_id: new_ownder,
+      },
+      data: {
+        status: ChannelMemberStatus.OWNER,
+      },
+    });
     return await this.prisma.channels.update({
       where: {
         channel_id: channel_id,

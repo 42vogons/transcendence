@@ -107,7 +107,7 @@ export class ChannelService {
     this.sendBroadCast(channel.channel_id, msg);
     const member = new MemberDto();
     member.channel_id = channel.channel_id;
-    member.status = ChannelMemberStatus.ADMIN;
+    member.status = ChannelMemberStatus.OWNER;
     member.member_id = userId;
     this.addMember(member, userId);
     return channel.channel_id;
@@ -238,7 +238,7 @@ export class ChannelService {
     const owner = await this.repository.checkOwner(leaveDto.channel_id, userId);
     if (owner === true) {
       await this.repository.changeOwner(admins[0].user_id, leaveDto.channel_id);
-      return 'Left the channel.';
+      //return 'Left the channel.';
     }
     return await this.repository.leaveChannel(userId, leaveDto.channel_id);
   }

@@ -9,6 +9,7 @@ export enum ChannelType {
 export enum ChannelMemberStatus {
   ADMIN = 'admin',
   MEMBER = 'member',
+  OWNER = 'owner',
 }
 
 export enum AdminActionType {
