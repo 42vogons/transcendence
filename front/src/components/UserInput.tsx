@@ -96,7 +96,7 @@ export default function UserInput({
 			{!selectedUser && isOptionsLoading && (
 				<UserList>
 					<LoadingContainer>
-						<Loading size={38} />
+						<Loading size={42} />
 						Loading...
 					</LoadingContainer>
 				</UserList>

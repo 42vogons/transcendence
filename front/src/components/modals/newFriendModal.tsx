@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react'
-import Modal from './modal'
 import UserInput, { iUser } from '../UserInput'
 import Button from '../button'
 import { MdClose } from 'react-icons/md'
 import { FaUserPlus } from 'react-icons/fa6'
 import { NewFriendModalContainer } from '@/styles/components/newFriendModal'
 import { ChatContext } from '@/contexts/ChatContext'
+import ModalWithCloseOutside from './modalWithCloseOutside'
 
 interface iNewFriendModal {
 	showNewFriendModal: boolean
@@ -34,7 +34,10 @@ export default function NewFriendModal({
 	}, [showNewFriendModal])
 
 	return (
-		<Modal isOpen={showNewFriendModal}>
+		<ModalWithCloseOutside
+			isOpen={showNewFriendModal}
+			setIsOpen={setShowNewFriendModal}
+		>
 			<NewFriendModalContainer>
 				<h2>New Friend</h2>
 				<UserInput
@@ -62,6 +65,6 @@ export default function NewFriendModal({
 					</Button>
 				</div>
 			</NewFriendModalContainer>
-		</Modal>
+		</ModalWithCloseOutside>
 	)
 }

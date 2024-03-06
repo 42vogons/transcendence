@@ -1,4 +1,3 @@
-import Modal from './modal'
 import Button from '../button'
 import { MdClose, MdGroupAdd } from 'react-icons/md'
 import { NewChannelModalForm } from '@/styles/components/newChannelModal'
@@ -10,6 +9,7 @@ import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
 import { ChatContext } from '@/contexts/ChatContext'
 import { useContext } from 'react'
+import ModalWithCloseOutside from './modalWithCloseOutside'
 
 interface iNewChannelModal {
 	showNewChannelModal: boolean
@@ -82,7 +82,10 @@ export default function NewChannelModal({
 	const type = watch('type')
 
 	return (
-		<Modal isOpen={showNewChannelModal}>
+		<ModalWithCloseOutside
+			isOpen={showNewChannelModal}
+			setIsOpen={setShowNewChannelModal}
+		>
 			<NewChannelModalForm
 				onSubmit={handleSubmit(handleCreateNewChannel)}
 			>
@@ -147,6 +150,6 @@ export default function NewChannelModal({
 					</Button>
 				</div>
 			</NewChannelModalForm>
-		</Modal>
+		</ModalWithCloseOutside>
 	)
 }

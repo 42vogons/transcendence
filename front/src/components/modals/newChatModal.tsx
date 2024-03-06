@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react'
-import Modal from './modal'
 import UserInput, { iUser } from '../UserInput'
 import Button from '../button'
 import { MdClose } from 'react-icons/md'
 import { FaUserPlus } from 'react-icons/fa6'
 import { NewChatModalContainer } from '@/styles/components/newChatModal'
 import { ChatContext } from '@/contexts/ChatContext'
+import ModalWithCloseOutside from './modalWithCloseOutside'
 
 interface iNewChatModal {
 	showNewChatModal: boolean
@@ -33,7 +33,10 @@ export default function NewChatModal({
 	}, [showNewChatModal])
 
 	return (
-		<Modal isOpen={showNewChatModal}>
+		<ModalWithCloseOutside
+			isOpen={showNewChatModal}
+			setIsOpen={setShowNewChatModal}
+		>
 			<NewChatModalContainer>
 				<h2>New Chat</h2>
 				<UserInput
@@ -61,6 +64,6 @@ export default function NewChatModal({
 					</Button>
 				</div>
 			</NewChatModalContainer>
-		</Modal>
+		</ModalWithCloseOutside>
 	)
 }

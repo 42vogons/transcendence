@@ -1,12 +1,12 @@
 /* eslint-disable camelcase */
 import { useEffect, useState } from 'react'
-import Modal from './modal'
 import Button from '../button'
 import { MdClose } from 'react-icons/md'
 import { ChangeChannelPasswordModalContainer } from '../../styles/components/changeChannelPasswordModal'
 
 import { z } from 'zod'
 import { GrUpdate } from 'react-icons/gr'
+import ModalWithCloseOutside from './modalWithCloseOutside'
 
 const passwordSchema = z
 	.string()
@@ -63,7 +63,10 @@ export default function ChangeChannelPasswordModal({
 	}, [showChangeChannelPasswordModal])
 
 	return (
-		<Modal isOpen={showChangeChannelPasswordModal}>
+		<ModalWithCloseOutside
+			isOpen={showChangeChannelPasswordModal}
+			setIsOpen={setShowChangeChannelPasswordModal}
+		>
 			<ChangeChannelPasswordModalContainer>
 				<h2>Change Password</h2>
 				<div className="inputContainer">
@@ -102,6 +105,6 @@ export default function ChangeChannelPasswordModal({
 					</Button>
 				</div>
 			</ChangeChannelPasswordModalContainer>
-		</Modal>
+		</ModalWithCloseOutside>
 	)
 }

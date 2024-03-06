@@ -1,7 +1,7 @@
-import Modal from './modal'
 import Button from '../button'
 import { MdCheck, MdClose } from 'react-icons/md'
 import { ConfirmationModalContainer } from '@/styles/components/confirmationModal'
+import ModalWithCloseOutside from './modalWithCloseOutside'
 
 interface iConfirmationModal {
 	showConfirmationModal: boolean
@@ -24,7 +24,10 @@ export default function ConfirmationModal({
 	}
 
 	return (
-		<Modal isOpen={showConfirmationModal}>
+		<ModalWithCloseOutside
+			isOpen={showConfirmationModal}
+			setIsOpen={setShowConfirmationModal}
+		>
 			<ConfirmationModalContainer>
 				<h2>{title}</h2>
 				<h3>{message}</h3>
@@ -46,6 +49,6 @@ export default function ConfirmationModal({
 					</Button>
 				</div>
 			</ConfirmationModalContainer>
-		</Modal>
+		</ModalWithCloseOutside>
 	)
 }

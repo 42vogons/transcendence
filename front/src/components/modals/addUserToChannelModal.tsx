@@ -1,11 +1,10 @@
-import { useContext, useEffect, useState } from 'react'
-import Modal from './modal'
+import { useEffect, useState } from 'react'
 import UserInput, { iUser } from '../UserInput'
 import Button from '../button'
 import { MdClose } from 'react-icons/md'
 import { FaUserPlus } from 'react-icons/fa6'
 import { AddUserToChannelModalContainer } from '@/styles/components/addUserToChannelModal'
-import { ChatContext } from '@/contexts/ChatContext'
+import ModalWithCloseOutside from './modalWithCloseOutside'
 
 interface iAddUserToChannelModal {
 	showAddUserToChannelModal: boolean
@@ -17,14 +16,12 @@ export default function AddUserToChannelModal({
 }: iAddUserToChannelModal) {
 	const [selectedUser, setSelectedUser] = useState<iUser>()
 
-	const { createDirectChat } = useContext(ChatContext)
-
 	function handleCreateAddUserToChannel() {
 		if (selectedUser) {
 			console.log('add to channel selectedUser:', selectedUser)
 			// createDirectChat(selectedUser.user_id)
+			setShowAddUserToChannelModal(false)
 		}
-		setShowAddUserToChannelModal(false)
 	}
 
 	useEffect(() => {
@@ -34,7 +31,10 @@ export default function AddUserToChannelModal({
 	}, [showAddUserToChannelModal])
 
 	return (
-		<Modal isOpen={showAddUserToChannelModal}>
+		<ModalWithCloseOutside
+			isOpen={showAddUserToChannelModal}
+			setIsOpen={setShowAddUserToChannelModal}
+		>
 			<AddUserToChannelModalContainer>
 				<h2>Add a new member</h2>
 				<UserInput
@@ -62,6 +62,6 @@ export default function AddUserToChannelModal({
 					</Button>
 				</div>
 			</AddUserToChannelModalContainer>
-		</Modal>
+		</ModalWithCloseOutside>
 	)
 }

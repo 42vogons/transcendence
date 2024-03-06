@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 import { ChangeEvent, useContext, useEffect, useState } from 'react'
-import Modal from './modal'
 import Button from '../button'
 import { MdClose, MdGroup } from 'react-icons/md'
 import { ChatContext } from '@/contexts/ChatContext'
@@ -24,6 +23,7 @@ import privateDefaulAvatar from '../../../public/assets/private.png'
 import protectedDefaulAvatar from '../../../public/assets/protected.png'
 import publicDefaulAvatar from '../../../public/assets/public.png'
 import { useRouter } from 'next/router'
+import ModalWithCloseOutside from './modalWithCloseOutside'
 
 const passwordSchema = z
 	.string()
@@ -180,7 +180,10 @@ export default function JoinChannelModal({
 	}, [channelName, channelList])
 
 	return (
-		<Modal isOpen={showJoinChannelModal}>
+		<ModalWithCloseOutside
+			isOpen={showJoinChannelModal}
+			setIsOpen={setShowJoinChannelModal}
+		>
 			<JoinChannelModalContainer>
 				<h2>Join Channel</h2>
 				<ChannelInputContainer
@@ -209,7 +212,7 @@ export default function JoinChannelModal({
 					{!selectedChannel && isOptionsLoading && (
 						<ChannelList>
 							<LoadingContainer>
-								<Loading size={38} />
+								<Loading size={42} />
 								Loading...
 							</LoadingContainer>
 						</ChannelList>
@@ -273,6 +276,6 @@ export default function JoinChannelModal({
 					</Button>
 				</div>
 			</JoinChannelModalContainer>
-		</Modal>
+		</ModalWithCloseOutside>
 	)
 }
