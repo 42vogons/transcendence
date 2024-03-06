@@ -24,7 +24,7 @@ export class AuthGuard implements CanActivate {
         secret: secretJwt, // Certifique-se de que 'secretJwt' é a sua chave secreta real
       });
       request['user'] = payload;
-      if (payload.action === 'Logged') return true;
+      if (payload.action === 'logged') return true;
     } catch {
       throw new UnauthorizedException();
     }
