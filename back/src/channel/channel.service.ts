@@ -244,8 +244,8 @@ export class ChannelService {
     return 'Left the channel.';
   }
 
-  async listAllChannels() {
-    return await this.repository.findAllChannels();
+  async listAllChannels(member_id: number) {
+    return await this.repository.findAllChannels(member_id);
   }
 
   async joinChannel(channelDto: ChannelDto, userId: any) {

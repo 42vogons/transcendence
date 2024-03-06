@@ -58,8 +58,8 @@ export class ChannelController {
   }
 
   @Get('/channels')
-  listChannels() {
-    return this.channelService.listAllChannels();
+  listChannels(@Req() request) {
+    return this.channelService.listAllChannels(request.user.id);
   }
 
   @Post('/joinChannel')

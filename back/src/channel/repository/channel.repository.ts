@@ -4,7 +4,7 @@ import { channels } from '@prisma/client';
 import { CreateChannelDto } from '../dto/create-channel.dto';
 import { ChannelDto } from '../dto/channel.dto';
 import { MemberDto } from '../dto/member.dto';
-import { ChannelMemberStatus } from '../constants';
+import { AdminActionType, ChannelMemberStatus } from '../constants';
 import { AdminActionDto } from '../dto/adminAction.dto';
 import { channel_listDTO } from '../dto/channelList.dto';
 
@@ -148,15 +148,33 @@ export class ChannelRepository {
     });
   }
 
-  async findAllChannels() {
+  async findAllChannels(member_id: number) {
+    const channelsBanned = await this.findChannelBannedByUser(member_id);
+    const channelBannedIds = channelsBanned.map(channel => channel.channel_id);
+
     return await this.prisma.channels.findMany({
       where: {
+        channel_id: {
+          notIn: channelBannedIds,
+        },
         OR: [{ type: 'public' }, { type: 'protected' }],
       },
       select: {
         channel_id: true,
         name: true,
         type: true,
+      },
+    });
+  }
+
+  async findChannelBannedByUser(member_id: number) {
+    return await this.prisma.admin_actions.findMany({
+      where: {
+        target_user_id: member_id,
+        action_type: AdminActionType.BANNED,
+      },
+      select: {
+        channel_id: true,
       },
     });
   }
