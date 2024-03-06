@@ -205,7 +205,7 @@ export class ChatGateway
       const memberName = await this.usersService.findUsernameByUserID(
         memberDto.member_id,
       );
-      const msg = `${adminName} added ${memberName} on channel`;
+      const msg = `${adminName} added ${memberName} to the channel`;
       this.logger.log(msg);
       await this.chatService.sendBroadCast(memberDto.channel_id, msg);
       await this.notifyMembers(memberDto.channel_id);

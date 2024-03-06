@@ -12,7 +12,6 @@ export interface ChatState {
 	friendList: FriendListItem[]
 	activeChannelData: iChannelData | undefined
 	channelList: iLastChannelMessage[]
-	activeChannel: number | undefined
 }
 
 export function ChatReducer(state: ChatState, action: any) {
@@ -41,13 +40,13 @@ export function ChatReducer(state: ChatState, action: any) {
 			}
 			return newState
 		}
-		case ActionTypes.UPDATE_ACTIVE_CHANNEL: {
-			const newState = {
-				...state,
-				activeChannel: action.payload.activeChannel,
-			}
-			return newState
-		}
+		// case ActionTypes.UPDATE_ACTIVE_CHANNEL: {
+		// 	const newState = {
+		// 		...state,
+		// 		activeChannel: action.payload.activeChannel,
+		// 	}
+		// 	return newState
+		// }
 		default:
 			return state
 	}
