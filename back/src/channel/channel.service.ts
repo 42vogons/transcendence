@@ -197,6 +197,17 @@ export class ChannelService {
       memberDto.channel_id,
       userId,
     );
+
+    const isMemberOwner = await this.checkOwner(
+      memberDto.channel_id,
+      memberDto.member_id,
+    );
+    if (isMemberOwner === true) {
+      throw new UnauthorizedException(
+        `You can't change status the owner of this channel.`,
+      );
+    }
+
     const isOwner = await this.checkOwner(memberDto.channel_id, userId);
     if (isAdmin || isOwner) {
       await this.repository.changeMemberStatus(memberDto);

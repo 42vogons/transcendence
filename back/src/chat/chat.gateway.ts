@@ -9,7 +9,11 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { SocketWithAuth } from 'src/types';
-import { Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ChatDto } from './dto/chat.dto';
 import { UsersService } from 'src/users/users.service';
 import { FriendsService } from 'src/friends/friends.service';
