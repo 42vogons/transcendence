@@ -10,6 +10,7 @@ import { useRouter } from 'next/router'
 import { ChatContext } from '@/contexts/ChatContext'
 import { useContext } from 'react'
 import ModalWithCloseOutside from './modalWithCloseOutside'
+import { delayMs } from '@/utils/delay'
 
 interface iNewChannelModal {
 	showNewChannelModal: boolean
@@ -66,7 +67,7 @@ export default function NewChannelModal({
 	async function handleCreateNewChannel(formData: NewChannelSchema) {
 		try {
 			const { data } = await api.post('/channel/create-channel', formData)
-			await new Promise((resolve) => setTimeout(resolve, 500))
+			await delayMs(500)
 			getChannelList()
 			reset()
 			setShowNewChannelModal(false)

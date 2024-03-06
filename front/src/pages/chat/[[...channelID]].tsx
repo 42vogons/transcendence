@@ -63,6 +63,7 @@ export default function Chat() {
 	const {
 		activeChannel,
 		activeChannelData,
+		leaveChannel,
 		getUsernameFromChannelMembers,
 		getActiveChannelName,
 		getActiveChannelAvatar,
@@ -80,10 +81,6 @@ export default function Chat() {
 		(messagesEndRef.current as unknown as HTMLElement)?.scrollIntoView({
 			behavior,
 		})
-	}
-
-	function leaveChannel(channelID: number) {
-		console.log('leave', channelID)
 	}
 
 	function muteUser(userID: number) {

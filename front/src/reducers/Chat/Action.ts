@@ -17,7 +17,7 @@ export function updateFriendList(friendList: FriendListItem[]) {
 	}
 }
 
-export function updateChannel(activeChannelData: iChannelData) {
+export function updateChannel(activeChannelData: iChannelData | undefined) {
 	return {
 		type: ActionTypes.UPDATE_CHANNEL,
 		payload: {

@@ -2,13 +2,14 @@ import Button from '../button'
 import { MdCheck, MdClose } from 'react-icons/md'
 import { ConfirmationModalContainer } from '@/styles/components/confirmationModal'
 import ModalWithCloseOutside from './modalWithCloseOutside'
+import { useState } from 'react'
 
 interface iConfirmationModal {
 	showConfirmationModal: boolean
 	setShowConfirmationModal: (state: boolean) => void
 	title: string
 	message: string
-	onConfirmation: () => void
+	onConfirmation: () => Promise<void>
 }
 export default function ConfirmationModal({
 	showConfirmationModal,
@@ -17,10 +18,13 @@ export default function ConfirmationModal({
 	message,
 	onConfirmation,
 }: iConfirmationModal) {
-	function handleConfirmation() {
+	const [isDisabled, setIsDisabled] = useState(false)
+	async function handleConfirmation() {
 		console.log('confirm')
-		onConfirmation()
+		setIsDisabled(true)
+		await onConfirmation()
 		setShowConfirmationModal(false)
+		setIsDisabled(false)
 	}
 
 	return (
@@ -43,9 +47,13 @@ export default function ConfirmationModal({
 						<MdClose size={40} />
 						Cancel
 					</Button>
-					<Button buttonType="accept" onClick={handleConfirmation}>
+					<Button
+						disabled={isDisabled}
+						buttonType="accept"
+						onClick={handleConfirmation}
+					>
 						<MdCheck size={40} />
-						Create
+						Confirm
 					</Button>
 				</div>
 			</ConfirmationModalContainer>

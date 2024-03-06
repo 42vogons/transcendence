@@ -20,7 +20,7 @@ export default function AddUserToChannelModal({
 }: iAddUserToChannelModal) {
 	const [selectedUser, setSelectedUser] = useState<iUser>()
 
-	const { addMemmberToChannel } = useContext(ChatContext)
+	const { addMemberToChannel } = useContext(ChatContext)
 
 	function handleCreateAddUserToChannel() {
 		if (selectedUser) {
@@ -29,7 +29,7 @@ export default function AddUserToChannelModal({
 				channel_id,
 				selectedUser,
 			)
-			addMemmberToChannel(selectedUser.user_id, channel_id)
+			addMemberToChannel(selectedUser.user_id, channel_id)
 			setShowAddUserToChannelModal(false)
 		}
 	}

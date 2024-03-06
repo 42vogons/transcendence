@@ -232,7 +232,7 @@ export class ChannelService {
     );
     if (admins.length === 0) {
       throw new ConflictException(
-        'Cannot leave the channel without other administrators.',
+        'Cannot leave the channel without appointing another administrator.',
       );
     }
     const owner = await this.repository.checkOwner(leaveDto.channel_id, userId);
