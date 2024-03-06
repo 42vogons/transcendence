@@ -230,14 +230,14 @@ export class ChannelService {
       userId,
       leaveDto.channel_id,
     );
+    const owner = await this.repository.checkOwner(leaveDto.channel_id, userId);
     const members = await this.repository.listMembers(leaveDto.channel_id);
-    if (admins.length === 0 && members.length != 1) {
+    if (admins.length === 0 && owner === true && members.length > 1) {
       throw new ConflictException(
         'Cannot leave the channel without appointing another administrator.',
       );
     }
-    const owner = await this.repository.checkOwner(leaveDto.channel_id, userId);
-    if (owner === true && members.length > 1) {
+    if (owner === true && admins.length > 0) {
       await this.repository.changeOwner(admins[0].user_id, leaveDto.channel_id);
     }
     await this.repository.leaveChannel(userId, leaveDto.channel_id);
