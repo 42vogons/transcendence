@@ -196,8 +196,10 @@ export class ChatGateway
       );
       await this.channelService.addMember(memberDto, client.userID);
 
-      const adminName = this.usersService.findUsernameByUserID(client.userID);
-      const memberName = this.usersService.findUsernameByUserID(
+      const adminName = await this.usersService.findUsernameByUserID(
+        client.userID,
+      );
+      const memberName = await this.usersService.findUsernameByUserID(
         memberDto.member_id,
       );
       const msg = `${adminName} added ${memberName} on channel`;

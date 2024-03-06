@@ -27,7 +27,12 @@ import {
 	MenuContent,
 	MenuItem,
 } from '@/styles/components/friendListItem'
-import { FaGamepad, FaUserAstronaut, FaUserPlus } from 'react-icons/fa6'
+import {
+	FaGamepad,
+	FaUserAstronaut,
+	FaUserPlus,
+	FaUserSlash,
+} from 'react-icons/fa6'
 import { GrUpdate } from 'react-icons/gr'
 import { UserContext } from '@/contexts/UserContext'
 import { useRouter } from 'next/router'
@@ -62,7 +67,7 @@ export default function Chat() {
 		getActiveChannelName,
 		getActiveChannelAvatar,
 		setActiveChannel,
-		hasAdminPriveleges,
+		hasPriveleges,
 	} = useContext(ChatContext)
 
 	const messages = activeChannelData?.msgs
@@ -95,6 +100,10 @@ export default function Chat() {
 
 	function ChannelBanUser(channelID: number, userID: number) {
 		console.log('ban', channelID, userID)
+	}
+
+	function DirectChannelBlockUser(userID: number) {
+		console.log('direct block', userID)
 	}
 
 	useEffect(() => {
@@ -181,50 +190,50 @@ export default function Chat() {
 													Channel
 												</MenuAction>
 											</MenuItem>
-											{hasAdminPriveleges(
+											{hasPriveleges(
 												Number(user?.userID),
+												['owner', 'admin'],
 											) && (
-												<>
+												<MenuItem>
+													<MenuAction
+														isAdmin="true"
+														onClick={() => {
+															setShowAddUserToChannelModal(
+																true,
+															)
+														}}
+													>
+														<FaUserPlus
+															size={menuIconSize}
+														/>
+														Member
+													</MenuAction>
+												</MenuItem>
+											)}
+											{activeChannelData.channel.type ===
+												'protected' &&
+												hasPriveleges(
+													Number(user?.userID),
+													['owner'],
+												) && (
 													<MenuItem>
 														<MenuAction
 															isAdmin="true"
 															onClick={() => {
-																setShowAddUserToChannelModal(
+																setShowChangeChannelPasswordModal(
 																	true,
 																)
 															}}
 														>
-															<FaUserPlus
+															<GrUpdate
 																size={
 																	menuIconSize
 																}
 															/>
-															Member
+															Password
 														</MenuAction>
 													</MenuItem>
-													{activeChannelData.channel
-														.type ===
-														'protected' && (
-														<MenuItem>
-															<MenuAction
-																isAdmin="true"
-																onClick={() => {
-																	setShowChangeChannelPasswordModal(
-																		true,
-																	)
-																}}
-															>
-																<GrUpdate
-																	size={
-																		menuIconSize
-																	}
-																/>
-																Password
-															</MenuAction>
-														</MenuItem>
-													)}
-												</>
-											)}
+												)}
 										</MenuContent>
 									</MenuPortal>
 								</ChatMenuWrapper>
@@ -306,32 +315,37 @@ export default function Chat() {
 																	Profile
 																</MenuAction>
 															</MenuItem>
-															<MenuItem>
-																<MenuAction
-																	onClick={() => {
-																		muteUser(
-																			message.sender_id,
-																		)
-																	}}
-																>
-																	<BiVolumeMute
-																		size={
-																			menuIconSize
-																		}
-																	/>
-																	Mute
-																</MenuAction>
-															</MenuItem>
 															{activeChannelData
 																.channel
 																.type !==
 																'direct' &&
-																hasAdminPriveleges(
+																hasPriveleges(
 																	Number(
 																		user?.userID,
 																	),
+																	[
+																		'owner',
+																		'admin',
+																	],
 																) && (
 																	<>
+																		<MenuItem>
+																			<MenuAction
+																				isAdmin="true"
+																				onClick={() => {
+																					muteUser(
+																						message.sender_id,
+																					)
+																				}}
+																			>
+																				<BiVolumeMute
+																					size={
+																						menuIconSize
+																					}
+																				/>
+																				Mute
+																			</MenuAction>
+																		</MenuItem>
 																		<MenuItem>
 																			<MenuAction
 																				isAdmin="true"
@@ -379,7 +393,7 @@ export default function Chat() {
 																					)
 																				}}
 																			>
-																				<MdBlock
+																				<FaUserSlash
 																					size={
 																						menuIconSize
 																					}
@@ -389,6 +403,27 @@ export default function Chat() {
 																		</MenuItem>
 																	</>
 																)}
+															{activeChannelData
+																.channel
+																.type ===
+																'direct' && (
+																<MenuItem>
+																	<MenuAction
+																		onClick={() => {
+																			DirectChannelBlockUser(
+																				message.sender_id,
+																			)
+																		}}
+																	>
+																		<MdBlock
+																			size={
+																				menuIconSize
+																			}
+																		/>
+																		Block
+																	</MenuAction>
+																</MenuItem>
+															)}
 														</MenuContent>
 													</MenuPortal>
 												</SenderMenuWrapper>
@@ -447,6 +482,9 @@ export default function Chat() {
 							showAddUserToChannelModal={
 								showAddUserToChannelModal
 							}
+							channel_id={Number(
+								activeChannelData?.channel.channel_id,
+							)}
 						/>
 						<ChangeChannelPasswordModal
 							setShowChangeChannelPasswordModal={

@@ -40,6 +40,7 @@ interface ChatContextType {
 	getChannelMessages: (channel_id: number) => void
 	sendMessageToChannel: (channel_id: number, content: string) => void
 	getChannelList: () => void
+	addMemmberToChannel: (member_id: number, channel_id: number) => void
 	getUsernameFromChannelMembers: (userID: number) => string
 	setActiveChannel: (channel_id: number) => void
 	getActiveChannelName: (
@@ -51,7 +52,7 @@ interface ChatContextType {
 		channelType: 'direct' | 'public' | 'protected' | 'private',
 		channelMembers: iChannelMember[],
 	) => string
-	hasAdminPriveleges: (userID: number) => boolean
+	hasPriveleges: (userID: number, allowedRoles: string[]) => boolean
 	closeChatSocket: () => void
 }
 
@@ -199,6 +200,16 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		emitSocketIfUserIsNotExpired('update_channel_list', '')
 	}
 
+	function addMemmberToChannel(member_id: number, channel_id: number) {
+		const status = 'member'
+		console.log('addMemmberToChannel:', member_id, channel_id, status)
+		emitSocketIfUserIsNotExpired('add_member', {
+			member_id,
+			channel_id,
+			status,
+		})
+	}
+
 	function getUsernameFromChannelMembers(userID: number) {
 		const member = (activeChannelData as iChannelData)?.channelMembers.find(
 			(member) => member.user_id === userID,
@@ -259,8 +270,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		}
 	}
 
-	function hasAdminPriveleges(userID: number) {
-		const allowedRoles = ['owner', 'admin']
+	function hasPriveleges(userID: number, allowedRoles: string[]) {
 		const member = (activeChannelData as iChannelData).channelMembers.find(
 			(member) => member.user_id === userID,
 		)
@@ -295,11 +305,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				getChannelMessages,
 				sendMessageToChannel,
 				getChannelList,
+				addMemmberToChannel,
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
 				getActiveChannelAvatar,
 				setActiveChannel,
-				hasAdminPriveleges,
+				hasPriveleges,
 			}}
 		>
 			{children}
