@@ -27,7 +27,7 @@ import userDefaulAvatar from '../../public/assets/user.png'
 import privateDefaulAvatar from '../../public/assets/private.png'
 import protectedDefaulAvatar from '../../public/assets/protected.png'
 import publicDefaulAvatar from '../../public/assets/public.png'
-import { delayMs } from '@/utils/delay'
+import { delayMs } from '@/utils/functions'
 
 interface ChatContextType {
 	friendList: FriendListItem[]
@@ -43,6 +43,11 @@ interface ChatContextType {
 	getChannelList: () => void
 	addMemberToChannel: (member_id: number, channel_id: number) => void
 	leaveChannel: (channel_id: number) => Promise<void>
+	changeChannelMemberStatus: (
+		member_id: number,
+		channel_id: number,
+		status: 'admin' | 'member',
+	) => void
 	getUsernameFromChannelMembers: (userID: number) => string
 	setActiveChannel: (channel_id: number) => void
 	getActiveChannelName: (
@@ -55,6 +60,7 @@ interface ChatContextType {
 		channelMembers: iChannelMember[],
 	) => string
 	hasPriveleges: (userID: number, allowedRoles: string[]) => boolean
+	getUserStatus: (userID: number) => string
 	closeChatSocket: () => void
 }
 
@@ -225,8 +231,19 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		emitSocketIfUserIsNotExpired('leave_channel', {
 			channel_id,
 		})
-		console.log('leaveChannel:', channel_id)
 		await delayMs(500)
+	}
+
+	async function changeChannelMemberStatus(
+		member_id: number,
+		channel_id: number,
+		status: 'admin' | 'member',
+	) {
+		emitSocketIfUserIsNotExpired('change_member_status', {
+			member_id,
+			channel_id,
+			status,
+		})
 	}
 
 	function getUsernameFromChannelMembers(userID: number) {
@@ -298,6 +315,17 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		)
 	}
 
+	function getUserStatus(userID: number) {
+		const member = (activeChannelData as iChannelData).channelMembers.find(
+			(member) => member.user_id === userID,
+		)
+		if (member) {
+			return member.status
+		} else {
+			return 'undefined'
+		}
+	}
+
 	function closeChatSocket() {
 		socket.close()
 	}
@@ -326,11 +354,13 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				getChannelList,
 				addMemberToChannel,
 				leaveChannel,
+				changeChannelMemberStatus,
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
 				getActiveChannelAvatar,
 				setActiveChannel,
 				hasPriveleges,
+				getUserStatus,
 			}}
 		>
 			{children}

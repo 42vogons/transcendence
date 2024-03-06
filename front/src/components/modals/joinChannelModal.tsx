@@ -24,7 +24,7 @@ import protectedDefaulAvatar from '../../../public/assets/protected.png'
 import publicDefaulAvatar from '../../../public/assets/public.png'
 import { useRouter } from 'next/router'
 import ModalWithCloseOutside from './modalWithCloseOutside'
-import { delayMs } from '@/utils/delay'
+import { delayMs } from '@/utils/functions'
 
 const passwordSchema = z
 	.string()

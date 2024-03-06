@@ -31,8 +31,10 @@ import {
 	FaGamepad,
 	FaUserAstronaut,
 	FaUserPlus,
+	FaUserShield,
 	FaUserSlash,
 } from 'react-icons/fa6'
+import { GiQueenCrown } from 'react-icons/gi'
 import { GrUpdate } from 'react-icons/gr'
 import { UserContext } from '@/contexts/UserContext'
 import { useRouter } from 'next/router'
@@ -41,12 +43,19 @@ import { iChannelMessage } from '@/reducers/Chat/Types'
 import ChatInput from '@/components/ChatInput'
 import MessageContainer from '@/components/messageContainer'
 import { toast } from 'react-toastify'
-import { BiExit, BiLogOut, BiShieldPlus, BiVolumeMute } from 'react-icons/bi'
+import {
+	BiExit,
+	BiLogOut,
+	BiShieldPlus,
+	BiSolidShieldX,
+	BiVolumeMute,
+} from 'react-icons/bi'
 import { MdBlock } from 'react-icons/md'
 import ConfirmationModal from '@/components/modals/confirmationModal'
 import AddUserToChannelModal from '@/components/modals/addUserToChannelModal'
 import { GameContext } from '@/contexts/GameContext'
 import ChangeChannelPasswordModal from '@/components/modals/changeChannelPasswordModal'
+import { capitalize } from '@/utils/functions'
 
 export default function Chat() {
 	const [showLeaveChannelModal, setShowLeaveChannelModal] = useState(false)
@@ -64,11 +73,13 @@ export default function Chat() {
 		activeChannel,
 		activeChannelData,
 		leaveChannel,
+		changeChannelMemberStatus,
 		getUsernameFromChannelMembers,
 		getActiveChannelName,
 		getActiveChannelAvatar,
 		setActiveChannel,
 		hasPriveleges,
+		getUserStatus,
 	} = useContext(ChatContext)
 
 	const messages = activeChannelData?.msgs
@@ -85,10 +96,6 @@ export default function Chat() {
 
 	function muteUser(userID: number) {
 		console.log('mute', userID)
-	}
-
-	function ChannelPromoteUser(channelID: number, userID: number) {
-		console.log('promote', channelID, userID)
 	}
 
 	function ChannelKickUser(channelID: number, userID: number) {
@@ -254,10 +261,34 @@ export default function Chat() {
 											message.sender_id !==
 												loggedUserID && (
 												<SenderMenuWrapper>
-													<SenderMenu>
-														<FaUserAstronaut
-															size={28}
-														/>
+													<SenderMenu
+														title={
+															'Channel ' +
+															capitalize(
+																getUserStatus(
+																	message.sender_id,
+																),
+															)
+														}
+													>
+														{getUserStatus(
+															message.sender_id,
+														) === 'owner' ? (
+															<GiQueenCrown
+																size={28}
+															/>
+														) : getUserStatus(
+																message.sender_id,
+														  ) === 'admin' ? (
+															<FaUserShield
+																size={28}
+															/>
+														) : (
+															<FaUserAstronaut
+																size={28}
+															/>
+														)}
+
 														{getUsernameFromChannelMembers(
 															message.sender_id,
 														)}
@@ -347,18 +378,44 @@ export default function Chat() {
 																			<MenuAction
 																				isAdmin="true"
 																				onClick={() => {
-																					ChannelPromoteUser(
-																						message.channel_id,
+																					changeChannelMemberStatus(
 																						message.sender_id,
+																						message.channel_id,
+																						hasPriveleges(
+																							message.sender_id,
+																							[
+																								'admin',
+																							],
+																						)
+																							? 'member'
+																							: 'admin',
 																					)
 																				}}
 																			>
-																				<BiShieldPlus
-																					size={
-																						menuIconSize
-																					}
-																				/>
-																				Promote
+																				{hasPriveleges(
+																					message.sender_id,
+																					[
+																						'admin',
+																					],
+																				) ? (
+																					<>
+																						<BiSolidShieldX
+																							size={
+																								menuIconSize
+																							}
+																						/>
+																						Demote
+																					</>
+																				) : (
+																					<>
+																						<BiShieldPlus
+																							size={
+																								menuIconSize
+																							}
+																						/>
+																						Promote
+																					</>
+																				)}
 																			</MenuAction>
 																		</MenuItem>
 

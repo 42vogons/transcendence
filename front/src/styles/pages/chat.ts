@@ -219,7 +219,7 @@ export const SenderMenuWrapper = styled(DropdownMenu.Root, {})
 
 export const SenderMenu = styled(DropdownMenu.Trigger, {
 	outline: 'none',
-	width: 140,
+	width: 150,
 	padding: '0.25rem 0.5rem',
 	display: 'flex',
 	alignItems: 'center',

@@ -10,7 +10,7 @@ import { useRouter } from 'next/router'
 import { ChatContext } from '@/contexts/ChatContext'
 import { useContext } from 'react'
 import ModalWithCloseOutside from './modalWithCloseOutside'
-import { delayMs } from '@/utils/delay'
+import { delayMs } from '@/utils/functions'
 
 interface iNewChannelModal {
 	showNewChannelModal: boolean
