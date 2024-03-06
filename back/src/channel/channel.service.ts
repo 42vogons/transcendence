@@ -101,7 +101,7 @@ export class ChannelService {
       userId,
     );
 
-    const userName = this.userRepository.findUsernameByUserID(userId);
+    const userName = await this.userRepository.findUsernameByUserID(userId);
     const msg = `Channel created by ${userName}`;
     this.logger.log(msg);
     this.sendBroadCast(channel.channel_id, msg);
