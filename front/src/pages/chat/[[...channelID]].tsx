@@ -41,11 +41,15 @@ import { MdBlock } from 'react-icons/md'
 import ConfirmationModal from '@/components/modals/confirmationModal'
 import AddUserToChannelModal from '@/components/modals/addUserToChannelModal'
 import { GameContext } from '@/contexts/GameContext'
+import ChangeChannelPasswordModal from '@/components/modals/changeChannelPasswordModal'
 
 export default function Chat() {
 	const [showLeaveChannelModal, setShowLeaveChannelModal] = useState(false)
 	const [showAddUserToChannelModal, setShowAddUserToChannelModal] =
 		useState(false)
+	const [showChangeChannelPasswordModal, setShowChangeChannelPasswordModal] =
+		useState(false)
+
 	const messagesEndRef = useRef(null)
 	const menuIconSize = 26
 	const broadCastID = 1
@@ -198,23 +202,27 @@ export default function Chat() {
 															Member
 														</MenuAction>
 													</MenuItem>
-													<MenuItem>
-														<MenuAction
-															isAdmin="true"
-															onClick={() => {
-																console.log(
-																	'change password',
-																)
-															}}
-														>
-															<GrUpdate
-																size={
-																	menuIconSize
-																}
-															/>{' '}
-															Password
-														</MenuAction>
-													</MenuItem>
+													{activeChannelData.channel
+														.type ===
+														'protected' && (
+														<MenuItem>
+															<MenuAction
+																isAdmin="true"
+																onClick={() => {
+																	setShowChangeChannelPasswordModal(
+																		true,
+																	)
+																}}
+															>
+																<GrUpdate
+																	size={
+																		menuIconSize
+																	}
+																/>
+																Password
+															</MenuAction>
+														</MenuItem>
+													)}
 												</>
 											)}
 										</MenuContent>
@@ -438,6 +446,14 @@ export default function Chat() {
 							}
 							showAddUserToChannelModal={
 								showAddUserToChannelModal
+							}
+						/>
+						<ChangeChannelPasswordModal
+							setShowChangeChannelPasswordModal={
+								setShowChangeChannelPasswordModal
+							}
+							showChangeChannelPasswordModal={
+								showChangeChannelPasswordModal
 							}
 						/>
 					</>

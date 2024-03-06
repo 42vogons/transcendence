@@ -3,11 +3,11 @@ import { styled } from '..'
 export const ButtonContainer = styled('button', {
 	width: '100%',
 	display: 'flex',
-	justifyContent: 'space-around',
+	justifyContent: 'space-between',
 	alignItems: 'center',
-	gap: 32,
+	gap: 16,
 	color: '$white',
-	fontSize: '$2xl',
+	fontSize: '$xl',
 	fontWeight: 'bold',
 	padding: '0.5rem 1rem',
 	borderRadius: 32,
@@ -20,9 +20,12 @@ export const ButtonContainer = styled('button', {
 		cursor: 'not-allowed',
 	},
 
+	'@bp1': {
+		fontSize: '$2xl',
+	},
+
 	'@bp2': {
 		width: 230,
-		justifyContent: 'space-between',
 	},
 
 	variants: {
