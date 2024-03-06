@@ -7,6 +7,7 @@ import { MemberDto } from '../dto/member.dto';
 import { AdminActionType, ChannelMemberStatus } from '../constants';
 import { AdminActionDto } from '../dto/adminAction.dto';
 import { channel_listDTO } from '../dto/channelList.dto';
+import { UpdateChannelDto } from '../dto/update-channel.dto';
 
 @Injectable()
 export class ChannelRepository {
@@ -23,6 +24,18 @@ export class ChannelRepository {
         password: creatChannel.password,
         owner_id: owner_id,
       },
+    });
+  }
+
+  async updateChannel(
+    channel_id: number,
+    updateChannelDto: UpdateChannelDto,
+  ): Promise<channels> {
+    return await this.prisma.channels.update({
+      where: {
+        channel_id: channel_id,
+      },
+      data: updateChannelDto,
     });
   }
 

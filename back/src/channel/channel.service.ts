@@ -21,6 +21,7 @@ import { channel_listDTO } from './dto/channelList.dto';
 import { ChatDto } from 'src/chat/dto/chat.dto';
 import { ChatRepository } from 'src/chat/repository/chat.repository';
 import { z } from 'zod';
+import { UpdateChannelDto } from './dto/update-channel.dto';
 
 @Injectable()
 export class ChannelService {
@@ -110,6 +111,39 @@ export class ChannelService {
     member.status = ChannelMemberStatus.OWNER;
     member.member_id = userId;
     this.addMember(member, userId);
+    return channel.channel_id;
+  }
+
+  async updateChannel(
+    updateChannelDto: UpdateChannelDto,
+    userId: number,
+    channelId: number,
+  ): Promise<any> {
+    const isAdmin = await this.repository.checkUser(channelId, userId);
+    const isOwner = await this.repository.checkOwner(channelId, userId);
+    if (!isAdmin && !isOwner) {
+      throw new UnauthorizedException(
+        'You are not an admin or owner of this channel.',
+      );
+    }
+    if ((updateChannelDto.password || updateChannelDto.type) && !isOwner) {
+      throw new UnauthorizedException('You are not an owner of this channel.');
+    }
+    if (
+      !Object.values(ChannelType).includes(updateChannelDto.type as ChannelType)
+    ) {
+      throw new BadRequestException('Invalid channel type.');
+    }
+    if (updateChannelDto.type === 'protected') {
+      this.checkValidPassword(updateChannelDto.password);
+      const hashPassword = await this.hashPassword(updateChannelDto.password);
+      updateChannelDto.password = hashPassword;
+    }
+
+    const channel = await this.repository.updateChannel(
+      channelId,
+      updateChannelDto,
+    );
     return channel.channel_id;
   }
 

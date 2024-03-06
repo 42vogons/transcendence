@@ -8,6 +8,7 @@ import {
   UseGuards,
   BadRequestException,
   Logger,
+  Param,
 } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { MemberDto } from './dto/member.dto';
@@ -15,6 +16,7 @@ import { ChannelDto } from './dto/channel.dto';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { LeaveDto } from './dto/leave.dto';
 import { AuthGuard } from 'src/login/auth.guard';
+import { UpdateChannelDto } from './dto/update-channel.dto';
 
 @UseGuards(AuthGuard)
 @Controller('channel')
@@ -35,6 +37,19 @@ export class ChannelController {
       this.logger.error(error.response.message);
       throw new BadRequestException(error.response);
     }
+  }
+
+  @Patch('/:channelId')
+  updateChannel(
+    @Req() request,
+    @Body() channel: UpdateChannelDto,
+    @Param('channelId') channelId: number,
+  ) {
+    return this.channelService.updateChannel(
+      channel,
+      request.user.id,
+      channelId,
+    );
   }
 
   @Post('/addMember')
