@@ -13,7 +13,6 @@ import { UserContext } from './UserContext'
 import { isDateExpired } from '@/reducers/User/Reducer'
 import { ChatReducer, FriendListItem } from '@/reducers/Chat/Reducer'
 import {
-	updateActiveChannel,
 	updateChannel,
 	updateChannelList,
 	updateFriendList,
@@ -49,7 +48,7 @@ interface ChatContextType {
 		status: 'admin' | 'member',
 	) => void
 	getUsernameFromChannelMembers: (userID: number) => string
-	setActiveChannel: (channel_id: number) => void
+	updateActiveChannel: (channel_id: number) => void
 	getActiveChannelName: (
 		channelName: string,
 		channelType: 'direct' | 'public' | 'protected' | 'private',
@@ -82,12 +81,13 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		friendList: [],
 		activeChannelData: undefined,
 		channelList: [],
-		activeChannel: undefined,
 	})
 
 	const { user } = useContext(UserContext)
 
-	const { friendList, activeChannelData, channelList, activeChannel } = state
+	const { friendList, activeChannelData, channelList } = state
+
+	let activeChannel: number | undefined
 
 	const router = useRouter()
 
@@ -182,22 +182,20 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		})
 	}
 
-	async function setActiveChannel(channel_id: number) {
+	async function updateActiveChannel(channel_id: number) {
 		let value
 		if (isNaN(channel_id)) {
 			value = undefined
 		} else {
 			value = channel_id
 		}
-		await dispatch(updateActiveChannel(value))
+		activeChannel = value
 		if (value) {
 			getChannelMessages(Number(value))
 		}
 	}
 
 	function getChannelMessages(channel_id: number) {
-		// console.log('channel_id::', channel_id)
-		// console.log('activeChannel:', activeChannel)
 		if (activeChannel && activeChannel === channel_id)
 			emitSocketIfUserIsNotExpired('get_channel_msg', {
 				channel_id,
@@ -331,6 +329,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	}
 
 	useEffect(() => {
+		console.log('activeChannel:', activeChannel)
 		if (activeChannel) {
 			getChannelMessages(activeChannel)
 		}
@@ -358,7 +357,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
 				getActiveChannelAvatar,
-				setActiveChannel,
+				updateActiveChannel,
 				hasPriveleges,
 				getUserStatus,
 			}}

@@ -50,7 +50,7 @@ export const ChangeChannelPasswordModalContainer = styled('div', {
 	'.buttonsContainer': {
 		width: '100%',
 		display: 'flex',
-		flexDirection: 'column',
+		flexDirection: 'column-reverse',
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		gap: 16,

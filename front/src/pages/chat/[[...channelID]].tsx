@@ -56,6 +56,7 @@ import AddUserToChannelModal from '@/components/modals/addUserToChannelModal'
 import { GameContext } from '@/contexts/GameContext'
 import ChangeChannelPasswordModal from '@/components/modals/changeChannelPasswordModal'
 import { capitalize } from '@/utils/functions'
+import Loading from '@/components/loading'
 
 export default function Chat() {
 	const [showLeaveChannelModal, setShowLeaveChannelModal] = useState(false)
@@ -77,7 +78,7 @@ export default function Chat() {
 		getUsernameFromChannelMembers,
 		getActiveChannelName,
 		getActiveChannelAvatar,
-		setActiveChannel,
+		updateActiveChannel,
 		hasPriveleges,
 		getUserStatus,
 	} = useContext(ChatContext)
@@ -112,10 +113,9 @@ export default function Chat() {
 
 	useEffect(() => {
 		const { channelID } = router.query
-		console.log('channelID:', channelID)
 		if (router.isReady) {
 			if (typeof channelID === 'undefined' || !isNaN(Number(channelID))) {
-				setActiveChannel(Number(channelID))
+				updateActiveChannel(Number(channelID))
 			} else {
 				toast('Invalid channel id', {
 					type: 'error',
@@ -555,8 +555,10 @@ export default function Chat() {
 						router.isReady &&
 						typeof router.query.channelID === 'undefined' ? (
 							<h2>Select a channel</h2>
-						) : (
+						) : isNaN(Number(router.query.channelID)) ? (
 							<h2>Invalid channel</h2>
+						) : (
+							<Loading size={200} />
 						)}
 					</MessageContainer>
 				)}
