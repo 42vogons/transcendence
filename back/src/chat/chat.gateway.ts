@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { SocketWithAuth } from 'src/types';
-import { Logger, NotFoundException } from '@nestjs/common';
+import { Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ChatDto } from './dto/chat.dto';
 import { UsersService } from 'src/users/users.service';
 import { FriendsService } from 'src/friends/friends.service';
@@ -229,10 +229,22 @@ export class ChatGateway
   @SubscribeMessage('admin_action')
   async adminAction(client: SocketWithAuth, adminActionDto: AdminActionDto) {
     try {
-      const adminName = this.usersService.findUsernameByUserID(client.userID);
-      const memberName = this.usersService.findUsernameByUserID(
+      const adminName = await this.usersService.findUsernameByUserID(
+        client.userID,
+      );
+      const memberName = await this.usersService.findUsernameByUserID(
         adminActionDto.member_id,
       );
+      const isOwner = await this.channelService.checkOwner(
+        adminActionDto.channel_id,
+        adminActionDto.member_id,
+      );
+      if (isOwner === true) {
+        throw new UnauthorizedException(
+          `You can't  ${adminActionDto.action} the owner of this channel.`,
+        );
+      }
+
       let msg = `${adminName} ${adminActionDto.action} ${memberName}`;
       if (adminActionDto.action === AdminActionType.MUTED) {
         msg += ` for ${adminActionDto.end_date} minutes`;

@@ -118,10 +118,7 @@ export class ChannelService {
       memberDto.channel_id,
       userId,
     );
-    const isOwner = await this.repository.checkOwner(
-      memberDto.channel_id,
-      userId,
-    );
+    const isOwner = await this.checkOwner(memberDto.channel_id, userId);
 
     if (isAdmin || isOwner) {
       const user = await this.userRepository.findOne(memberDto.member_id);
@@ -153,11 +150,8 @@ export class ChannelService {
       adminActionDto.channel_id,
       userId,
     );
-    const isOwner = await this.repository.checkOwner(
-      adminActionDto.channel_id,
-      userId,
-    );
-    const memberIsOwner = await this.repository.checkOwner(
+    const isOwner = await this.checkOwner(adminActionDto.channel_id, userId);
+    const memberIsOwner = await this.checkOwner(
       adminActionDto.channel_id,
       adminActionDto.member_id,
     );
@@ -203,10 +197,7 @@ export class ChannelService {
       memberDto.channel_id,
       userId,
     );
-    const isOwner = await this.repository.checkOwner(
-      memberDto.channel_id,
-      userId,
-    );
+    const isOwner = await this.checkOwner(memberDto.channel_id, userId);
     if (isAdmin || isOwner) {
       await this.repository.changeMemberStatus(memberDto);
       return 'Member status changed successfully.';
@@ -225,12 +216,16 @@ export class ChannelService {
     return await this.repository.listChannelsByUser(userId);
   }
 
+  async checkOwner(channel_id: number, userId: number) {
+    return await this.repository.checkOwner(channel_id, userId);
+  }
+
   async leaveChannel(leaveDto: LeaveDto, userId: any) {
     const admins = await this.repository.checkAdmins(
       userId,
       leaveDto.channel_id,
     );
-    const owner = await this.repository.checkOwner(leaveDto.channel_id, userId);
+    const owner = await this.checkOwner(leaveDto.channel_id, userId);
     const members = await this.repository.listMembers(leaveDto.channel_id);
     if (admins.length === 0 && owner === true && members.length > 1) {
       throw new ConflictException(
@@ -286,10 +281,7 @@ export class ChannelService {
   }
 
   async changePassword(channelDto: ChannelDto, userId: any) {
-    const isOwner = await this.repository.checkOwner(
-      channelDto.channel_id,
-      userId,
-    );
+    const isOwner = await this.checkOwner(channelDto.channel_id, userId);
     if (isOwner) {
       this.checkValidPassword(channelDto.password);
       const hashPassword = await this.hashPassword(channelDto.password);
