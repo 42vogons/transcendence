@@ -1,4 +1,4 @@
-import { Injectable, Response, Body, Logger } from '@nestjs/common';
+import { Injectable, Response, Body, Logger, UnauthorizedException } from '@nestjs/common';
 import axios from 'axios';
 import * as FormData from 'form-data';
 import { UsersService } from 'src/users/users.service';
@@ -63,10 +63,16 @@ export class LoginService {
     }
   }
 
-  async insertToken(profile: any, expiresAt: Date, @Response() res) {
+  async insertToken(
+    profile: any,
+    expiresAt: Date,
+    @Response() res,
+    action: string,
+  ) {
     const payload = {
       id: profile.user_id,
       login: profile.username,
+      action: action,
     };
     const token = await this.generateToken(payload);
     Logger.log('cookie=' + token);
@@ -97,46 +103,51 @@ export class LoginService {
     return this.usersService.create(newUser);
   }
 
-  async checkTwoFactor(token: string, code: string): Promise<boolean> {
-    const user = await this.usersService.findByToken(token);
-    const valid =
-      this.twoFactorAutenticateService.isTwoFactorAuthenticationCodeValid(
-        code,
-        user.token_secret,
-      );
-    return valid;
+  async checkTwoFactor(
+    token: string,
+    code: string,
+    @Response() res,
+  ): Promise<boolean> {
+    const secretJwt = process.env.SECRET_JWT;
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: secretJwt,
+      });
+      const user = await this.usersService.findOne(payload.id);
+      const valid =
+        this.twoFactorAutenticateService.isTwoFactorAuthenticationCodeValid(
+          code,
+          user.token_secret,
+        );
+      let action = '';
+      if (valid) {
+        action = 'Logged';
+      } else {
+        action = 'authenticate-fail';
+      }
+      const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
+      await this.insertToken(user, expiresAt, res, action);
+      return valid;
+    } catch {
+      throw new UnauthorizedException();
+    }
+    //return false;
   }
 
   async login(@Body() body: any, @Response() res) {
-    Logger.log('body:', body);
     const token = await this.getToken(body.code);
     const profile = await this.getInfo(token);
     const user = await this.checkUser(profile);
     const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
-    await this.insertToken(user, expiresAt, res);
-    Logger.log('user ', user);
     let action = 'logged';
     const { user_id: userID, username } = user;
     if (user.two_factor_enabled) {
       action = 'authenticate';
-      return res
-        .status(200)
-        .send({ action, user: { userID, username, expiresAt } });
     }
-
+    await this.insertToken(user, expiresAt, res, action);
     return res
       .status(200)
       .send({ action, user: { userID, username, expiresAt } });
-  }
-
-  private mapToDto<T>(source: any, dto: new () => T): T {
-    const dtoInstance = new dto();
-    Object.keys(dtoInstance).forEach(key => {
-      if (source.hasOwnProperty(key)) {
-        dtoInstance[key] = source[key];
-      }
-    });
-    return dtoInstance;
   }
 
   async generateToken(payload: any): Promise<string> {
