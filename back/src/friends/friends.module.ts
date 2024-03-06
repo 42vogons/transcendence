@@ -6,6 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { UsersRepository } from 'src/users/repositories/users.repository';
+import { TwoFactorAutenticateService } from 'src/two-factor-autenticate/two-factor-autenticate.service';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UsersRepository } from 'src/users/repositories/users.repository';
     JwtService,
     UsersService,
     UsersRepository,
+    TwoFactorAutenticateService,
   ],
   exports: [
     FriendsService,

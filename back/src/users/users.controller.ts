@@ -57,7 +57,7 @@ export class UsersController {
   @Patch()
   @UseGuards(AuthGuard)
   async update(@Req() request, @Body() updateUserDto: UpdateUserDto) {
-    const user = await this.usersService.findByToken(request.user.id);
+    const user = await this.usersService.findOne(request.user.id);
     try {
       UpdateUserSchema.parse(updateUserDto);
     } catch (error) {
@@ -67,28 +67,30 @@ export class UsersController {
     return this.usersService.update(user.user_id, updateUserDto);
   }
 
+  @UseGuards(AuthGuard)
   @Post('/findUsersByPartOfUserName')
   async findUsersByPartOfUserName(@Body() body) {
     return this.usersService.findUsersByPartOfUserName(body.user_name);
   }
 
-  @Post('/activeTwoFactor')
   @UseGuards(AuthGuard)
+  @Post('/activeTwoFactor')
   async activeTwoFactor(@Req() request, @Response() response) {
-    const user = await this.usersService.findByToken(request.user.id);
-    user.two_factor_enabled = user.two_factor_enabled ? false : true;
-    if (user.two_factor_enabled) {
-      const { secret, otpauthUrl } =
-        await this.twoFactorAutenticateService.generateSecret(user.email);
-      user.token_secret = secret;
-      this.usersService.update(user.user_id, user);
+    const result = await this.usersService.activeTwoFactor(request.user.id);
+    if (result.enabled && result.otpauthUrl) {
       return this.twoFactorAutenticateService.pipeQrCodeStream(
         response,
-        otpauthUrl,
+        result.otpauthUrl,
       );
+    } else if (result.enabled) {
+      response
+        .status(400)
+        .send(
+          'Failed to generate QR Code for 2FA. Please retry or check your 2FA setup.',
+        );
+    } else {
+      return response.status(200).send('2FA successfully disabled.');
     }
-    this.usersService.update(user.user_id, user);
-    return response.status(200).send();
   }
 
   @Post('upload-avatar')
@@ -122,7 +124,7 @@ export class UsersController {
     }
     const avatarUrl =
       process.env.BACK_HOST + `/uploads/avatar/${userId}/${file.originalname}`;
-    const user = await this.usersService.findByToken(request.user.id);
+    const user = await this.usersService.findOne(request.user.id);
     user.avatar_url = avatarUrl;
     await this.usersService.update(userId, user);
     return {
@@ -141,6 +143,7 @@ export class UsersController {
   }
 
   @Get('/findUsersByUserID/:userId')
+  @UseGuards(AuthGuard)
   async findUsersByUserID(@Param('userId') userId: number) {
     return this.usersService
       .findOne(userId)
@@ -148,6 +151,7 @@ export class UsersController {
   }
 
   @Get('/findUsernameByUserID/:userId')
+  @UseGuards(AuthGuard)
   async findUsernameByUserID(@Param('userId') userId: number) {
     const username = await this.usersService.findUsernameByUserID(userId);
     return { username: username };

@@ -8,12 +8,14 @@ import { NotFoundError } from '../common/errors/types/NotFoundError';
 import { UserEntity } from './entities/user.entity';
 import { BlockUserDto } from './dto/blockUser.dto';
 import { ProfileDto } from './dto/profile.dto';
+import { TwoFactorAutenticateService } from 'src/two-factor-autenticate/two-factor-autenticate.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly repository: UsersRepository,
     private readonly jwtService: JwtService,
+    private readonly twoFactorAutenticateService: TwoFactorAutenticateService,
   ) {}
 
   createNewUser(profile: any) {
@@ -32,10 +34,6 @@ export class UsersService {
 
   async findAll() {
     return await this.repository.findAll();
-  }
-
-  async findByToken(userId: any) {
-    return await this.findOne(userId);
   }
 
   async findOne(user_id: number): Promise<UserEntity> {
@@ -126,6 +124,24 @@ export class UsersService {
         `Failed to upload avatar for user ${userId}: ${error.message}`,
       );
       throw new Error('Failed to upload avatar.');
+    }
+  }
+
+  async activeTwoFactor(user_id: number) {
+    const user = await this.findOne(user_id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.two_factor_enabled = !user.two_factor_enabled;
+    if (user.two_factor_enabled) {
+      const { secret, otpauthUrl } =
+        await this.twoFactorAutenticateService.generateSecret(user.email);
+      user.token_secret = secret;
+      await this.update(user.user_id, user);
+      return { enabled: true, otpauthUrl };
+    } else {
+      await this.update(user.user_id, user);
+      return { enabled: false };
     }
   }
 }

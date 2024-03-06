@@ -24,10 +24,11 @@ export class AuthGuard implements CanActivate {
         secret: secretJwt, // Certifique-se de que 'secretJwt' é a sua chave secreta real
       });
       request['user'] = payload;
+      if (payload.action === 'Logged') return true;
     } catch {
       throw new UnauthorizedException();
     }
-    return true;
+    return false;
   }
 
   private extractTokenFromCookie(request: Request): string | undefined {
