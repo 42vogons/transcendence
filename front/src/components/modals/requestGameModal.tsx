@@ -49,7 +49,10 @@ export default function RequestGameModal() {
 					</div>
 				)}
 				{gameRequest?.type === 'refused' && (
-					<div className="buttonsContainer">
+					<div
+						className="buttonsContainer"
+						style={{ justifyContent: 'center' }}
+					>
 						<Button buttonType="cancel" onClick={resetGameRequest}>
 							<MdClose size={40} />
 							Ok

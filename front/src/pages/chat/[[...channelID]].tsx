@@ -20,7 +20,7 @@ import {
 
 import { SlOptionsVertical } from 'react-icons/sl'
 
-import { ReactElement, useContext, useEffect, useRef } from 'react'
+import { ReactElement, useContext, useEffect, useRef, useState } from 'react'
 import Layout from '@/components/layout'
 import {
 	MenuArrow,
@@ -38,12 +38,19 @@ import MessageContainer from '@/components/messageContainer'
 import { toast } from 'react-toastify'
 import { BiExit, BiLogOut, BiShieldPlus, BiVolumeMute } from 'react-icons/bi'
 import { MdBlock } from 'react-icons/md'
+import ConfirmationModal from '@/components/modals/confirmationModal'
+import AddUserToChannelModal from '@/components/modals/addUserToChannelModal'
+import { GameContext } from '@/contexts/GameContext'
 
 export default function Chat() {
+	const [showLeaveChannelModal, setShowLeaveChannelModal] = useState(false)
+	const [showAddUserToChannelModal, setShowAddUserToChannelModal] =
+		useState(false)
 	const messagesEndRef = useRef(null)
 	const menuIconSize = 26
 	const broadCastID = 1
 	const { user } = useContext(UserContext)
+	const { requestMatch } = useContext(GameContext)
 	const {
 		activeChannel,
 		activeChannelData,
@@ -64,6 +71,26 @@ export default function Chat() {
 		(messagesEndRef.current as unknown as HTMLElement)?.scrollIntoView({
 			behavior,
 		})
+	}
+
+	function leaveChannel(channelID: number) {
+		console.log('leave', channelID)
+	}
+
+	function muteUser(userID: number) {
+		console.log('mute', userID)
+	}
+
+	function ChannelPromoteUser(channelID: number, userID: number) {
+		console.log('promote', channelID, userID)
+	}
+
+	function ChannelKickUser(channelID: number, userID: number) {
+		console.log('kick', channelID, userID)
+	}
+
+	function ChannelBanUser(channelID: number, userID: number) {
+		console.log('ban', channelID, userID)
 	}
 
 	useEffect(() => {
@@ -139,8 +166,8 @@ export default function Chat() {
 											<MenuItem>
 												<MenuAction
 													onClick={() => {
-														console.log(
-															'leave channel',
+														setShowLeaveChannelModal(
+															true,
 														)
 													}}
 												>
@@ -158,8 +185,8 @@ export default function Chat() {
 														<MenuAction
 															isAdmin="true"
 															onClick={() => {
-																console.log(
-																	'Add user',
+																setShowAddUserToChannelModal(
+																	true,
 																)
 															}}
 														>
@@ -231,8 +258,19 @@ export default function Chat() {
 															<MenuItem>
 																<MenuAction
 																	onClick={() => {
-																		console.log(
-																			'play',
+																		requestMatch(
+																			message.sender_id,
+																		)
+																		router.push(
+																			'/',
+																		)
+																		toast(
+																			`You invited ${getUsernameFromChannelMembers(
+																				message.sender_id,
+																			)} to play`,
+																			{
+																				type: 'info',
+																			},
 																		)
 																	}}
 																>
@@ -247,8 +285,8 @@ export default function Chat() {
 															<MenuItem>
 																<MenuAction
 																	onClick={() => {
-																		console.log(
-																			'profile',
+																		router.push(
+																			`/profile/${message.sender_id}`,
 																		)
 																	}}
 																>
@@ -256,15 +294,15 @@ export default function Chat() {
 																		size={
 																			menuIconSize
 																		}
-																	/>{' '}
+																	/>
 																	Profile
 																</MenuAction>
 															</MenuItem>
 															<MenuItem>
 																<MenuAction
 																	onClick={() => {
-																		console.log(
-																			'mute',
+																		muteUser(
+																			message.sender_id,
 																		)
 																	}}
 																>
@@ -290,8 +328,9 @@ export default function Chat() {
 																			<MenuAction
 																				isAdmin="true"
 																				onClick={() => {
-																					console.log(
-																						'promote to admi',
+																					ChannelPromoteUser(
+																						message.channel_id,
+																						message.sender_id,
 																					)
 																				}}
 																			>
@@ -308,8 +347,9 @@ export default function Chat() {
 																			<MenuAction
 																				isAdmin="true"
 																				onClick={() => {
-																					console.log(
-																						'kick',
+																					ChannelKickUser(
+																						message.channel_id,
+																						message.sender_id,
 																					)
 																				}}
 																			>
@@ -325,8 +365,9 @@ export default function Chat() {
 																			<MenuAction
 																				isAdmin="true"
 																				onClick={() => {
-																					console.log(
-																						'ban',
+																					ChannelBanUser(
+																						message.channel_id,
+																						message.sender_id,
 																					)
 																				}}
 																			>
@@ -376,6 +417,28 @@ export default function Chat() {
 						</ChatMessageContainer>
 						<ChatInput
 							channel_id={activeChannelData.channel.channel_id}
+						/>
+						<ConfirmationModal
+							setShowConfirmationModal={setShowLeaveChannelModal}
+							showConfirmationModal={showLeaveChannelModal}
+							title={
+								`Channel ${activeChannelData?.channel.name}` ||
+								''
+							}
+							message="Are you sure o want to leave this Channel?"
+							onConfirmation={() =>
+								leaveChannel(
+									activeChannelData?.channel.channel_id,
+								)
+							}
+						/>
+						<AddUserToChannelModal
+							setShowAddUserToChannelModal={
+								setShowAddUserToChannelModal
+							}
+							showAddUserToChannelModal={
+								showAddUserToChannelModal
+							}
 						/>
 					</>
 				) : (
