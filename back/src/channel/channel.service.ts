@@ -230,17 +230,18 @@ export class ChannelService {
       userId,
       leaveDto.channel_id,
     );
-    if (admins.length === 0) {
+    const members = await this.repository.listMembers(leaveDto.channel_id);
+    if (admins.length === 0 && members.length != 1) {
       throw new ConflictException(
         'Cannot leave the channel without appointing another administrator.',
       );
     }
     const owner = await this.repository.checkOwner(leaveDto.channel_id, userId);
-    if (owner === true) {
+    if (owner === true && members.length > 1) {
       await this.repository.changeOwner(admins[0].user_id, leaveDto.channel_id);
-      //return 'Left the channel.';
     }
-    return await this.repository.leaveChannel(userId, leaveDto.channel_id);
+    await this.repository.leaveChannel(userId, leaveDto.channel_id);
+    return 'Left the channel.';
   }
 
   async listAllChannels() {
