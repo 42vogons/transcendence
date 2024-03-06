@@ -214,13 +214,16 @@ export class ChatGateway
   async changeMemberStatus(client: SocketWithAuth, memberDto: MemberDto) {
     try {
       await this.channelService.changeMemberStatus(memberDto, client.userID);
-      const adminName = this.usersService.findUsernameByUserID(client.userID);
-      const memberName = this.usersService.findUsernameByUserID(
+      const adminName = await this.usersService.findUsernameByUserID(
+        client.userID,
+      );
+      const memberName = await this.usersService.findUsernameByUserID(
         memberDto.member_id,
       );
       const msg = `${adminName}  changed ${memberName}'s status to ${memberDto.status}`;
       this.logger.log(msg + 'on channel' + memberDto.channel_id);
       await this.chatService.sendBroadCast(memberDto.channel_id, msg);
+      await this.notifyMembers(memberDto.channel_id);
     } catch (error) {
       this.sendError(error);
     }
