@@ -15,8 +15,6 @@ import {
   ParseFilePipe,
   BadRequestException,
   Logger,
-  HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -145,6 +143,7 @@ export class UsersController {
   }
 
   @Get('/findUsersByUserID/:userId')
+  @UseGuards(AuthGuard)
   async findUsersByUserID(@Param('userId') userId: number) {
     return this.usersService
       .findOne(userId)
@@ -152,6 +151,7 @@ export class UsersController {
   }
 
   @Get('/findUsernameByUserID/:userId')
+  @UseGuards(AuthGuard)
   async findUsernameByUserID(@Param('userId') userId: number) {
     const username = await this.usersService.findUsernameByUserID(userId);
     return { username: username };
