@@ -16,6 +16,7 @@ interface iPlayer {
 	userID: number
 	username: string
 	score: number
+	avatarUrl: string
 }
 
 export interface MatchProps {
@@ -44,7 +45,7 @@ export default function MatchCard({ players, winnerID }: MatchProps) {
 				<UserContainer>
 					<UserImageContainer>
 						<Image
-							src={userDefaulAvatar}
+							src={player1.avatarUrl || userDefaulAvatar}
 							width={imgSize}
 							height={imgSize}
 							alt="user"
@@ -67,7 +68,7 @@ export default function MatchCard({ players, winnerID }: MatchProps) {
 				<UserContainer>
 					<UserImageContainer>
 						<Image
-							src={userDefaulAvatar}
+							src={player2.avatarUrl || userDefaulAvatar}
 							width={imgSize}
 							height={imgSize}
 							alt="user"

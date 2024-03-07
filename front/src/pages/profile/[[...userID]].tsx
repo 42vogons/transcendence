@@ -31,6 +31,7 @@ interface Player {
 	userID: number
 	username: string
 	score: number
+	avatarUrl: string
 }
 
 interface ProfileData {
