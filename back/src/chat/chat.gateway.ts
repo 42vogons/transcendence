@@ -252,9 +252,15 @@ export class ChatGateway
         );
       }
 
-      let msg = `${adminName} ${adminActionDto.action} ${memberName}`;
+      let msg = `${adminName} ${
+        adminActionDto.action === 'ban'
+          ? 'banned'
+          : adminActionDto.action === 'kick'
+            ? 'kicked'
+            : 'muted'
+      } ${memberName}`;
       if (adminActionDto.action === AdminActionType.MUTED) {
-        msg += ` for ${adminActionDto.end_date} minutes`;
+        msg += ` for ${adminActionDto.end_date} minute(s)`;
       }
       this.logger.log(msg + 'on channel' + adminActionDto.channel_id);
       await this.chatService.sendBroadCast(adminActionDto.channel_id, msg);

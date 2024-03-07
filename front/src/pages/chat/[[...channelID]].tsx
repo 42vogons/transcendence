@@ -57,6 +57,9 @@ import { GameContext } from '@/contexts/GameContext'
 import ChangeChannelPasswordModal from '@/components/modals/changeChannelPasswordModal'
 import { capitalize } from '@/utils/functions'
 import Loading from '@/components/loading'
+import MuteChannelUserModal, {
+	iMuteData,
+} from '@/components/modals/muteChannelUserModal'
 
 export default function Chat() {
 	const [showLeaveChannelModal, setShowLeaveChannelModal] = useState(false)
@@ -64,6 +67,14 @@ export default function Chat() {
 		useState(false)
 	const [showChangeChannelPasswordModal, setShowChangeChannelPasswordModal] =
 		useState(false)
+	const [showMuteChannelUserModal, setShowMuteChannelUserModal] =
+		useState(false)
+	const [muteData, setMuteData] = useState<iMuteData>({
+		channel_id: 0,
+		channelName: '',
+		user_id: 0,
+		username: '',
+	})
 
 	const messagesEndRef = useRef(null)
 	const menuIconSize = 26
@@ -74,6 +85,7 @@ export default function Chat() {
 		activeChannel,
 		activeChannelData,
 		leaveChannel,
+		adminAtion,
 		changeChannelMemberStatus,
 		getUsernameFromChannelMembers,
 		getActiveChannelName,
@@ -93,18 +105,6 @@ export default function Chat() {
 		(messagesEndRef.current as unknown as HTMLElement)?.scrollIntoView({
 			behavior,
 		})
-	}
-
-	function muteUser(userID: number) {
-		console.log('mute', userID)
-	}
-
-	function ChannelKickUser(channelID: number, userID: number) {
-		console.log('kick', channelID, userID)
-	}
-
-	function ChannelBanUser(channelID: number, userID: number) {
-		console.log('ban', channelID, userID)
 	}
 
 	function DirectChannelBlockUser(userID: number) {
@@ -361,8 +361,26 @@ export default function Chat() {
 																			<MenuAction
 																				isAdmin="true"
 																				onClick={() => {
-																					muteUser(
-																						message.sender_id,
+																					setMuteData(
+																						{
+																							channel_id:
+																								activeChannelData
+																									.channel
+																									.channel_id,
+																							channelName:
+																								activeChannelData
+																									.channel
+																									.name,
+																							user_id:
+																								message.sender_id,
+																							username:
+																								getUsernameFromChannelMembers(
+																									message.sender_id,
+																								),
+																						},
+																					)
+																					setShowMuteChannelUserModal(
+																						true,
 																					)
 																				}}
 																			>
@@ -423,9 +441,10 @@ export default function Chat() {
 																			<MenuAction
 																				isAdmin="true"
 																				onClick={() => {
-																					ChannelKickUser(
-																						message.channel_id,
+																					adminAtion(
 																						message.sender_id,
+																						message.channel_id,
+																						'kick',
 																					)
 																				}}
 																			>
@@ -441,9 +460,10 @@ export default function Chat() {
 																			<MenuAction
 																				isAdmin="true"
 																				onClick={() => {
-																					ChannelBanUser(
-																						message.channel_id,
+																					adminAtion(
 																						message.sender_id,
+																						message.channel_id,
+																						'ban',
 																					)
 																				}}
 																			>
@@ -548,6 +568,13 @@ export default function Chat() {
 								showChangeChannelPasswordModal
 							}
 						/>
+						<MuteChannelUserModal
+							setShowMuteChannelUserModal={
+								setShowMuteChannelUserModal
+							}
+							showMuteChannelUserModal={showMuteChannelUserModal}
+							muteData={muteData}
+						/>
 					</>
 				) : (
 					<MessageContainer>
@@ -555,7 +582,8 @@ export default function Chat() {
 						router.isReady &&
 						typeof router.query.channelID === 'undefined' ? (
 							<h2>Select a channel</h2>
-						) : isNaN(Number(router.query.channelID)) ? (
+						) : isNaN(Number(router.query.channelID)) ||
+						  activeChannel ? (
 							<h2>Invalid channel</h2>
 						) : (
 							<Loading size={200} />

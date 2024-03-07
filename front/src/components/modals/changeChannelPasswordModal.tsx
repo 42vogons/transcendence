@@ -39,7 +39,7 @@ export default function ChangeChannelPasswordModal({
 		setShowChangeChannelPasswordModal(false)
 	}
 
-	function handleChangeChannelPassowrd() {
+	function handleChangeChannelPassword() {
 		console.log('ChangeChannelPassowrd:', password)
 
 		const validatePassword = passwordSchema.safeParse(password)
@@ -87,7 +87,7 @@ export default function ChangeChannelPasswordModal({
 					</Button>
 					<Button
 						buttonType="accept"
-						onClick={handleChangeChannelPassowrd}
+						onClick={handleChangeChannelPassword}
 						disabled={password === ''}
 					>
 						<div

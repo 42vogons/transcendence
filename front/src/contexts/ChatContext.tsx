@@ -47,6 +47,12 @@ interface ChatContextType {
 		channel_id: number,
 		status: 'admin' | 'member',
 	) => void
+	adminAtion: (
+		member_id: number,
+		channel_id: number,
+		action: 'ban' | 'kick' | 'mute',
+		end_date?: number,
+	) => void
 	getUsernameFromChannelMembers: (userID: number) => string
 	updateActiveChannel: (channel_id: number) => void
 	getActiveChannelName: (
@@ -76,6 +82,8 @@ const socket = socketClient(`${process.env.NEXT_PUBLIC_BACK_HOST}/chat`, {
 
 export const ChatContext = createContext({} as ChatContextType)
 
+let activeChannel: number | undefined
+
 export function ChatProvider({ children }: ChatProviderProps) {
 	const [state, dispatch] = useReducer(ChatReducer, {
 		friendList: [],
@@ -86,8 +94,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	const { user } = useContext(UserContext)
 
 	const { friendList, activeChannelData, channelList } = state
-
-	let activeChannel: number | undefined
 
 	const router = useRouter()
 
@@ -232,7 +238,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		await delayMs(500)
 	}
 
-	async function changeChannelMemberStatus(
+	function changeChannelMemberStatus(
 		member_id: number,
 		channel_id: number,
 		status: 'admin' | 'member',
@@ -242,6 +248,31 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			channel_id,
 			status,
 		})
+	}
+
+	function adminAtion(
+		member_id: number,
+		channel_id: number,
+		action: 'ban' | 'kick' | 'mute',
+		end_date?: number,
+	) {
+		console.log('adminAtion:', member_id, channel_id, action)
+		if (action !== 'mute') {
+			console.log('action not mute:', action)
+			emitSocketIfUserIsNotExpired('admin_action', {
+				member_id,
+				channel_id,
+				action,
+			})
+		} else {
+			console.log('action mute:', action, end_date)
+			emitSocketIfUserIsNotExpired('admin_action', {
+				member_id,
+				channel_id,
+				action,
+				end_date,
+			})
+		}
 	}
 
 	function getUsernameFromChannelMembers(userID: number) {
@@ -308,6 +339,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		const member = (activeChannelData as iChannelData).channelMembers.find(
 			(member) => member.user_id === userID,
 		)
+		console.log('hasPriveleges:', userID, member)
 		return (
 			!!member && !!member.status && allowedRoles.includes(member?.status)
 		)
@@ -354,6 +386,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				addMemberToChannel,
 				leaveChannel,
 				changeChannelMemberStatus,
+				adminAtion,
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
 				getActiveChannelAvatar,
