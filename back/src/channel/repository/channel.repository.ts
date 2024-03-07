@@ -161,14 +161,27 @@ export class ChannelRepository {
     });
   }
 
+  async findMyChannels(member_id: number) {
+    return await this.prisma.channel_members.findMany({
+      where: {
+        user_id: member_id,
+      },
+    });
+  }
+
   async findAllChannels(member_id: number) {
     const channelsBanned = await this.findChannelBannedByUser(member_id);
     const channelBannedIds = channelsBanned.map(channel => channel.channel_id);
 
+    const myChannels = await this.findMyChannels(member_id);
+    const myChannelds = myChannels.map(channel => channel.channel_id);
+
+    const notListChannels = channelBannedIds.concat(myChannelds);
+
     return await this.prisma.channels.findMany({
       where: {
         channel_id: {
-          notIn: channelBannedIds,
+          notIn: notListChannels,
         },
         OR: [{ type: 'public' }, { type: 'protected' }],
       },
