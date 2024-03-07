@@ -794,7 +794,7 @@ export class GameService {
     return this.matchRepository.getAllMatchHistoryByUserID(Number(userID));
   }
 
-  requestMatch(
+  async requestMatch(
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
     client: SocketWithAuth,
     guestID: number,
@@ -808,16 +808,17 @@ export class GameService {
       client.emit(
         'request_game_error',
         'You are not allowed to play a new game.',
-      );
-      return;
-    }
-
+        );
+        return;
+      }
+      
     if (!playerGuest) {
       client.emit('request_game_error', 'Player not found.');
       return;
     }
 
-    if (playerGuest.status !== 'idle') {
+    const userGuest = await this.usersRespository.findOne(playerGuest.userID)
+    if (userGuest.status !== 'online' || playerGuest.status !== 'idle') {
       client.emit('request_game_error', 'Player not available.');
       return;
     }
