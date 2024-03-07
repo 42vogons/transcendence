@@ -74,6 +74,7 @@ export default function Chat() {
 		activeChannel,
 		activeChannelData,
 		leaveChannel,
+		adminAtion,
 		changeChannelMemberStatus,
 		getUsernameFromChannelMembers,
 		getActiveChannelName,
@@ -93,18 +94,6 @@ export default function Chat() {
 		(messagesEndRef.current as unknown as HTMLElement)?.scrollIntoView({
 			behavior,
 		})
-	}
-
-	function muteUser(userID: number) {
-		console.log('mute', userID)
-	}
-
-	function ChannelKickUser(channelID: number, userID: number) {
-		console.log('kick', channelID, userID)
-	}
-
-	function ChannelBanUser(channelID: number, userID: number) {
-		console.log('ban', channelID, userID)
 	}
 
 	function DirectChannelBlockUser(userID: number) {
@@ -361,8 +350,11 @@ export default function Chat() {
 																			<MenuAction
 																				isAdmin="true"
 																				onClick={() => {
-																					muteUser(
+																					adminAtion(
 																						message.sender_id,
+																						message.channel_id,
+																						'mute',
+																						1,
 																					)
 																				}}
 																			>
@@ -423,9 +415,10 @@ export default function Chat() {
 																			<MenuAction
 																				isAdmin="true"
 																				onClick={() => {
-																					ChannelKickUser(
-																						message.channel_id,
+																					adminAtion(
 																						message.sender_id,
+																						message.channel_id,
+																						'kick',
 																					)
 																				}}
 																			>
@@ -441,9 +434,10 @@ export default function Chat() {
 																			<MenuAction
 																				isAdmin="true"
 																				onClick={() => {
-																					ChannelBanUser(
-																						message.channel_id,
+																					adminAtion(
 																						message.sender_id,
+																						message.channel_id,
+																						'ban',
 																					)
 																				}}
 																			>
@@ -555,7 +549,8 @@ export default function Chat() {
 						router.isReady &&
 						typeof router.query.channelID === 'undefined' ? (
 							<h2>Select a channel</h2>
-						) : isNaN(Number(router.query.channelID)) ? (
+						) : isNaN(Number(router.query.channelID)) ||
+						  activeChannel ? (
 							<h2>Invalid channel</h2>
 						) : (
 							<Loading size={200} />

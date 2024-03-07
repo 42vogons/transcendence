@@ -315,7 +315,7 @@ export class ChannelService {
         ChannelMemberStatus.MEMBER,
       );
 
-      const memberName = this.userRepository.findUsernameByUserID(userId);
+      const memberName = await this.userRepository.findUsernameByUserID(userId);
       const msg = `${memberName} joined`;
       this.logger.log(msg + ' on channel ' + channelDto.channel_id);
       await this.sendBroadCast(channelDto.channel_id, msg);

@@ -252,7 +252,13 @@ export class ChatGateway
         );
       }
 
-      let msg = `${adminName} ${adminActionDto.action} ${memberName}`;
+      let msg = `${adminName} ${
+        adminActionDto.action === 'ban'
+          ? 'banned'
+          : adminActionDto.action === 'kick'
+            ? 'kicked'
+            : 'muted'
+      } ${memberName}`;
       if (adminActionDto.action === AdminActionType.MUTED) {
         msg += ` for ${adminActionDto.end_date} minutes`;
       }
