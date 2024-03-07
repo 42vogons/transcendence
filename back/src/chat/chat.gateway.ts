@@ -179,7 +179,9 @@ export class ChatGateway
         channelDto,
         client.userID,
       );
-      const userName = this.usersService.findUsernameByUserID(client.userID);
+      const userName = await this.usersService.findUsernameByUserID(
+        client.userID,
+      );
       const msg = `Chat created by ${userName}`;
       this.logger.log(msg);
       await this.chatService.sendBroadCast(channel, msg);
@@ -193,9 +195,11 @@ export class ChatGateway
   async addMember(client: SocketWithAuth, memberDto: MemberDto) {
     try {
       this.checkType(memberDto);
-      await this.channelService.checkBanned(
+      await this.channelService.checkAction(
         memberDto.member_id,
         memberDto.channel_id,
+        AdminActionType.BANNED,
+        'error',
       );
       await this.channelService.addMember(memberDto, client.userID);
 
@@ -252,6 +256,20 @@ export class ChatGateway
         );
       }
 
+      this.channelService.checkAction(
+        adminActionDto.member_id,
+        adminActionDto.channel_id,
+        AdminActionType.BANNED,
+        'error',
+      );
+
+      this.channelService.checkAction(
+        adminActionDto.member_id,
+        adminActionDto.channel_id,
+        AdminActionType.KICKED,
+        'error',
+      );
+
       let msg = `${adminName} ${
         adminActionDto.action === 'ban'
           ? 'banned'
@@ -280,6 +298,23 @@ export class ChatGateway
       );
       const msg = `${memberName} left the channel`;
       this.logger.log(msg + 'on channel' + leaveDto.channel_id);
+      const isBanned = this.channelService.checkAction(
+        client.userID,
+        leaveDto.channel_id,
+        AdminActionType.BANNED,
+        'status',
+      );
+      const isKicked = this.channelService.checkAction(
+        client.userID,
+        leaveDto.channel_id,
+        AdminActionType.KICKED,
+        'status',
+      );
+
+      // ajustar essa msg?
+      if (isKicked != null || isBanned != null) {
+        return;
+      }
       await this.chatService.sendBroadCast(leaveDto.channel_id, msg);
       await this.notifyMembers(leaveDto.channel_id);
       client.emit('left_the_channel');
@@ -363,10 +398,22 @@ export class ChatGateway
     const members = await this.channelService.getChannelMembers(channel_id);
     members.forEach(async member => {
       const memberId = this.users.get(member.user_id);
-      this.server.to(memberId).emit('refresh_chat', { channelID: channel_id });
-      const lastMessageChannel =
-        await this.channelService.getLastChannelMessage(member.user_id);
-      this.server.to(memberId).emit('refresh_channel_list', lastMessageChannel);
+      const isBanned = await this.channelService.checkAction(
+        member.user_id,
+        channel_id,
+        AdminActionType.BANNED,
+        'status',
+      );
+      if (!isBanned) {
+        this.server
+          .to(memberId)
+          .emit('refresh_chat', { channelID: channel_id });
+        const lastMessageChannel =
+          await this.channelService.getLastChannelMessage(member.user_id);
+        this.server
+          .to(memberId)
+          .emit('refresh_channel_list', lastMessageChannel);
+      }
     });
   }
 

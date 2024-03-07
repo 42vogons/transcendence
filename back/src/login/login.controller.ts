@@ -22,7 +22,6 @@ export class LoginController {
     return await this.loginService.login(body, res);
   }
 
-  //@UseGuards(AuthGuard)
   @Post('/checkTwoFactor')
   @HttpCode(200)
   async checkTwoFactor(@Req() request, @Body() body: any, @Response() res) {
