@@ -20,6 +20,10 @@ export class CreateMatchHistoryDto {
 	@IsNotEmpty()
 	player1_score: number;
 
+  @IsString()
+  @IsNotEmpty()
+  player1_avatar_url: string;
+
 	@IsInt()
 	@IsNotEmpty()
 	player2_user_id: number;
@@ -31,6 +35,10 @@ export class CreateMatchHistoryDto {
 	@IsInt()
 	@IsNotEmpty()
 	player2_score: number;
+
+  @IsString()
+  @IsNotEmpty()
+  player2_avatar_url: string;
 
 	@IsInt()
 	@IsNotEmpty()

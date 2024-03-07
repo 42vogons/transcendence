@@ -29,11 +29,13 @@ export class GameController {
 				userID: match.player1_user_id,
 				username: match.player1_username,
 				score: match.player1_score,
+        avatarUrl: match.player1_avatar_url,
 			},
 			player2: {
 				userID: match.player2_user_id,
 				username: match.player2_username,
 				score: match.player2_score,
+        avatarUrl: match.player2_avatar_url,
 			},
 			winnerID: match.winner_id,
 			looserID: match.looser_id,
