@@ -32,10 +32,6 @@ export function FriendListItem({
 
 	const iconSize = 26
 
-	function handleChatOnClick() {
-		console.log('chat', username)
-	}
-
 	function handleGameOnClick() {
 		console.log('game', username)
 		if (userID) {
@@ -82,11 +78,6 @@ export function FriendListItem({
 				<MenuItem>
 					<FriendAction onClick={handleProfileOnClick}>
 						<FaUserAstronaut size={iconSize} /> Profile
-					</FriendAction>
-				</MenuItem>
-				<MenuItem>
-					<FriendAction onClick={handleChatOnClick}>
-						<BsChatSquareTextFill size={iconSize} /> Chat
 					</FriendAction>
 				</MenuItem>
 				<MenuItem>
