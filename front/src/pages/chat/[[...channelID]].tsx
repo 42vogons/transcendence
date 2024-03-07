@@ -57,6 +57,9 @@ import { GameContext } from '@/contexts/GameContext'
 import ChangeChannelPasswordModal from '@/components/modals/changeChannelPasswordModal'
 import { capitalize } from '@/utils/functions'
 import Loading from '@/components/loading'
+import MuteChannelUserModal, {
+	iMuteData,
+} from '@/components/modals/muteChannelUserModal'
 
 export default function Chat() {
 	const [showLeaveChannelModal, setShowLeaveChannelModal] = useState(false)
@@ -64,6 +67,14 @@ export default function Chat() {
 		useState(false)
 	const [showChangeChannelPasswordModal, setShowChangeChannelPasswordModal] =
 		useState(false)
+	const [showMuteChannelUserModal, setShowMuteChannelUserModal] =
+		useState(false)
+	const [muteData, setMuteData] = useState<iMuteData>({
+		channel_id: 0,
+		channelName: '',
+		user_id: 0,
+		username: '',
+	})
 
 	const messagesEndRef = useRef(null)
 	const menuIconSize = 26
@@ -350,11 +361,26 @@ export default function Chat() {
 																			<MenuAction
 																				isAdmin="true"
 																				onClick={() => {
-																					adminAtion(
-																						message.sender_id,
-																						message.channel_id,
-																						'mute',
-																						1,
+																					setMuteData(
+																						{
+																							channel_id:
+																								activeChannelData
+																									.channel
+																									.channel_id,
+																							channelName:
+																								activeChannelData
+																									.channel
+																									.name,
+																							user_id:
+																								message.sender_id,
+																							username:
+																								getUsernameFromChannelMembers(
+																									message.sender_id,
+																								),
+																						},
+																					)
+																					setShowMuteChannelUserModal(
+																						true,
 																					)
 																				}}
 																			>
@@ -541,6 +567,13 @@ export default function Chat() {
 							showChangeChannelPasswordModal={
 								showChangeChannelPasswordModal
 							}
+						/>
+						<MuteChannelUserModal
+							setShowMuteChannelUserModal={
+								setShowMuteChannelUserModal
+							}
+							showMuteChannelUserModal={showMuteChannelUserModal}
+							muteData={muteData}
 						/>
 					</>
 				) : (

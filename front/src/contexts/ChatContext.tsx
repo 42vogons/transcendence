@@ -259,19 +259,19 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		console.log('adminAtion:', member_id, channel_id, action)
 		if (action !== 'mute') {
 			console.log('action not mute:', action)
-			// emitSocketIfUserIsNotExpired('admin_action', {
-			// 	member_id,
-			// 	channel_id,
-			// 	action,
-			// })
+			emitSocketIfUserIsNotExpired('admin_action', {
+				member_id,
+				channel_id,
+				action,
+			})
 		} else {
 			console.log('action mute:', action, end_date)
-			// emitSocketIfUserIsNotExpired('admin_action', {
-			// 	member_id,
-			// 	channel_id,
-			// 	action,
-			// 	end_date,
-			// })
+			emitSocketIfUserIsNotExpired('admin_action', {
+				member_id,
+				channel_id,
+				action,
+				end_date,
+			})
 		}
 	}
 
