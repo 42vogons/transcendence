@@ -76,6 +76,8 @@ const socket = socketClient(`${process.env.NEXT_PUBLIC_BACK_HOST}/chat`, {
 
 export const ChatContext = createContext({} as ChatContextType)
 
+let activeChannel: number | undefined
+
 export function ChatProvider({ children }: ChatProviderProps) {
 	const [state, dispatch] = useReducer(ChatReducer, {
 		friendList: [],
@@ -86,8 +88,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	const { user } = useContext(UserContext)
 
 	const { friendList, activeChannelData, channelList } = state
-
-	let activeChannel: number | undefined
 
 	const router = useRouter()
 
