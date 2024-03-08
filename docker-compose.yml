@@ -35,12 +35,15 @@ services:
             - transcendence 
 
     back:
-        build: ./back
+        build:
+            context: ./back
+            args:
+                - BACK_DOMAIN=${BACK_DOMAIN}
         image: transcendence_back
         container_name: transcendence_back
         restart: unless-stopped
-        # depends_on:
-        #     - db
+        depends_on:
+            - db
         env_file:
             - .env
         environment:

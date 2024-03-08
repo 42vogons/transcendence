@@ -1,4 +1,10 @@
-import { Injectable, Response, Body, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  Response,
+  Body,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import axios from 'axios';
 import * as FormData from 'form-data';
 import { UsersService } from 'src/users/users.service';
@@ -79,7 +85,7 @@ export class LoginService {
     res.cookie('accessToken', token, {
       expires: expiresAt,
       httpOnly: true,
-      domain: 'localhost',
+      domain: process.env.BACK_DOMAIN,
     });
   }
 
