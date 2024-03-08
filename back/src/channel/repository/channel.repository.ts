@@ -248,11 +248,26 @@ export class ChannelRepository {
     });
   }
 
-  async getLastAdminActionByUser(member_id: number, channel_id: number) {
+  async adminActionRemoveKick(user_id: number, channel_id: number) {
+    await this.prisma.admin_actions.deleteMany({
+      where: {
+        channel_id: channel_id,
+        target_user_id: user_id,
+        action_type: AdminActionType.KICKED,
+      },
+    });
+  }
+
+  async getLastAdminActionByUser(
+    member_id: number,
+    channel_id: number,
+    action: string,
+  ) {
     return await this.prisma.admin_actions.findFirst({
       where: {
         target_user_id: member_id,
         channel_id: channel_id,
+        action_type: action,
       },
       orderBy: {
         action_id: 'desc',
