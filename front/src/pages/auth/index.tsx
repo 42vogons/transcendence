@@ -26,12 +26,12 @@ export default function Auth() {
 				const { data } = await api.post('/auth/user', { code })
 				toast('Login was successful', { type: 'success' })
 				const { action, user } = data
-				handleLogin(user)
 				if (action === 'authenticate') {
 					setRequest2FA(true)
 					setIsLoading(false)
 				}
 				if (action === 'logged') {
+					handleLogin(user)
 					router.push('/')
 				}
 			} catch (error) {
@@ -61,6 +61,7 @@ export default function Auth() {
 			const { action } = res.data
 			if (action === 'logged') {
 				console.log('action login:', action)
+				// todo adicionar user no 2fa
 				router.push('/')
 			} else {
 				console.log('erro action:', action)

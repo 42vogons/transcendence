@@ -540,30 +540,36 @@ export class GameService {
     winnerDto.total_games = winner.total_games;
     winnerDto.total_wins = winner.total_wins;
     winnerDto.total_losses = winner.total_losses;
-    this.usersRespository.updateUserGameStatistic(winner.user_id, winnerDto);
+    await this.usersRespository.updateUserGameStatistic(
+      winner.user_id,
+      winnerDto,
+    );
     const looserDto: UpdateUserGameStatisticDto =
       new UpdateUserGameStatisticDto();
     looserDto.total_games = looser.total_games;
     looserDto.total_wins = looser.total_wins;
     looserDto.total_losses = looser.total_losses;
-    this.usersRespository.updateUserGameStatistic(looser.user_id, looserDto);
+    await this.usersRespository.updateUserGameStatistic(
+      looser.user_id,
+      looserDto,
+    );
   }
 
-  saveMatchResult(matchResult: MatchResult) {
+  async saveMatchResult(matchResult: MatchResult) {
     const matchHistoryDto: CreateMatchHistoryDto = new CreateMatchHistoryDto();
     matchHistoryDto.player1_user_id = matchResult.player1.userID;
     matchHistoryDto.player1_username = matchResult.player1.username;
     matchHistoryDto.player1_score = matchResult.player1.score;
-    matchHistoryDto.player1_avatar_url = matchResult.player1.avatarUrl
+    matchHistoryDto.player1_avatar_url = matchResult.player1.avatarUrl;
     matchHistoryDto.player2_user_id = matchResult.player2.userID;
     matchHistoryDto.player2_username = matchResult.player2.username;
     matchHistoryDto.player2_score = matchResult.player2.score;
-    matchHistoryDto.player2_avatar_url = matchResult.player2.avatarUrl
+    matchHistoryDto.player2_avatar_url = matchResult.player2.avatarUrl;
     matchHistoryDto.winner_id = matchResult.winnerID;
     matchHistoryDto.looser_id = matchResult.looserID;
     matchHistoryDto.ended_at = matchResult.endedAt;
-    this.matchRepository.create(matchHistoryDto);
-    this.updateUser(matchResult);
+    await this.matchRepository.create(matchHistoryDto);
+    await this.updateUser(matchResult);
   }
 
   async endMatch(match: MatchData): Promise<MatchResult> {
@@ -589,21 +595,21 @@ export class GameService {
       }
     }
 
-    const user1 = await this.usersRespository.findOne(match.player1.userID)
-    const user2 = await this.usersRespository.findOne(match.player2.userID)
+    const user1 = await this.usersRespository.findOne(match.player1.userID);
+    const user2 = await this.usersRespository.findOne(match.player2.userID);
 
     const player1 = {
       userID: match.player1.userID,
       username: match.player1.username,
       score: match.score.p1,
-      avatarUrl: user1.avatar_url ?? "",
+      avatarUrl: user1.avatar_url ?? '',
     };
 
     const player2 = {
       userID: match.player2.userID,
       username: match.player2.username,
       score: match.score.p2,
-      avatarUrl: user2.avatar_url ?? "",
+      avatarUrl: user2.avatar_url ?? '',
     };
 
     const matchResult: MatchResult = {
@@ -614,7 +620,7 @@ export class GameService {
       endedAt,
     };
 
-    this.saveMatchResult(matchResult);
+    await this.saveMatchResult(matchResult);
     return matchResult;
   }
 
@@ -761,7 +767,7 @@ export class GameService {
   ) {
     const match = this.findMatchByRoomID(roomID);
     if (match.status === 'end') {
-      const matchResult = this.endMatch(match);
+      const matchResult = await this.endMatch(match);
       io.to(roomID).emit('end_match', matchResult);
       io.to(roomID).emit('status_changed', 'connected');
       io.socketsLeave(roomID);
@@ -808,16 +814,16 @@ export class GameService {
       client.emit(
         'request_game_error',
         'You are not allowed to play a new game.',
-        );
-        return;
-      }
-      
+      );
+      return;
+    }
+
     if (!playerGuest) {
       client.emit('request_game_error', 'Player not found.');
       return;
     }
 
-    const userGuest = await this.usersRespository.findOne(playerGuest.userID)
+    const userGuest = await this.usersRespository.findOne(playerGuest.userID);
     if (userGuest.status !== 'online' || playerGuest.status !== 'idle') {
       client.emit('request_game_error', 'Player not available.');
       return;
