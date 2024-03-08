@@ -60,6 +60,7 @@ import Loading from '@/components/loading'
 import MuteChannelUserModal, {
 	iMuteData,
 } from '@/components/modals/muteChannelUserModal'
+import { FaCog } from 'react-icons/fa'
 
 export default function Chat() {
 	const [showLeaveChannelModal, setShowLeaveChannelModal] = useState(false)
@@ -219,12 +220,32 @@ export default function Chat() {
 														</MenuAction>
 													</MenuItem>
 												)}
-												{activeChannelData.channel
-													.type === 'protected' &&
-													hasPriveleges(
-														Number(user?.userID),
-														['owner'],
-													) && (
+												{hasPriveleges(
+													Number(user?.userID),
+													['owner'],
+												) && (
+													<>
+														{activeChannelData
+															.channel.type ===
+															'protected' && (
+															<MenuItem>
+																<MenuAction
+																	isAdmin="true"
+																	onClick={() => {
+																		setShowChangeChannelPasswordModal(
+																			true,
+																		)
+																	}}
+																>
+																	<GrUpdate
+																		size={
+																			menuIconSize
+																		}
+																	/>
+																	Password
+																</MenuAction>
+															</MenuItem>
+														)}
 														<MenuItem>
 															<MenuAction
 																isAdmin="true"
@@ -234,15 +255,16 @@ export default function Chat() {
 																	)
 																}}
 															>
-																<GrUpdate
+																<FaCog
 																	size={
 																		menuIconSize
 																	}
 																/>
-																Password
+																Channel
 															</MenuAction>
 														</MenuItem>
-													)}
+													</>
+												)}
 											</>
 										) : (
 											<>
@@ -621,6 +643,9 @@ export default function Chat() {
 							showChangeChannelPasswordModal={
 								showChangeChannelPasswordModal
 							}
+							channel_id={Number(
+								activeChannelData?.channel.channel_id,
+							)}
 						/>
 						<MuteChannelUserModal
 							setShowMuteChannelUserModal={
