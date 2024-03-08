@@ -33,7 +33,7 @@ export class ChatRepository {
         timestamp: { lt: blockEntry },
       },
       orderBy: {
-        timestamp: 'desc',
+        timestamp: 'asc',
       },
     });
   }

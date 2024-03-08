@@ -88,6 +88,7 @@ export default function Chat() {
 		activeChannel,
 		activeChannelData,
 		leaveChannel,
+		blockUser,
 		adminAtion,
 		changeChannelMemberStatus,
 		getUsernameFromChannelMembers,
@@ -109,10 +110,6 @@ export default function Chat() {
 		(messagesEndRef.current as unknown as HTMLElement)?.scrollIntoView({
 			behavior,
 		})
-	}
-
-	function DirectChannelBlockUser(userID: number) {
-		console.log('direct block', userID)
 	}
 
 	useEffect(() => {
@@ -562,7 +559,7 @@ export default function Chat() {
 																<MenuItem>
 																	<MenuAction
 																		onClick={() => {
-																			DirectChannelBlockUser(
+																			blockUser(
 																				message.sender_id,
 																			)
 																		}}
