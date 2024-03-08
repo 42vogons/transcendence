@@ -126,10 +126,10 @@ export class LoginService {
         action = 'authenticate-fail';
       }
       const userId = user.user_id;
-      const userName = user.username;
+      const username = user.username;
       const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
       await this.insertToken(user, expiresAt, res, action);
-      res.status(200).send({ action, user: { userId, userName, expiresAt } });
+      res.status(200).send({ action, user: { userId, username, expiresAt } });
       return valid;
     } catch {
       throw new UnauthorizedException();

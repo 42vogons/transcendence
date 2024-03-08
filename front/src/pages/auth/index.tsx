@@ -58,10 +58,10 @@ export default function Auth() {
 			const res = await api.post('/checkTwoFactor', { code: twoFAcode })
 			toast('Login was successful', { type: 'success' })
 			console.log('res:', res)
-			const { action } = res.data
-			if (action === 'logged') {
+			const { action, user } = res.data
+			if (action.toLowerCase() === 'logged') {
 				console.log('action login:', action)
-				// todo adicionar user no 2fa
+				handleLogin(user)
 				router.push('/')
 			} else {
 				console.log('erro action:', action)
