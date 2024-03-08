@@ -437,8 +437,7 @@ export class ChannelService {
     channel_id: number,
     action: string,
   ) {
-    console.log('checkAdminActions');
-    return await this.repository.getLastAdminActionByUser(
+     return await this.repository.getLastAdminActionByUser(
       member_id,
       channel_id,
       action,
