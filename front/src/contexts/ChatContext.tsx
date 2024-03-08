@@ -42,6 +42,7 @@ interface ChatContextType {
 	getChannelList: () => void
 	addMemberToChannel: (member_id: number, channel_id: number) => void
 	leaveChannel: (channel_id: number) => Promise<void>
+	blockUser: (member_id: number) => void
 	changeChannelMemberStatus: (
 		member_id: number,
 		channel_id: number,
@@ -55,6 +56,10 @@ interface ChatContextType {
 	) => void
 	getUsernameFromChannelMembers: (userID: number) => string
 	updateActiveChannel: (channel_id: number) => void
+	getTheOtherChannelMember: (
+		userID: number | undefined,
+		channelMembers: iChannelMember[],
+	) => iChannelMember['users'] | undefined
 	getActiveChannelName: (
 		channelName: string,
 		channelType: 'direct' | 'public' | 'protected' | 'private',
@@ -238,6 +243,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		await delayMs(500)
 	}
 
+	function blockUser(member_id: number) {
+		emitSocketIfUserIsNotExpired('block_user', {
+			member_id,
+		})
+	}
+
 	function changeChannelMemberStatus(
 		member_id: number,
 		channel_id: number,
@@ -385,8 +396,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				getChannelList,
 				addMemberToChannel,
 				leaveChannel,
+				blockUser,
 				changeChannelMemberStatus,
 				adminAtion,
+				getTheOtherChannelMember,
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
 				getActiveChannelAvatar,

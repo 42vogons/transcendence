@@ -554,9 +554,11 @@ export class GameService {
     matchHistoryDto.player1_user_id = matchResult.player1.userID;
     matchHistoryDto.player1_username = matchResult.player1.username;
     matchHistoryDto.player1_score = matchResult.player1.score;
+    matchHistoryDto.player1_avatar_url = matchResult.player1.avatarUrl
     matchHistoryDto.player2_user_id = matchResult.player2.userID;
     matchHistoryDto.player2_username = matchResult.player2.username;
     matchHistoryDto.player2_score = matchResult.player2.score;
+    matchHistoryDto.player2_avatar_url = matchResult.player2.avatarUrl
     matchHistoryDto.winner_id = matchResult.winnerID;
     matchHistoryDto.looser_id = matchResult.looserID;
     matchHistoryDto.ended_at = matchResult.endedAt;
@@ -564,7 +566,7 @@ export class GameService {
     this.updateUser(matchResult);
   }
 
-  endMatch(match: MatchData): MatchResult {
+  async endMatch(match: MatchData): Promise<MatchResult> {
     const endedAt = new Date();
     let winnerID: number;
     let looserID: number;
@@ -587,16 +589,21 @@ export class GameService {
       }
     }
 
+    const user1 = await this.usersRespository.findOne(match.player1.userID)
+    const user2 = await this.usersRespository.findOne(match.player2.userID)
+
     const player1 = {
       userID: match.player1.userID,
       username: match.player1.username,
       score: match.score.p1,
+      avatarUrl: user1.avatar_url ?? "",
     };
 
     const player2 = {
       userID: match.player2.userID,
       username: match.player2.username,
       score: match.score.p2,
+      avatarUrl: user2.avatar_url ?? "",
     };
 
     const matchResult: MatchResult = {
@@ -787,7 +794,7 @@ export class GameService {
     return this.matchRepository.getAllMatchHistoryByUserID(Number(userID));
   }
 
-  requestMatch(
+  async requestMatch(
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
     client: SocketWithAuth,
     guestID: number,
@@ -801,16 +808,17 @@ export class GameService {
       client.emit(
         'request_game_error',
         'You are not allowed to play a new game.',
-      );
-      return;
-    }
-
+        );
+        return;
+      }
+      
     if (!playerGuest) {
       client.emit('request_game_error', 'Player not found.');
       return;
     }
 
-    if (playerGuest.status !== 'idle') {
+    const userGuest = await this.usersRespository.findOne(playerGuest.userID)
+    if (userGuest.status !== 'online' || playerGuest.status !== 'idle') {
       client.emit('request_game_error', 'Player not available.');
       return;
     }

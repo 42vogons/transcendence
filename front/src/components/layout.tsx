@@ -274,6 +274,7 @@ export default function Layout({ children }: iLayoutProps) {
 													console.log('new Friend')
 													setShowNewFriendModal(true)
 												}}
+												title="Add Friend"
 											>
 												<FaUserPlus
 													size={iconSizeMenuOptions}
@@ -307,6 +308,7 @@ export default function Layout({ children }: iLayoutProps) {
 									<>
 										<div className="menuOptions">
 											<IconButton
+												title="Create Direct Chat"
 												handleOnClick={() => {
 													console.log('new chat')
 													setShowNewChatModal(true)
@@ -317,6 +319,7 @@ export default function Layout({ children }: iLayoutProps) {
 												/>
 											</IconButton>
 											<IconButton
+												title="Create Channel"
 												handleOnClick={() => {
 													console.log('new channel')
 													setShowNewChannelModal(true)
@@ -327,6 +330,7 @@ export default function Layout({ children }: iLayoutProps) {
 												/>
 											</IconButton>
 											<IconButton
+												title="Join Channel"
 												handleOnClick={() => {
 													console.log('join channel')
 													setShowJoinChannelModal(

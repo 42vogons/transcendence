@@ -33,6 +33,7 @@ export class ChannelController {
         request.user.id,
       );
       this.logger.log(`Channel created by id ${channel_id}.`);
+      return channel_id;
     } catch (error) {
       this.logger.error(error.response.message);
       throw new BadRequestException(error.response);
@@ -90,6 +91,7 @@ export class ChannelController {
 
   @Patch('/changePassword')
   async changePassword(@Req() request, @Body() channel: ChannelDto) {
+    console.log('channel:', channel);
     try {
       await this.channelService.changePassword(channel, request.user.id);
       this.logger.log(`Password was changed ${channel.channel_id}.`);

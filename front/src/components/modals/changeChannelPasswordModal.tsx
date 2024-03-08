@@ -7,6 +7,8 @@ import { ChangeChannelPasswordModalContainer } from '../../styles/components/cha
 import { z } from 'zod'
 import { GrUpdate } from 'react-icons/gr'
 import ModalWithCloseOutside from './modalWithCloseOutside'
+import { api } from '@/services/api'
+import { toast } from 'react-toastify'
 
 const passwordSchema = z
 	.string()
@@ -24,10 +26,12 @@ const passwordSchema = z
 interface iChangeChannelPasswordModal {
 	showChangeChannelPasswordModal: boolean
 	setShowChangeChannelPasswordModal: (state: boolean) => void
+	channel_id: number
 }
 export default function ChangeChannelPasswordModal({
 	showChangeChannelPasswordModal,
 	setShowChangeChannelPasswordModal,
+	channel_id,
 }: iChangeChannelPasswordModal) {
 	const [password, setPassword] = useState('')
 	const [error, setError] = useState('')
@@ -39,20 +43,30 @@ export default function ChangeChannelPasswordModal({
 		setShowChangeChannelPasswordModal(false)
 	}
 
-	function handleChangeChannelPassword() {
+	async function handleChangeChannelPassword() {
 		console.log('ChangeChannelPassowrd:', password)
 
 		const validatePassword = passwordSchema.safeParse(password)
 		if (!validatePassword.success) {
 			const errors = (validatePassword as any).error.format()._errors
 			setError(errors[0])
-			return
 		} else {
 			console.log('password changed to: ', password)
 			setError('')
+			try {
+				const data = { channel_id, password }
+				console.log('data :', data)
+				await api.patch('/channel/changePassword', data)
+				// await delayMs(500)
+				// getChannelList()
+				setShowChangeChannelPasswordModal(false)
+			} catch (error: any) {
+				console.log('error:', error)
+				toast(error.message ? error.message : error, {
+					type: 'error',
+				})
+			}
 		}
-
-		setShowChangeChannelPasswordModal(false)
 	}
 
 	useEffect(() => {
