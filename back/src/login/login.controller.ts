@@ -26,14 +26,13 @@ export class LoginController {
   @HttpCode(200)
   async checkTwoFactor(@Req() request, @Body() body: any, @Response() res) {
     console.log(request.cookies.accessToken);
-    const valid = await this.loginService.checkTwoFactor(
+    return await this.loginService.checkTwoFactor(
       request.cookies.accessToken,
       body.code,
       res,
     );
-    console.log('valid?' + valid);
-    if (valid) res.status(200).send('{"action":"logged"}');
-    else res.status(401).send('{"action":"authenticate-fail"}');
+    /*if (valid) res.status(200).send('{"action":"logged"}');
+    else res.status(401).send('{"action":"authenticate-fail"}');*/
   }
 
   @Post('/logout')

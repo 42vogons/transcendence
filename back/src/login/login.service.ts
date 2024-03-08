@@ -125,13 +125,15 @@ export class LoginService {
       } else {
         action = 'authenticate-fail';
       }
+      const userId = user.user_id;
+      const userName = user.username;
       const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
       await this.insertToken(user, expiresAt, res, action);
+      res.status(200).send({ action, user: { userId, userName, expiresAt } });
       return valid;
     } catch {
       throw new UnauthorizedException();
     }
-    //return false;
   }
 
   async login(@Body() body: any, @Response() res) {
