@@ -1,4 +1,10 @@
-import { Injectable, Response, Body, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  Response,
+  Body,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import axios from 'axios';
 import * as FormData from 'form-data';
 import { UsersService } from 'src/users/users.service';
@@ -121,15 +127,15 @@ export class LoginService {
         );
       let action = '';
       if (valid) {
-        action = 'Logged';
+        action = 'logged';
       } else {
         action = 'authenticate-fail';
       }
-      const userId = user.user_id;
+      const userID = user.user_id;
       const username = user.username;
       const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
       await this.insertToken(user, expiresAt, res, action);
-      res.status(200).send({ action, user: { userId, username, expiresAt } });
+      res.status(200).send({ action, user: { userID, username, expiresAt } });
       return valid;
     } catch {
       throw new UnauthorizedException();

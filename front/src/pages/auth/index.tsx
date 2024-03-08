@@ -59,7 +59,7 @@ export default function Auth() {
 			toast('Login was successful', { type: 'success' })
 			console.log('res:', res)
 			const { action, user } = res.data
-			if (action.toLowerCase() === 'logged') {
+			if (action === 'logged') {
 				console.log('action login:', action)
 				handleLogin(user)
 				router.push('/')
