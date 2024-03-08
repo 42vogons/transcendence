@@ -32,7 +32,7 @@ interface GameContextType {
 	exitQueue: () => void
 	playing: () => void
 	resume: () => void
-	requestMatch: (guestID: number) => void
+	requestMatch: (guestID: number | undefined) => void
 	answerRequestMatch: (response: 'accept' | 'refused') => void
 	resetGameRequest: () => void
 	clearMatchCompleted: () => void
@@ -168,7 +168,7 @@ export function GameProvider({ children }: GameProviderProps) {
 		emitSocketIfUserIsNotExpired('resume', '')
 	}
 
-	function requestMatch(guestID: number) {
+	function requestMatch(guestID: number | undefined) {
 		emitSocketIfUserIsNotExpired('request_match', { guestID })
 	}
 

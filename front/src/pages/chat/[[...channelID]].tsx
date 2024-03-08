@@ -88,6 +88,7 @@ export default function Chat() {
 		adminAtion,
 		changeChannelMemberStatus,
 		getUsernameFromChannelMembers,
+		getTheOtherChannelMember,
 		getActiveChannelName,
 		getActiveChannelAvatar,
 		updateActiveChannel,
@@ -168,80 +169,133 @@ export default function Chat() {
 								</ChatTitle>
 								{/* <ChatSubTitle>online</ChatSubTitle> */}
 							</ChatHeaderTextContainer>
-							{activeChannelData.channel.type !== 'direct' && (
-								<ChatMenuWrapper>
-									<ChatMenu>
-										<SlOptionsVertical size={28} />
-									</ChatMenu>
-									<MenuPortal>
-										<MenuContent
-											style={{
-												zIndex: 1,
-											}}
-										>
-											<MenuArrow />
-											<MenuItem>
-												<MenuAction
-													onClick={() => {
-														setShowLeaveChannelModal(
-															true,
-														)
-													}}
-												>
-													<BiExit
-														size={menuIconSize}
-													/>
-													Channel
-												</MenuAction>
-											</MenuItem>
-											{hasPriveleges(
-												Number(user?.userID),
-												['owner', 'admin'],
-											) && (
+							<ChatMenuWrapper>
+								<ChatMenu>
+									<SlOptionsVertical size={28} />
+								</ChatMenu>
+								<MenuPortal>
+									<MenuContent
+										style={{
+											zIndex: 1,
+										}}
+									>
+										<MenuArrow />
+										{activeChannelData.channel.type !==
+										'direct' ? (
+											<>
 												<MenuItem>
 													<MenuAction
-														isAdmin="true"
 														onClick={() => {
-															setShowAddUserToChannelModal(
+															setShowLeaveChannelModal(
 																true,
 															)
 														}}
 													>
-														<FaUserPlus
+														<BiExit
 															size={menuIconSize}
 														/>
-														Member
+														Channel
 													</MenuAction>
 												</MenuItem>
-											)}
-											{activeChannelData.channel.type ===
-												'protected' &&
-												hasPriveleges(
+												{hasPriveleges(
 													Number(user?.userID),
-													['owner'],
+													['owner', 'admin'],
 												) && (
 													<MenuItem>
 														<MenuAction
 															isAdmin="true"
 															onClick={() => {
-																setShowChangeChannelPasswordModal(
+																setShowAddUserToChannelModal(
 																	true,
 																)
 															}}
 														>
-															<GrUpdate
+															<FaUserPlus
 																size={
 																	menuIconSize
 																}
 															/>
-															Password
+															Member
 														</MenuAction>
 													</MenuItem>
 												)}
-										</MenuContent>
-									</MenuPortal>
-								</ChatMenuWrapper>
-							)}
+												{activeChannelData.channel
+													.type === 'protected' &&
+													hasPriveleges(
+														Number(user?.userID),
+														['owner'],
+													) && (
+														<MenuItem>
+															<MenuAction
+																isAdmin="true"
+																onClick={() => {
+																	setShowChangeChannelPasswordModal(
+																		true,
+																	)
+																}}
+															>
+																<GrUpdate
+																	size={
+																		menuIconSize
+																	}
+																/>
+																Password
+															</MenuAction>
+														</MenuItem>
+													)}
+											</>
+										) : (
+											<>
+												<MenuItem>
+													<MenuAction
+														onClick={() => {
+															requestMatch(
+																getTheOtherChannelMember(
+																	user?.userID,
+																	activeChannelData.channelMembers,
+																)?.user_id,
+															)
+															router.push('/')
+															toast(
+																`You invited ${getTheOtherChannelMember(
+																	user?.userID,
+																	activeChannelData.channelMembers,
+																)
+																	?.username} to play`,
+																{
+																	type: 'info',
+																},
+															)
+														}}
+													>
+														<FaGamepad
+															size={menuIconSize}
+														/>{' '}
+														Play
+													</MenuAction>
+												</MenuItem>
+												<MenuItem>
+													<MenuAction
+														onClick={() => {
+															router.push(
+																`/profile/${getTheOtherChannelMember(
+																	user?.userID,
+																	activeChannelData.channelMembers,
+																)?.user_id}`,
+															)
+														}}
+													>
+														<FaUserAstronaut
+															size={menuIconSize}
+														/>
+														Profile
+													</MenuAction>
+												</MenuItem>
+											</>
+										)}
+									</MenuContent>
+								</MenuPortal>
+							</ChatMenuWrapper>
 						</ChatHeader>
 						<ChatMessageContainer>
 							{messages && messages?.length > 0 ? (

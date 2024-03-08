@@ -55,6 +55,10 @@ interface ChatContextType {
 	) => void
 	getUsernameFromChannelMembers: (userID: number) => string
 	updateActiveChannel: (channel_id: number) => void
+	getTheOtherChannelMember: (
+		userID: number | undefined,
+		channelMembers: iChannelMember[],
+	) => iChannelMember['users'] | undefined
 	getActiveChannelName: (
 		channelName: string,
 		channelType: 'direct' | 'public' | 'protected' | 'private',
@@ -387,6 +391,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				leaveChannel,
 				changeChannelMemberStatus,
 				adminAtion,
+				getTheOtherChannelMember,
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
 				getActiveChannelAvatar,
