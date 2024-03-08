@@ -41,7 +41,7 @@ export default function Login({ clientID }: LoginProps) {
 				</Title>
 				<ConnectButtonContainer>
 					<a
-						href={`https://api.intra.42.fr/oauth/authorize?client_id=${clientID}&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&response_type=code`}
+						href={`https://api.intra.42.fr/oauth/authorize?client_id=${clientID}&redirect_uri=http%3A%2F%2F${process.env.FRONT_DOMAIN}%3A3000%2Fauth&response_type=code`}
 					>
 						<ConnectButton>
 							<Image

@@ -19,7 +19,10 @@ services:
             - transcendence 
 
     front:
-        build: ./front
+        build:
+            context: ./front
+            args:
+                - FRONT_DOMAIN=${FRONT_DOMAIN}
         image: transcendence_front
         container_name: transcendence_front
         restart: unless-stopped
