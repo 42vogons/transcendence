@@ -34,15 +34,11 @@ export class LoginService {
       formData.append('client_secret', clientSecret);
       formData.append('code', authorizationCode);
       formData.append('redirect_uri', redirectUri);
-      const response = await axios.post(
-        'https://api.intra.42.fr/oauth/token',
-        formData,
-        {
-          headers: {
-            ...formData.getHeaders(),
-          },
+      const response = await axios.post(process.env.INTRA_URL_TOKEN, formData, {
+        headers: {
+          ...formData.getHeaders(),
         },
-      );
+      });
       if (response.data && response.data.access_token) {
         return response.data.access_token;
       } else {
@@ -58,7 +54,7 @@ export class LoginService {
   async getInfo(token: string): Promise<any> {
     try {
       Logger.log('token ' + token);
-      return await axios.get('https://api.intra.42.fr/v2/me', {
+      return await axios.get(process.env.INTRA_URL_PROFILE, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

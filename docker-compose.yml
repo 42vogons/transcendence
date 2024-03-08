@@ -42,6 +42,8 @@ services:
             context: ./back
             args:
                 - BACK_DOMAIN=${BACK_DOMAIN}
+                - INTRA_URL_TOKEN=${INTRA_URL_TOKEN}
+                - INTRA_URL_PROFILE=${INTRA_URL_PROFILE}
         image: transcendence_back
         container_name: transcendence_back
         restart: unless-stopped
