@@ -39,8 +39,8 @@ services:
         image: transcendence_back
         container_name: transcendence_back
         restart: unless-stopped
-        depends_on:
-            - db
+        # depends_on:
+        #     - db
         env_file:
             - .env
         environment:
@@ -55,7 +55,7 @@ services:
             - transcendence
         command: >
             sh -c "npx prisma generate && 
-            npx prisma migrate dev --name init && 
+            npx prisma migrate deploy && 
             npm run start"
 
 networks:
