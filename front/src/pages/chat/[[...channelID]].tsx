@@ -61,6 +61,7 @@ import MuteChannelUserModal, {
 	iMuteData,
 } from '@/components/modals/muteChannelUserModal'
 import { FaCog } from 'react-icons/fa'
+import UpdateChannelModal from '@/components/modals/updateChannelModal'
 
 export default function Chat() {
 	const [showLeaveChannelModal, setShowLeaveChannelModal] = useState(false)
@@ -70,6 +71,7 @@ export default function Chat() {
 		useState(false)
 	const [showMuteChannelUserModal, setShowMuteChannelUserModal] =
 		useState(false)
+	const [showUpdateChannelModal, setShowUpdateChannelModal] = useState(false)
 	const [muteData, setMuteData] = useState<iMuteData>({
 		channel_id: 0,
 		channelName: '',
@@ -250,7 +252,7 @@ export default function Chat() {
 															<MenuAction
 																isAdmin="true"
 																onClick={() => {
-																	setShowChangeChannelPasswordModal(
+																	setShowUpdateChannelModal(
 																		true,
 																	)
 																}}
@@ -647,6 +649,21 @@ export default function Chat() {
 								activeChannelData?.channel.channel_id,
 							)}
 						/>
+
+						{activeChannelData?.channel.type !== 'direct' && (
+							<UpdateChannelModal
+								setShowUpdateChannelModal={
+									setShowUpdateChannelModal
+								}
+								showUpdateChannelModal={showUpdateChannelModal}
+								channel_id={Number(
+									activeChannelData?.channel.channel_id,
+								)}
+								channel_name={activeChannelData?.channel.name}
+								channel_type={activeChannelData?.channel.type}
+							/>
+						)}
+
 						<MuteChannelUserModal
 							setShowMuteChannelUserModal={
 								setShowMuteChannelUserModal
