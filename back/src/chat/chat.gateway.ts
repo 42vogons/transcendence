@@ -75,6 +75,19 @@ export class ChatGateway
   @SubscribeMessage('msg_to_server')
   async handleMessage(client: SocketWithAuth, chatDto: ChatDto): Promise<void> {
     try {
+      await this.channelService.checkAction(
+        client.userID,
+        chatDto.channel_id,
+        AdminActionType.BANNED,
+        'error',
+      );
+      await this.channelService.checkAction(
+        client.userID,
+        chatDto.channel_id,
+        AdminActionType.KICKED,
+        'error',
+      );
+
       chatDto.sender_id = client.userID;
       await this.chatService.saveMessage(chatDto);
       await this.notifyMembers(chatDto.channel_id);

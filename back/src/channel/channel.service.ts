@@ -154,8 +154,6 @@ export class ChannelService {
       userId,
     );
 
-
-
     const isOwner = await this.checkOwner(memberDto.channel_id, userId);
 
     if (isAdmin || isOwner) {
@@ -305,15 +303,34 @@ export class ChannelService {
       channelDto.channel_id,
     );
 
-    if (member) {
+    await this.checkAction(
+      userId,
+      channelDto.channel_id,
+      AdminActionType.BANNED,
+      'error',
+    );
+
+    const isKicked = await this.checkAction(
+      userId,
+      channelDto.channel_id,
+      AdminActionType.KICKED,
+      'status',
+    );
+
+    if (member && !isKicked) {
       throw new ConflictException('You are already a member of the channel.');
     }
-    //await this.checkBanned(userId, channelDto.channel_id);
+    let validPassword = true;
+    if (channel.type === ChannelType.PROTECTED) {
+      if (channelDto.password == null) {
+        throw new UnauthorizedException('Invalid password.');
+      }
+      validPassword = await this.validatePassword(
+        channelDto.password,
+        channel.password,
+      );
+    }
 
-    const validPassword = await this.validatePassword(
-      channelDto.password,
-      channel.password,
-    );
     if (
       (validPassword || channel.type === ChannelType.PUBLIC) &&
       channel.type !== ChannelType.PRIVATE
@@ -324,6 +341,7 @@ export class ChannelService {
         ChannelMemberStatus.MEMBER,
       );
 
+      this.repository.adminActionRemoveKick(userId, channelDto.channel_id);
       const memberName = await this.userRepository.findUsernameByUserID(userId);
       const msg = `${memberName} joined`;
       this.logger.log(msg + ' on channel ' + channelDto.channel_id);
@@ -383,7 +401,7 @@ export class ChannelService {
       return adminAction;
     }
 
-    if (adminAction.action_type === AdminActionType.BANNED) {
+    if (adminAction.action_type == AdminActionType.BANNED) {
       throw new ForbiddenException('Member is banned.');
     }
 
@@ -392,7 +410,7 @@ export class ChannelService {
         throw new ForbiddenException('Member is muted.');
       }
     }
-    if (adminAction.action_type === AdminActionType.KICKED) {
+    if (adminAction.action_type == AdminActionType.KICKED) {
       throw new ForbiddenException('Member is kicked.');
     }
     return null;

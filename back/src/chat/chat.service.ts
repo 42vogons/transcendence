@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ChatRepository } from './repository/chat.repository';
 import { ChatDto } from './dto/chat.dto';
 import { ChannelRepository } from 'src/channel/repository/channel.repository';
@@ -32,19 +32,6 @@ export class ChatService {
     if (!isMember && chatDto.sender_id != 0) {
       throw new NotFoundException('You are not a member of this channel.');
     }
-    await this.channelService.checkAction(
-      chatDto.sender_id,
-      chatDto.channel_id,
-      AdminActionType.MUTED,
-      'error',
-    );
-
-    await this.channelService.checkAction(
-      chatDto.sender_id,
-      chatDto.channel_id,
-      AdminActionType.BANNED,
-      'error',
-    );
     await this.repository.saveMessage(chatDto);
     const members = await this.channelRepository.listMembers(
       chatDto.channel_id,
@@ -62,7 +49,6 @@ export class ChatService {
 
     const channel = await this.channelRepository.findChannel(channel_id);
     if (channel.type !== 'direct') {
-
       const isBanned = await this.channelService.checkAction(
         user_id,
         channel_id,
