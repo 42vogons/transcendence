@@ -27,7 +27,18 @@ const newChannelSchema = z.discriminatedUnion(
 		z.object({
 			type: z.enum(['protected']),
 			name: z.string().min(1, '*Required'),
-			password: z.string().min(1, '*Required'),
+			password: z
+				.string()
+				.min(6, 'The password must contain at least 6 character(s)')
+				.refine((pwd) => /[0-9]/.test(pwd), {
+					message: 'The password must have a number.',
+				})
+				.refine((pwd) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd), {
+					message: 'The password must have a special character.',
+				})
+				.refine((pwd) => /[A-Z]/.test(pwd), {
+					message: 'The password must have an Upper case letter.',
+				}),
 		}),
 	],
 	{

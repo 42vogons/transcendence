@@ -33,6 +33,7 @@ export class ChannelController {
         request.user.id,
       );
       this.logger.log(`Channel created by id ${channel_id}.`);
+      return channel_id;
     } catch (error) {
       this.logger.error(error.response.message);
       throw new BadRequestException(error.response);
