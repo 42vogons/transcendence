@@ -36,12 +36,15 @@ export class ChatService {
     const members = await this.channelRepository.listMembers(
       chatDto.channel_id,
     );
-    // se for DM precisa verificar se a msg não está bloqueada para não notificar o user.
     return members.map(member => member.user_id);
   }
 
-  async getChatMessage(channel_id: number, user_id: number): Promise<any> {
-    const members = await this.channelRepository.listMembers(channel_id);
+  async getChatMessage(
+    channel_id: number,
+    user_id: number,
+    members: any,
+  ): Promise<any> {
+    //const members = await this.channelRepository.listMembers(channel_id);
     const isMember = members.some(member => member.users.user_id === user_id);
     if (!isMember) {
       throw new NotFoundException('You are not a member of this channel.');

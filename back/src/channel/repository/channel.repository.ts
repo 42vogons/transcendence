@@ -223,14 +223,45 @@ export class ChannelRepository {
   }
 
   async listMembers(channel_id: number) {
-    return await this.prisma.channel_members.findMany({
+    const members = await this.prisma.channel_members.findMany({
       where: {
         channel_id: channel_id,
       },
       include: {
-        users: { select: { username: true, user_id: true, avatar_url: true } },
+        users: {
+          select: {
+            username: true,
+            user_id: true,
+            avatar_url: true,
+            admin_actions_admin_actions_target_user_idTousers: {
+              where: {
+                channel_id: channel_id,
+              },
+              select: {
+                action_type: true,
+              },
+            },
+          },
+        },
       },
     });
+
+    const modifiedMembers = members.map(member => {
+      const actions =
+        member.users.admin_actions_admin_actions_target_user_idTousers.map(
+          action => action.action_type,
+        );
+      return {
+        ...member,
+        users: {
+          ...member.users,
+          action: actions,
+          admin_actions_admin_actions_target_user_idTousers: undefined,
+        },
+      };
+    });
+
+    return modifiedMembers;
   }
 
   async adminAction(adminActionDto: AdminActionDto, user_id: number) {
@@ -364,5 +395,15 @@ export class ChannelRepository {
     );
     lastMessages.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     return lastMessages.filter(message => message !== undefined);
+  }
+
+  async findBlocked(member_id: number, channel_id: number): Promise<boolean> {
+    const blockedEntry = await this.prisma.blocklist.findFirst({
+      where: {
+        memberId: member_id,
+        channelId: channel_id,
+      },
+    });
+    return blockedEntry !== null;
   }
 }

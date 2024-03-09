@@ -437,7 +437,7 @@ export class ChannelService {
     channel_id: number,
     action: string,
   ) {
-     return await this.repository.getLastAdminActionByUser(
+    return await this.repository.getLastAdminActionByUser(
       member_id,
       channel_id,
       action,
@@ -478,5 +478,9 @@ export class ChannelService {
         'The password must contain 6 characters, including 1 special character, 1 numeric character and 1 upper',
       );
     }
+  }
+
+  async findBlocked(member_id: number, channel_id: number): Promise<boolean> {
+    return await this.repository.findBlocked(member_id, channel_id);
   }
 }

@@ -106,9 +106,14 @@ export class ChatGateway
   ): Promise<void> {
     console.log('getchannelMessageDto:', channelMessageDto);
     try {
+      let channelMembers = await this.channelService.getChannelMembers(
+        channelMessageDto.channel_id,
+      );
+
       const msgs = await this.chatService.getChatMessage(
         channelMessageDto.channel_id,
         client.userID,
+        channelMembers,
       );
       msgs.forEach(async msg => {
         msg.username = await this.usersService.findUsernameByUserID(
@@ -118,10 +123,20 @@ export class ChatGateway
       const channel = await this.channelService.findChannel(
         channelMessageDto.channel_id,
       );
+
+      if (channel.type == 'direct') {
+        const updatedMembers = await Promise.all(
+          channelMembers.map(async member => {
+            const blocked = await this.channelService.findBlocked(
+              member.user_id,
+              channelMessageDto.channel_id,
+            );
+            return { ...member, blocked };
+          }),
+        );
+        channelMembers = updatedMembers;
+      }
       delete channel.password;
-      const channelMembers = await this.channelService.getChannelMembers(
-        channelMessageDto.channel_id,
-      );
       client.emit('update_channel', {
         channel,
         channelMembers,
@@ -372,6 +387,7 @@ export class ChatGateway
   async blockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
     try {
       blockUser.user_id = client.userID;
+      blockUser.channel_id = 1;
       await this.usersService.blockUser(blockUser);
       this.logger.log(`User ${client.userID} Blocked ${blockUser.member_id}.`);
     } catch (error) {
@@ -391,6 +407,7 @@ export class ChatGateway
   async unBlockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
     try {
       blockUser.user_id = client.userID;
+      blockUser.channel_id = 1;
       await this.usersService.unBlockUser(blockUser);
       this.logger.log(
         `User ${client.userID} UnBlocked ${blockUser.member_id}.`,
