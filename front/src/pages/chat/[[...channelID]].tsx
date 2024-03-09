@@ -91,7 +91,6 @@ export default function Chat() {
 		blockUser,
 		adminAtion,
 		changeChannelMemberStatus,
-		getUsernameFromChannelMembers,
 		getTheOtherChannelMember,
 		getActiveChannelName,
 		getActiveChannelAvatar,
@@ -363,10 +362,7 @@ export default function Chat() {
 																size={28}
 															/>
 														)}
-
-														{getUsernameFromChannelMembers(
-															message.sender_id,
-														)}
+														{message.username}
 													</SenderMenu>
 													<MenuPortal>
 														<MenuContent
@@ -385,9 +381,7 @@ export default function Chat() {
 																			'/',
 																		)
 																		toast(
-																			`You invited ${getUsernameFromChannelMembers(
-																				message.sender_id,
-																			)} to play`,
+																			`You invited ${message.username} to play`,
 																			{
 																				type: 'info',
 																			},
@@ -449,9 +443,7 @@ export default function Chat() {
 																							user_id:
 																								message.sender_id,
 																							username:
-																								getUsernameFromChannelMembers(
-																									message.sender_id,
-																								),
+																								message.username,
 																						},
 																					)
 																					setShowMuteChannelUserModal(
@@ -618,7 +610,7 @@ export default function Chat() {
 								''
 							}
 							message="Are you sure o want to leave this Channel?"
-							onConfirmation={() =>
+							onConfirmation={async () =>
 								leaveChannel(
 									activeChannelData?.channel.channel_id,
 								)

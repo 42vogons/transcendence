@@ -28,6 +28,7 @@ export interface iChannelMessage {
 	message_id: number
 	sender_id: number
 	timestamp: Date
+	username: string
 }
 
 export interface iChannelData {

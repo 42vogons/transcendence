@@ -316,13 +316,13 @@ export class ChatGateway
       );
       const msg = `${memberName} left the channel`;
       this.logger.log(msg + 'on channel' + leaveDto.channel_id);
-      const isBanned = this.channelService.checkAction(
+      const isBanned = await this.channelService.checkAction(
         client.userID,
         leaveDto.channel_id,
         AdminActionType.BANNED,
         'status',
       );
-      const isKicked = this.channelService.checkAction(
+      const isKicked = await this.channelService.checkAction(
         client.userID,
         leaveDto.channel_id,
         AdminActionType.KICKED,
