@@ -74,7 +74,6 @@ export class ChatService {
           isKicked.end_time,
         );
       }
-
       return await this.repository.getChatMessage(channel_id);
     }
     const blockUserDto = new BlockUserDto();

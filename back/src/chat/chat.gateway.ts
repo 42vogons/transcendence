@@ -110,6 +110,11 @@ export class ChatGateway
         channelMessageDto.channel_id,
         client.userID,
       );
+      msgs.forEach(async msg => {
+        msg.username = await this.usersService.findUsernameByUserID(
+          msg.sender_id,
+        );
+      });
       const channel = await this.channelService.findChannel(
         channelMessageDto.channel_id,
       );
@@ -406,6 +411,7 @@ export class ChatGateway
     });
   }
 
+  @SubscribeMessage('notify_members')
   private async notifyMembers(channel_id: number) {
     await setTimeout(100);
     const members = await this.channelService.getChannelMembers(channel_id);
