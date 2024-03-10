@@ -55,7 +55,6 @@ export default function EnableTwoFAModal({
 
 	useEffect(() => {
 		if (showEnableTwoFAModal) {
-			console.log('moda qrCodeSrc):', qrCodeSrc)
 			if (qrCodeSrc) {
 				;(codeInput.current as unknown as HTMLElement).focus()
 				setHasError(false)

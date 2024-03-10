@@ -43,7 +43,7 @@ export const EnableTwoFAModalContainer = styled('form', {
 	},
 
 	img: {
-		border: '1px solid $blue200',
+		border: '4px solid $blue100',
 		borderRadius: 16,
 	},
 

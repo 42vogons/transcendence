@@ -1,5 +1,6 @@
 import { TwoFAForm } from '@/styles/components/TwoFAInputForm'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useRef, useState } from 'react'
+import TwoFAInput from './TwoFAInput'
 
 interface TwoFAInputFormProps {
 	sendTwoFA: (value: string) => void
@@ -7,6 +8,8 @@ interface TwoFAInputFormProps {
 
 export default function TwoFAInputForm({ sendTwoFA }: TwoFAInputFormProps) {
 	const [value, setValue] = useState('')
+
+	const codeInput = useRef(null)
 	function handleSubmit(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault()
 		console.log('2fa: ', value)
@@ -17,12 +20,10 @@ export default function TwoFAInputForm({ sendTwoFA }: TwoFAInputFormProps) {
 	return (
 		<TwoFAForm onSubmit={handleSubmit}>
 			<label htmlFor="2fa">2FA code</label>
-			<input
-				id="2fa"
-				type="number"
-				max={999999}
-				onChange={(e) => setValue(e.target.value)}
-				value={value}
+			<TwoFAInput
+				ref={codeInput}
+				setTwoFaCode={setValue}
+				twoFaCode={value}
 			/>
 			<button>Send</button>
 		</TwoFAForm>

@@ -4,12 +4,12 @@ import { ChangeEvent, Ref, forwardRef } from 'react'
 interface TwoFAInputProps {
 	twoFaCode: string
 	setTwoFaCode: (state: string) => void
-	hasError: boolean
+	hasError?: boolean
 }
 
 const TwoFAInput = forwardRef(
 	(
-		{ setTwoFaCode, twoFaCode, hasError }: TwoFAInputProps,
+		{ setTwoFaCode, twoFaCode, hasError = false }: TwoFAInputProps,
 		ref: Ref<HTMLInputElement>,
 	) => {
 		function handleChange(e: ChangeEvent<HTMLInputElement>) {
