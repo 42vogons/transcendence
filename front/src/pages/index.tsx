@@ -17,6 +17,7 @@ import { UserContext } from '@/contexts/UserContext'
 import Modal from '@/components/modals/modal'
 import Button from '@/components/button'
 import { MdClose } from 'react-icons/md'
+import { useRouter } from 'next/router'
 
 export default function Home() {
 	const {
@@ -33,6 +34,8 @@ export default function Home() {
 	} = useContext(GameContext)
 
 	const { user } = useContext(UserContext)
+
+	const router = useRouter()
 
 	useEffect(() => {
 		console.log('rodou effect game')
@@ -60,7 +63,7 @@ export default function Home() {
 			</Head>
 			<HomeContainer>
 				<Header>
-					<button>
+					<button onClick={() => router.push('/editProfile')}>
 						<FaUserAstronaut size={32} />
 						<p>
 							<b>{user?.username}</b>

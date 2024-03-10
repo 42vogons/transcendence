@@ -95,17 +95,21 @@ export const EditProfileImageContainer = styled('button', {
 	},
 })
 
-export const InputContainer = styled('div', {
+export const InputContainer = styled('form', {
 	position: 'relative',
 	width: 186,
 	display: 'flex',
 	flexDirection: 'column',
 	justifyContent: 'center',
 	alignItems: 'center',
-	gap: 32,
-	color: '$white',
+	gap: 8,
+
+	textAlign: 'center',
+	color: '$red',
+	fontWeight: 'bold',
 
 	'@bp2': {
+		fontSize: '$xl',
 		width: 230,
 	},
 

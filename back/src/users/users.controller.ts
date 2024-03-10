@@ -31,8 +31,8 @@ const UpdateUserSchema = z.object({
   username: z
     .string()
     .length(8, { message: 'Username must be exactly 8 characters long' })
-    .regex(/^\w+$/, {
-      message: 'Username must not contain spaces or special characters',
+    .regex(/^[a-zA-Z0-9-]+$/, {
+      message: 'Username must contain only letters, numbers or hyphen',
     }),
 });
 

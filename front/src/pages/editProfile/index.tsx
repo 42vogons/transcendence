@@ -12,7 +12,14 @@ import { FaUserAstronaut } from 'react-icons/fa6'
 import { MdEdit } from 'react-icons/md'
 
 import userDefaulAvatar from '../../../public/assets/user.png'
-import { ReactElement, useContext, useEffect, useRef, useState } from 'react'
+import {
+	FormEvent,
+	ReactElement,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from 'react'
 import { useRouter } from 'next/router'
 import { api } from '@/services/api'
 import { toast } from 'react-toastify'
@@ -24,10 +31,18 @@ import Button from '@/components/button'
 import { SwitchThumb } from '@radix-ui/react-switch'
 import { GrUpdate } from 'react-icons/gr'
 import { delayMs } from '@/utils/functions'
+import { z } from 'zod'
+
+const editUsernameSchema = z
+	.string()
+	.length(8, { message: 'Username must be exactly 8 characters long' })
+	.regex(/^[a-zA-Z0-9-]+$/, {
+		message: 'Username must contain only letters, numbers or hyphen',
+	})
 
 export default function EditProfile() {
 	const router = useRouter()
-	const { user } = useContext(UserContext)
+	const { user, handleLogin } = useContext(UserContext)
 
 	const usernameInput = useRef(null)
 	const switchButtonRef = useRef(null)
@@ -35,13 +50,43 @@ export default function EditProfile() {
 	const [isLoading, setIsLoading] = useState(true)
 	const [username, setUsername] = useState('')
 	const [avatarUrl, setAvatarUrl] = useState('')
+	const [error, setError] = useState('')
 	const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false)
 	const [isUsernameDisabled, setIsUsernameDisabled] = useState(true)
 
-	async function handleChangeUsername() {
+	async function handleEditUsername() {
 		setIsUsernameDisabled(false)
 		await delayMs(100)
 		;(usernameInput.current as unknown as HTMLElement).focus()
+	}
+
+	async function handleSubmitEditUsername(e: FormEvent<HTMLFormElement>) {
+		e.preventDefault()
+		console.log('submit')
+		const validateUsername = editUsernameSchema.safeParse(username)
+		if (!validateUsername.success) {
+			const errors = (validateUsername as any).error.format()._errors
+			setError(errors[0])
+		} else {
+			setError('')
+			try {
+				await api.patch('/users/', { username })
+				if (user) {
+					const updatedUser = user
+					updatedUser.username = username
+					handleLogin(updatedUser)
+				}
+				toast('Username updated.', {
+					type: 'success',
+				})
+				setIsUsernameDisabled(true)
+			} catch (error: any) {
+				toast(error.response.data.message[0].message, {
+					type: 'error',
+				})
+			}
+		}
+		// setError('test')
 	}
 
 	function handleToogle() {
@@ -100,7 +145,7 @@ export default function EditProfile() {
 						<MdEdit size={32} />
 					</div>
 				</EditProfileImageContainer>
-				<InputContainer>
+				<InputContainer onSubmit={(e) => handleSubmitEditUsername(e)}>
 					<input
 						type="text"
 						value={username}
@@ -110,10 +155,20 @@ export default function EditProfile() {
 						disabled={isUsernameDisabled}
 					/>
 					<FaUserAstronaut size={32} className="icon" />
-					<Button onClick={handleChangeUsername}>
-						<GrUpdate size={32} />
-						User
-					</Button>
+					<span>{error}</span>
+
+					{isUsernameDisabled && (
+						<Button type="button" onClick={handleEditUsername}>
+							<MdEdit size={32} />
+							Username
+						</Button>
+					)}
+					{!isUsernameDisabled && (
+						<Button buttonType="accept" type="submit">
+							<GrUpdate size={32} />
+							Username
+						</Button>
+					)}
 				</InputContainer>
 
 				<TwoFAContainer
