@@ -95,6 +95,18 @@ export const EditProfileImageContainer = styled('button', {
 	},
 })
 
+export const UploadProgessContainer = styled('div', {
+	position: 'absolute',
+	top: '102%',
+	left: '50%',
+	transform: 'translate(-50%, -50%)',
+	p: {
+		fontSize: 16,
+		fontWeight: 'bold',
+		color: '$blue100',
+	},
+})
+
 export const InputContainer = styled('form', {
 	position: 'relative',
 	width: 186,

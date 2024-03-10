@@ -6,6 +6,7 @@ import {
 	SwitchButton,
 	SwitchContainer,
 	TwoFAContainer,
+	UploadProgessContainer,
 } from '@/styles/pages/editProfile'
 import Image from 'next/image'
 import { FaUserAstronaut } from 'react-icons/fa6'
@@ -13,6 +14,7 @@ import { MdEdit } from 'react-icons/md'
 
 import userDefaulAvatar from '../../../public/assets/user.png'
 import {
+	ChangeEvent,
 	FormEvent,
 	ReactElement,
 	useContext,
@@ -33,6 +35,7 @@ import { GrUpdate } from 'react-icons/gr'
 import { delayMs } from '@/utils/functions'
 import { z } from 'zod'
 import EnableTwoFAModal from '@/components/modals/enableTwoFAModal'
+import axios from 'axios'
 
 const editUsernameSchema = z
 	.string()
@@ -46,6 +49,7 @@ export default function EditProfile() {
 	const { user, handleLogin } = useContext(UserContext)
 
 	const usernameInput = useRef(null)
+	const fileInput = useRef(null)
 
 	const [isLoading, setIsLoading] = useState(true)
 	const [username, setUsername] = useState('')
@@ -55,6 +59,7 @@ export default function EditProfile() {
 	const [isUsernameDisabled, setIsUsernameDisabled] = useState(true)
 	const [qrCodeSrc, setQrCodeSrc] = useState('')
 	const [showEnableTwoFAModal, setShowEnableTwoFAModal] = useState(false)
+	const [uploadProgress, setUploadProgress] = useState<number>(100)
 
 	async function handleEditUsername() {
 		setIsUsernameDisabled(false)
@@ -129,13 +134,51 @@ export default function EditProfile() {
 					type: 'error',
 				})
 			}
-			// setIsTwoFactorEnabled(true)
 		}
 	}
 
-	useEffect(() => {
-		console.log('TwoFA:', isTwoFactorEnabled)
-	}, [isTwoFactorEnabled])
+	function handleEditAvatar() {
+		;(fileInput.current as unknown as HTMLElement).click()
+	}
+
+	async function handleAvatarChange(e: ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0]
+		if (file) {
+			try {
+				const formData = new FormData()
+				formData.append('avatar', file)
+				const cancelTokenSource = axios.CancelToken.source()
+				const response = await api.post(
+					'users/upload-avatar',
+					formData,
+					{
+						headers: {
+							'Content-Type': 'multipart/form-data',
+						},
+						onUploadProgress: (progressEvent) => {
+							if (progressEvent.total) {
+								const progress = Math.round(
+									(progressEvent.loaded * 100) /
+										progressEvent.total,
+								)
+								setUploadProgress(progress)
+							}
+						},
+						cancelToken: cancelTokenSource.token,
+					},
+				)
+				setAvatarUrl(response.data.url)
+				toast('Avatar changed successfuly', {
+					type: 'success',
+				})
+			} catch (error: any) {
+				console.log('error:', error)
+				toast(error.response.data.message, {
+					type: 'error',
+				})
+			}
+		}
+	}
 
 	useEffect(() => {
 		async function getUserData() {
@@ -176,7 +219,7 @@ export default function EditProfile() {
 		<EditProfileWrapper>
 			<EditProfileContainer>
 				<h2>Edit Profile</h2>
-				<EditProfileImageContainer>
+				<EditProfileImageContainer onClick={handleEditAvatar}>
 					<Image
 						src={avatarUrl || userDefaulAvatar.src}
 						width={180}
@@ -188,6 +231,19 @@ export default function EditProfile() {
 					<div className="icon">
 						<MdEdit size={32} />
 					</div>
+					{uploadProgress > 0 && uploadProgress < 100 && (
+						<UploadProgessContainer>
+							<p>Uploading: {uploadProgress}%</p>
+							<progress value={uploadProgress} max={100} />
+						</UploadProgessContainer>
+					)}
+					<input
+						type="file"
+						accept="image/*"
+						onChange={handleAvatarChange}
+						ref={fileInput}
+						style={{ display: 'none' }}
+					/>
 				</EditProfileImageContainer>
 				<InputContainer onSubmit={(e) => handleSubmitEditUsername(e)}>
 					<input
