@@ -860,21 +860,23 @@ export class GameService {
     userID: number,
   ) {
     const playerOwner = this.findPlayerByUserID(userID);
-    const room = this.findRoomByRoomID(playerOwner.roomID)
+    const room = this.findRoomByRoomID(playerOwner.roomID);
     const playerGuest = this.findPlayerByUserID(
       room.users[0].userID === playerOwner.userID
         ? room.users[1].userID
         : room.users[0].userID,
     );
 
-    if (room.WasRequestReturned)
-      return;
+    if (room.WasRequestReturned) return;
 
     playerGuest.roomID = '';
     playerOwner.roomID = '';
     playerOwner.status = 'idle';
-    
-    io.to(room.ID).emit('request_game_error', 'The request was not responded in time.');
+
+    io.to(room.ID).emit(
+      'request_game_error',
+      'The request was not responded in time.',
+    );
     io.to(room.ID).emit('status_changed', 'connected');
 
     this.updatePlayer(playerGuest);
@@ -891,6 +893,10 @@ export class GameService {
   ) {
     const playerGuest = this.findPlayerByUserID(client.userID);
     const room = this.findRoomByRoomID(playerGuest.roomID);
+    if (!room) {
+      client.emit('request_game_error', 'Request expired.');
+      return;
+    }
     const playerOwner = this.findPlayerByUserID(
       room.users[0].userID === client.userID
         ? room.users[1].userID

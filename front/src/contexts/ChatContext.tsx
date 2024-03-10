@@ -386,7 +386,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		const member = (activeChannelData as iChannelData).channelMembers.find(
 			(member) => member.user_id === userID,
 		)
-		console.log('member bloqued:', member)
 		if (member) {
 			return member.blocked
 		} else {
