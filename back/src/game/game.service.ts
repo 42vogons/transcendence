@@ -37,6 +37,7 @@ export class GameService {
   };
   private paddleSpeed = this.paddle.height * 0.2;
   private timeToBeReady = 60 * 1000;
+  private timeToReturnRequestMatch = 60 * 1000;
 
   throwError(client: SocketWithAuth, msg: string) {
     let player = this.findPlayerByUserID(client.userID);
@@ -336,6 +337,7 @@ export class GameService {
       ID: client.id,
       users: [player1],
       IsReady: false,
+      WasRequestReturned: false,
     };
     this.rooms.push(room);
     client.join(client.id);
@@ -848,6 +850,38 @@ export class GameService {
       type: 'request',
       username: client.username,
     });
+    setTimeout(() => {
+      this.cancelRequestMatch(io, playerOwner.userID);
+    }, this.timeToReturnRequestMatch);
+  }
+
+  cancelRequestMatch(
+    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+    userID: number,
+  ) {
+    const playerOwner = this.findPlayerByUserID(userID);
+    const room = this.findRoomByRoomID(playerOwner.roomID)
+    const playerGuest = this.findPlayerByUserID(
+      room.users[0].userID === playerOwner.userID
+        ? room.users[1].userID
+        : room.users[0].userID,
+    );
+
+    if (room.WasRequestReturned)
+      return;
+
+    playerGuest.roomID = '';
+    playerOwner.roomID = '';
+    playerOwner.status = 'idle';
+    
+    io.to(room.ID).emit('request_game_error', 'The request was not responded in time.');
+    io.to(room.ID).emit('status_changed', 'connected');
+
+    this.updatePlayer(playerGuest);
+    this.updatePlayer(playerOwner);
+    io.in(room.ID).socketsLeave(playerOwner.socketID);
+
+    this.deleteRoomByRoomID(room.ID);
   }
 
   responseRequestMatch(
@@ -862,6 +896,9 @@ export class GameService {
         ? room.users[1].userID
         : room.users[0].userID,
     );
+
+    room.WasRequestReturned = true;
+    this.updateRoom(room);
 
     if (response === 'refused') {
       playerGuest.roomID = '';

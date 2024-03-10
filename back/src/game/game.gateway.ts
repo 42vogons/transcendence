@@ -140,6 +140,11 @@ export class GameGateway
     this.gameService.requestMatch(this.io, client, guestID);
   }
 
+  @SubscribeMessage('cancel_request_match')
+  handleCancelRequestMatch(client: SocketWithAuth) {
+    this.gameService.cancelRequestMatch(this.io, client.userID);
+  }
+
   @SubscribeMessage('response_resquest_match')
   handleResponseRequestMatch(client: SocketWithAuth, data) {
     const { response } = data;

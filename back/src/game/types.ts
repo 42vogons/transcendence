@@ -13,6 +13,7 @@ export type Room = {
   users: UserData[];
   IsReady: boolean;
   ExpiredAt?: Date;
+  WasRequestReturned: boolean;
 };
 
 export type Ball = {
