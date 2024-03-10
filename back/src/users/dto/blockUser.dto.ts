@@ -8,4 +8,8 @@ export class BlockUserDto {
   @IsNotEmpty()
   @IsNumber()
   member_id: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  channel_id: number;
 }

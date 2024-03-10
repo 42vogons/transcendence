@@ -171,6 +171,7 @@ export class UsersRepository {
       data: {
         userId: blockUser.user_id,
         memberId: blockUser.member_id,
+        channelId: blockUser.channel_id,
         blockedAt: new Date(),
       },
     });
