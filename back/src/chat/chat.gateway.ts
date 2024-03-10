@@ -389,6 +389,8 @@ export class ChatGateway
       blockUser.user_id = client.userID;
       await this.usersService.blockUser(blockUser);
       this.logger.log(`User ${client.userID} Blocked ${blockUser.member_id}.`);
+      client.emit('refresh_chat', { channelID: blockUser.channel_id });
+      client.emit('announcement', 'User blocked.');
     } catch (error) {
       this.sendError(error);
     }
@@ -410,6 +412,8 @@ export class ChatGateway
       this.logger.log(
         `User ${client.userID} UnBlocked ${blockUser.member_id}.`,
       );
+      client.emit('refresh_chat', { channelID: blockUser.channel_id });
+      client.emit('announcement', 'User unblocked.');
     } catch (error) {
       this.sendError(error);
     }

@@ -34,6 +34,7 @@ import {
 	FaUserShield,
 	FaUserSlash,
 } from 'react-icons/fa6'
+import { CgUnblock } from 'react-icons/cg'
 import { GiQueenCrown } from 'react-icons/gi'
 import { GrUpdate } from 'react-icons/gr'
 import { UserContext } from '@/contexts/UserContext'
@@ -89,6 +90,7 @@ export default function Chat() {
 		activeChannelData,
 		leaveChannel,
 		blockUser,
+		unBlockUser,
 		adminAtion,
 		changeChannelMemberStatus,
 		getTheOtherChannelMember,
@@ -97,6 +99,7 @@ export default function Chat() {
 		updateActiveChannel,
 		hasPriveleges,
 		getUserStatus,
+		isUserBlocked,
 	} = useContext(ChatContext)
 
 	const messages = activeChannelData?.msgs
@@ -547,24 +550,46 @@ export default function Chat() {
 															{activeChannelData
 																.channel
 																.type ===
-																'direct' && (
-																<MenuItem>
-																	<MenuAction
-																		onClick={() => {
-																			blockUser(
-																				message.sender_id,
-																			)
-																		}}
-																	>
-																		<MdBlock
-																			size={
-																				menuIconSize
-																			}
-																		/>
-																		Block
-																	</MenuAction>
-																</MenuItem>
-															)}
+																'direct' &&
+																(isUserBlocked(
+																	message.sender_id,
+																) ? (
+																	<MenuItem>
+																		<MenuAction
+																			onClick={() => {
+																				unBlockUser(
+																					message.sender_id,
+																					message.channel_id,
+																				)
+																			}}
+																		>
+																			<CgUnblock
+																				size={
+																					menuIconSize
+																				}
+																			/>
+																			Unblock
+																		</MenuAction>
+																	</MenuItem>
+																) : (
+																	<MenuItem>
+																		<MenuAction
+																			onClick={() => {
+																				blockUser(
+																					message.sender_id,
+																					message.channel_id,
+																				)
+																			}}
+																		>
+																			<MdBlock
+																				size={
+																					menuIconSize
+																				}
+																			/>
+																			Block
+																		</MenuAction>
+																	</MenuItem>
+																))}
 														</MenuContent>
 													</MenuPortal>
 												</SenderMenuWrapper>

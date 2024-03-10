@@ -12,10 +12,12 @@ export interface iChannel {
 }
 
 export interface iChannelMember {
+	blocked: boolean
 	channel_id: number
 	status: string
 	user_id: number
 	users: {
+		action: string[]
 		user_id: number
 		username: string
 		avatar_url: string

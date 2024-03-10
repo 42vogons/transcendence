@@ -42,7 +42,8 @@ interface ChatContextType {
 	getChannelList: () => void
 	addMemberToChannel: (member_id: number, channel_id: number) => void
 	leaveChannel: (channel_id: number) => Promise<void>
-	blockUser: (member_id: number) => void
+	blockUser: (member_id: number, channel_id: number) => void
+	unBlockUser: (member_id: number, channel_id: number) => void
 	changeChannelMemberStatus: (
 		member_id: number,
 		channel_id: number,
@@ -71,6 +72,7 @@ interface ChatContextType {
 	) => string
 	hasPriveleges: (userID: number, allowedRoles: string[]) => boolean
 	getUserStatus: (userID: number) => string
+	isUserBlocked: (userID: number) => boolean
 	closeChatSocket: () => void
 }
 
@@ -143,6 +145,11 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			getChannelList()
 			dispatch(updateChannel(undefined))
 			router.push('/chat')
+		})
+		socket.on('announcement', (msg) => {
+			toast(msg, {
+				type: 'info',
+			})
 		})
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
@@ -243,9 +250,17 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		await delayMs(500)
 	}
 
-	function blockUser(member_id: number) {
+	function blockUser(member_id: number, channel_id: number) {
 		emitSocketIfUserIsNotExpired('block_user', {
 			member_id,
+			channel_id,
+		})
+	}
+
+	function unBlockUser(member_id: number, channel_id: number) {
+		emitSocketIfUserIsNotExpired('un_block_user', {
+			member_id,
+			channel_id,
 		})
 	}
 
@@ -367,6 +382,18 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		}
 	}
 
+	function isUserBlocked(userID: number) {
+		const member = (activeChannelData as iChannelData).channelMembers.find(
+			(member) => member.user_id === userID,
+		)
+		console.log('member bloqued:', member)
+		if (member) {
+			return member.blocked
+		} else {
+			return false
+		}
+	}
+
 	function closeChatSocket() {
 		socket.close()
 	}
@@ -397,6 +424,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				addMemberToChannel,
 				leaveChannel,
 				blockUser,
+				unBlockUser,
 				changeChannelMemberStatus,
 				adminAtion,
 				getTheOtherChannelMember,
@@ -406,6 +434,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				updateActiveChannel,
 				hasPriveleges,
 				getUserStatus,
+				isUserBlocked,
 			}}
 		>
 			{children}
