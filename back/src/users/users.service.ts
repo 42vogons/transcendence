@@ -132,6 +132,13 @@ export class UsersService {
     if (!user) {
       throw new Error('User not found');
     }
+
+    if (user.two_factor_enabled) {
+      user.two_factor_enabled = !user.two_factor_enabled;
+      await this.update(user.user_id, user);
+      return { enabled: false };
+    }
+
     const { secret, otpauthUrl } =
       await this.twoFactorAutenticateService.generateSecret(user.email);
     user.token_secret = secret;
@@ -139,12 +146,11 @@ export class UsersService {
     return { enabled: true, otpauthUrl };
   }
 
-  async firstActiveTwoFactor(user_id: number, code: string) {
+  async firstActiveTwoFactor(user_id: number, code: string): Promise<boolean> {
     const user = await this.findOne(user_id);
     if (!user) {
       throw new Error('User not found');
     }
-
     const valid =
       this.twoFactorAutenticateService.isTwoFactorAuthenticationCodeValid(
         code,
@@ -153,7 +159,8 @@ export class UsersService {
     if (valid) {
       user.two_factor_enabled = !user.two_factor_enabled;
       await this.update(user.user_id, user);
+      return true;
     }
-    return { two_factor: valid };
+    return false;
   }
 }
