@@ -32,6 +32,7 @@ import { SwitchThumb } from '@radix-ui/react-switch'
 import { GrUpdate } from 'react-icons/gr'
 import { delayMs } from '@/utils/functions'
 import { z } from 'zod'
+import { config } from 'process'
 
 const editUsernameSchema = z
 	.string()
@@ -45,7 +46,6 @@ export default function EditProfile() {
 	const { user, handleLogin } = useContext(UserContext)
 
 	const usernameInput = useRef(null)
-	const switchButtonRef = useRef(null)
 
 	const [isLoading, setIsLoading] = useState(true)
 	const [username, setUsername] = useState('')
@@ -86,27 +86,67 @@ export default function EditProfile() {
 				})
 			}
 		}
-		// setError('test')
 	}
 
-	function handleToogle() {
-		;(switchButtonRef.current as unknown as HTMLElement).click()
+	async function handleToogleTwoFA() {
+		console.log('handleToogleTwoFA:', isTwoFactorEnabled)
+		if (isTwoFactorEnabled) {
+			console.log('fazer req')
+			try {
+				const { data } = await api.post(`/users/activeTwoFactor`)
+				console.log('activeTwoFactor data:', data)
+				setIsTwoFactorEnabled(false)
+			} catch (error: any) {
+				console.log('error:', error)
+				toast(error.message ? error.message : error, {
+					type: 'error',
+				})
+			}
+		} else {
+			console.log('abrir modal')
+			try {
+				const response = await api.post(
+					`/users/activeTwoFactor`,
+					{},
+					{
+						responseType: 'arraybuffer',
+					},
+				)
+				const base64String = btoa(
+					new Uint8Array(response.data).reduce(
+						(data, byte) => data + String.fromCharCode(byte),
+						'',
+					),
+				)
+				const qrCodeUrl = `data:image/png;base64,${base64String}`
+			} catch (error: any) {
+				console.log('error:', error)
+				toast(error.message ? error.message : error, {
+					type: 'error',
+				})
+			}
+			// setIsTwoFactorEnabled(true)
+		}
 	}
 
 	useEffect(() => {
-		async function getUserData(userID: number) {
+		console.log('TwoFA:', isTwoFactorEnabled)
+	}, [isTwoFactorEnabled])
+
+	useEffect(() => {
+		async function getUserData() {
 			setIsLoading(true)
 			try {
-				const { data: userData } = await api.get(
-					`/users/findUsersByUserID/${userID}`,
-				)
+				const { data: userData } = await api.get(`/users/me`)
 				setUsername(userData.username)
 				setAvatarUrl(userData.avatar_url)
+				setIsTwoFactorEnabled(userData.two_factor_enabled)
 				setIsLoading(false)
 			} catch (error: any) {
 				console.log('error:', error)
 				setUsername('')
 				setAvatarUrl('')
+				setIsTwoFactorEnabled(false)
 				setIsLoading(false)
 				toast(error.message ? error.message : error, {
 					type: 'error',
@@ -115,7 +155,7 @@ export default function EditProfile() {
 		}
 
 		if (router.isReady && user) {
-			getUserData(Number(user?.userID))
+			getUserData()
 		} else {
 			setIsLoading(false)
 			toast('Error', {
@@ -173,7 +213,7 @@ export default function EditProfile() {
 
 				<TwoFAContainer
 					isTwoFAEnabled={isTwoFactorEnabled}
-					onClick={handleToogle}
+					onClick={handleToogleTwoFA}
 				>
 					<SwitchContainer>
 						<label
@@ -189,10 +229,10 @@ export default function EditProfile() {
 						<SwitchButton
 							id="2fa"
 							checked={isTwoFactorEnabled}
-							onCheckedChange={(value) =>
-								setIsTwoFactorEnabled(value)
-							}
-							ref={switchButtonRef}
+							// onCheckedChange={(value) =>
+							// 	setIsTwoFactorEnabled(value)
+							// }
+							// ref={switchButtonRef}
 						>
 							<SwitchThumb asChild>
 								<div className="thumb">

@@ -48,6 +48,19 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @Get('/me')
+  @UseGuards(AuthGuard)
+  async findMe(@Req() request) {
+    const user = await this.usersService.findOne(request.user.id);
+    const myUser = {
+      user_id: user.user_id,
+      username: user.username,
+      avatar_url: user.avatar_url,
+      two_factor_enabled: user.two_factor_enabled,
+    };
+    return myUser;
+  }
+
   @Get('/friends')
   @UseGuards(AuthGuard)
   async findFriend(@Req() request) {
