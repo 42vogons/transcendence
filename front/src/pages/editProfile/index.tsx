@@ -87,7 +87,8 @@ export default function EditProfile() {
 				})
 				setIsUsernameDisabled(true)
 			} catch (error: any) {
-				toast(error.response.data.message[0].message, {
+				console.log('error:', error)
+				toast(error.response.data.message, {
 					type: 'error',
 				})
 			}
