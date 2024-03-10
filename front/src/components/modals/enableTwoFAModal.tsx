@@ -6,21 +6,21 @@ import Image from 'next/image'
 import TwoFAInput from '../TwoFAInput'
 import Modal from './modal'
 import { toast } from 'react-toastify'
+import { api } from '@/services/api'
 
 interface iEnableTwoFAModal {
 	showEnableTwoFAModal: boolean
 	setShowEnableTwoFAModal: (state: boolean) => void
 	setIsTwoFactorEnabled: (state: boolean) => void
-	qrCodeSrc: string
 }
 
 export default function EnableTwoFAModal({
 	showEnableTwoFAModal,
 	setShowEnableTwoFAModal,
-	qrCodeSrc,
 	setIsTwoFactorEnabled,
 }: iEnableTwoFAModal) {
 	const [twoFaCode, setTwoFaCode] = useState('')
+	const [qrCodeSrc, setQrCodeSrc] = useState('')
 	const [isSubmiting, setIsSubmiting] = useState(false)
 	const [hasError, setHasError] = useState(false)
 
@@ -30,13 +30,20 @@ export default function EnableTwoFAModal({
 		e.preventDefault()
 		setIsSubmiting(true)
 		setHasError(false)
-		console.log('handleEnableTwoFA:')
 		if (twoFaCode.length === 6) {
-			// todo req
-			console.log('twoFAcode:', twoFaCode)
-			setIsTwoFactorEnabled(true)
-			setShowEnableTwoFAModal(false)
-			setTwoFaCode('')
+			try {
+				await api.post(`/users/firstActiveTwoFactor`, {
+					code: twoFaCode,
+				})
+				setIsTwoFactorEnabled(true)
+				setShowEnableTwoFAModal(false)
+				setTwoFaCode('')
+			} catch (error: any) {
+				console.log('error:', error)
+				toast(error.message ? error.message : error, {
+					type: 'error',
+				})
+			}
 		} else {
 			toast('The code must contain 6 numbers', {
 				type: 'error',
@@ -47,33 +54,59 @@ export default function EnableTwoFAModal({
 		setIsSubmiting(false)
 	}
 
-	function handleImageError() {
-		toast('Unable to load QrCode', {
-			type: 'error',
-		})
+	async function getQrCode() {
+		try {
+			setHasError(false)
+			const response = await api.post(
+				`/users/activeTwoFactor`,
+				{},
+				{
+					responseType: 'arraybuffer',
+				},
+			)
+			const base64String = btoa(
+				new Uint8Array(response.data).reduce(
+					(data, byte) => data + String.fromCharCode(byte),
+					'',
+				),
+			)
+			setQrCodeSrc(`data:image/png;base64,${base64String}`)
+		} catch (error: any) {
+			console.log('error:', error)
+			toast(error.message ? error.message : error, {
+				type: 'error',
+			})
+		}
 	}
 
 	useEffect(() => {
 		if (showEnableTwoFAModal) {
-			if (qrCodeSrc) {
-				;(codeInput.current as unknown as HTMLElement).focus()
-				setHasError(false)
-			}
+			getQrCode()
+		} else {
+			setQrCodeSrc('')
 		}
-	}, [showEnableTwoFAModal, setIsTwoFactorEnabled, qrCodeSrc])
+	}, [showEnableTwoFAModal, setIsTwoFactorEnabled])
 
 	return (
 		<Modal isOpen={showEnableTwoFAModal}>
 			<EnableTwoFAModalContainer onSubmit={handleEnableTwoFA}>
 				<h2>Enable 2FA</h2>
 
-				<Image
-					src={qrCodeSrc}
-					width={180}
-					height={180}
-					alt="QrCode"
-					onError={handleImageError}
-				/>
+				{qrCodeSrc ? (
+					<Image
+						src={qrCodeSrc || '/assets/loading.gif'}
+						width={180}
+						height={180}
+						alt="QrCode"
+					/>
+				) : (
+					<Image
+						src={'/assets/loading.gif'}
+						width={180}
+						height={180}
+						alt="Loading"
+					/>
+				)}
 
 				<h3>
 					Read the QrCode with your authentication app.
@@ -95,7 +128,6 @@ export default function EnableTwoFAModal({
 						buttonType="cancel"
 						type="button"
 						onClick={() => {
-							console.log('close')
 							setShowEnableTwoFAModal(false)
 						}}
 					>

@@ -1,6 +1,8 @@
 import { TwoFAForm } from '@/styles/components/TwoFAInputForm'
 import { FormEvent, useRef, useState } from 'react'
 import TwoFAInput from './TwoFAInput'
+import Button from './button'
+import { MdCheck } from 'react-icons/md'
 
 interface TwoFAInputFormProps {
 	sendTwoFA: (value: string) => void
@@ -25,7 +27,10 @@ export default function TwoFAInputForm({ sendTwoFA }: TwoFAInputFormProps) {
 				setTwoFaCode={setValue}
 				twoFaCode={value}
 			/>
-			<button>Send</button>
+			<Button buttonType="accept" disabled={value.length !== 6}>
+				<MdCheck size={40} />
+				Send
+			</Button>
 		</TwoFAForm>
 	)
 }

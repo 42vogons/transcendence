@@ -12,9 +12,10 @@ import { FcGoogle } from 'react-icons/fc'
 
 interface LoginProps {
 	clientID: string
+	frontDomain: string
 }
 
-export default function Login({ clientID }: LoginProps) {
+export default function Login({ clientID, frontDomain }: LoginProps) {
 	return (
 		<>
 			<Head>
@@ -41,7 +42,7 @@ export default function Login({ clientID }: LoginProps) {
 				</Title>
 				<ConnectButtonContainer>
 					<a
-						href={`https://api.intra.42.fr/oauth/authorize?client_id=${clientID}&redirect_uri=http%3A%2F%2F${process.env.FRONT_DOMAIN}%3A3000%2Fauth&response_type=code`}
+						href={`https://api.intra.42.fr/oauth/authorize?client_id=${clientID}&redirect_uri=http%3A%2F%2F${frontDomain}%3A3000%2Fauth&response_type=code`}
 					>
 						<ConnectButton>
 							<Image
@@ -65,9 +66,11 @@ export default function Login({ clientID }: LoginProps) {
 
 export async function getStaticProps() {
 	const clientID = process.env.CLIENT_ID
+	const frontDomain = process.env.FRONT_DOMAIN
 	return {
 		props: {
 			clientID,
+			frontDomain,
 		},
 	}
 }

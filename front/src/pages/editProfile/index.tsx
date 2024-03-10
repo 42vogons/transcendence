@@ -57,7 +57,6 @@ export default function EditProfile() {
 	const [error, setError] = useState('')
 	const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false)
 	const [isUsernameDisabled, setIsUsernameDisabled] = useState(true)
-	const [qrCodeSrc, setQrCodeSrc] = useState('')
 	const [showEnableTwoFAModal, setShowEnableTwoFAModal] = useState(false)
 	const [uploadProgress, setUploadProgress] = useState<number>(100)
 
@@ -103,7 +102,6 @@ export default function EditProfile() {
 				const { data } = await api.post(`/users/activeTwoFactor`)
 				console.log('activeTwoFactor data:', data)
 				setIsTwoFactorEnabled(false)
-				// setQrCodeSrc('')
 			} catch (error: any) {
 				console.log('error:', error)
 				toast(error.message ? error.message : error, {
@@ -112,28 +110,7 @@ export default function EditProfile() {
 			}
 		} else {
 			console.log('abrir modal')
-			try {
-				const response = await api.post(
-					`/users/activeTwoFactor`,
-					{},
-					{
-						responseType: 'arraybuffer',
-					},
-				)
-				const base64String = btoa(
-					new Uint8Array(response.data).reduce(
-						(data, byte) => data + String.fromCharCode(byte),
-						'',
-					),
-				)
-				setQrCodeSrc(`data:image/png;base64,${base64String}`)
-				setShowEnableTwoFAModal(true)
-			} catch (error: any) {
-				console.log('error:', error)
-				toast(error.message ? error.message : error, {
-					type: 'error',
-				})
-			}
+			setShowEnableTwoFAModal(true)
 		}
 	}
 
@@ -306,7 +283,6 @@ export default function EditProfile() {
 			<EnableTwoFAModal
 				showEnableTwoFAModal={showEnableTwoFAModal}
 				setShowEnableTwoFAModal={setShowEnableTwoFAModal}
-				qrCodeSrc={qrCodeSrc}
 				setIsTwoFactorEnabled={setIsTwoFactorEnabled}
 			/>
 		</EditProfileWrapper>

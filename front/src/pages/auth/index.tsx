@@ -56,15 +56,20 @@ export default function Auth() {
 		setRequest2FA(false)
 		try {
 			const res = await api.post('/checkTwoFactor', { code: twoFAcode })
-			toast('Login was successful', { type: 'success' })
 			console.log('res:', res)
 			const { action, user } = res.data
 			if (action === 'logged') {
+				toast('Login was successful', { type: 'success' })
 				console.log('action login:', action)
 				handleLogin(user)
 				router.push('/')
 			} else {
 				console.log('erro action:', action)
+				setIsLoading(false)
+				setRequest2FA(true)
+				toast('Invalid code', {
+					type: 'error',
+				})
 			}
 		} catch (error) {
 			console.log('error:', error)
