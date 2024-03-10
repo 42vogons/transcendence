@@ -32,7 +32,7 @@ import { SwitchThumb } from '@radix-ui/react-switch'
 import { GrUpdate } from 'react-icons/gr'
 import { delayMs } from '@/utils/functions'
 import { z } from 'zod'
-import { config } from 'process'
+import EnableTwoFAModal from '@/components/modals/enableTwoFAModal'
 
 const editUsernameSchema = z
 	.string()
@@ -53,6 +53,8 @@ export default function EditProfile() {
 	const [error, setError] = useState('')
 	const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false)
 	const [isUsernameDisabled, setIsUsernameDisabled] = useState(true)
+	const [qrCodeSrc, setQrCodeSrc] = useState('')
+	const [showEnableTwoFAModal, setShowEnableTwoFAModal] = useState(true)
 
 	async function handleEditUsername() {
 		setIsUsernameDisabled(false)
@@ -118,7 +120,8 @@ export default function EditProfile() {
 						'',
 					),
 				)
-				const qrCodeUrl = `data:image/png;base64,${base64String}`
+				setQrCodeSrc(`data:image/png;base64,${base64String}`)
+				setShowEnableTwoFAModal(true)
 			} catch (error: any) {
 				console.log('error:', error)
 				toast(error.message ? error.message : error, {
@@ -243,6 +246,12 @@ export default function EditProfile() {
 					</SwitchContainer>
 				</TwoFAContainer>
 			</EditProfileContainer>
+			<EnableTwoFAModal
+				showEnableTwoFAModal={showEnableTwoFAModal}
+				setShowEnableTwoFAModal={setShowEnableTwoFAModal}
+				qrCodeSrc={qrCodeSrc}
+				setIsTwoFactorEnabled={setIsTwoFactorEnabled}
+			/>
 		</EditProfileWrapper>
 	)
 }
