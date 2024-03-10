@@ -387,7 +387,6 @@ export class ChatGateway
   async blockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
     try {
       blockUser.user_id = client.userID;
-      blockUser.channel_id = 1;
       await this.usersService.blockUser(blockUser);
       this.logger.log(`User ${client.userID} Blocked ${blockUser.member_id}.`);
     } catch (error) {
@@ -407,7 +406,6 @@ export class ChatGateway
   async unBlockUser(client: SocketWithAuth, blockUser: BlockUserDto) {
     try {
       blockUser.user_id = client.userID;
-      blockUser.channel_id = 1;
       await this.usersService.unBlockUser(blockUser);
       this.logger.log(
         `User ${client.userID} UnBlocked ${blockUser.member_id}.`,

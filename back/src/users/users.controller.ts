@@ -93,6 +93,19 @@ export class UsersController {
     }
   }
 
+  @UseGuards(AuthGuard)
+  @Post('/firstActiveTwoFactor')
+  async firstActiveTwoFactor(@Req() request, @Body() body, @Response() res) {
+    const result = await this.usersService.firstActiveTwoFactor(
+      request.user.id,
+      body.code,
+    );
+    if (result) {
+      return res.status(200).send('Actived');
+    }
+    return res.status(400).send('Fail');
+  }
+
   @Post('upload-avatar')
   @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('avatar'))
