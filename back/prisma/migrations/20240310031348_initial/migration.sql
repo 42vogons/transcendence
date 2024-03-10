@@ -134,6 +134,7 @@ CREATE TABLE "blocklist" (
     "userId" INTEGER NOT NULL,
     "memberId" INTEGER NOT NULL,
     "blockedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "channelId" INTEGER NOT NULL,
 
     CONSTRAINT "blocklist_pkey" PRIMARY KEY ("id")
 );
