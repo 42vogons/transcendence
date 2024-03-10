@@ -1,5 +1,8 @@
 FROM node:latest
 
+ARG FRONT_DOMAIN
+ENV FRONT_DOMAIN=$FRONT_DOMAIN
+
 WORKDIR /srcs
 
 COPY ./ ./

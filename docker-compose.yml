@@ -19,7 +19,10 @@ services:
             - transcendence 
 
     front:
-        build: ./front
+        build:
+            context: ./front
+            args:
+                - FRONT_DOMAIN=${FRONT_DOMAIN}
         image: transcendence_front
         container_name: transcendence_front
         restart: unless-stopped
@@ -35,7 +38,12 @@ services:
             - transcendence 
 
     back:
-        build: ./back
+        build:
+            context: ./back
+            args:
+                - BACK_DOMAIN=${BACK_DOMAIN}
+                - INTRA_URL_TOKEN=${INTRA_URL_TOKEN}
+                - INTRA_URL_PROFILE=${INTRA_URL_PROFILE}
         image: transcendence_back
         container_name: transcendence_back
         restart: unless-stopped
@@ -55,7 +63,7 @@ services:
             - transcendence
         command: >
             sh -c "npx prisma generate && 
-            npx prisma migrate dev --name init && 
+            npx prisma migrate deploy && 
             npm run start"
 
 networks:
