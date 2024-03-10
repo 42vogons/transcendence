@@ -40,7 +40,6 @@ export const Header = styled('header', {
 	left: 0,
 	width: '100%',
 	height: 78,
-	padding: '0 1rem',
 	backgroundColor: '$blue300',
 	borderTopRightRadius: 30,
 	borderBottom: '1px solid $blue100',
@@ -50,12 +49,14 @@ export const Header = styled('header', {
 
 	button: {
 		backgroundColor: 'transparent',
-		border: 'none',
 		display: 'flex',
-		color: '$white',
-		// cursor: 'pointer',
-		height: '100%',
 		alignItems: 'center',
+		color: '$white',
+		cursor: 'pointer',
+		padding: '4px 8px',
+		borderRadius: 16,
+		border: '4px solid transparent',
+		transition: '0.2s',
 
 		p: {
 			marginLeft: '1rem',
@@ -63,6 +64,15 @@ export const Header = styled('header', {
 			fontFamily: 'monospace',
 			fontVariantNnumeric: 'slashed-zero',
 		},
+	},
+
+	'button:hover': {
+		backgroundColor: '$blue100',
+		border: '4px solid rgba(255, 255, 255, 0.4)',
+	},
+
+	'@bp1': {
+		padding: '0 1rem',
 	},
 
 	'@bp3': {

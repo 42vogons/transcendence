@@ -31,8 +31,8 @@ const UpdateUserSchema = z.object({
   username: z
     .string()
     .length(8, { message: 'Username must be exactly 8 characters long' })
-    .regex(/^\w+$/, {
-      message: 'Username must not contain spaces or special characters',
+    .regex(/^[a-zA-Z0-9-]+$/, {
+      message: 'Username must contain only letters, numbers or hyphen',
     }),
 });
 
@@ -46,6 +46,19 @@ export class UsersController {
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
+  }
+
+  @Get('/me')
+  @UseGuards(AuthGuard)
+  async findMe(@Req() request) {
+    const user = await this.usersService.findOne(request.user.id);
+    const myUser = {
+      user_id: user.user_id,
+      username: user.username,
+      avatar_url: user.avatar_url,
+      two_factor_enabled: user.two_factor_enabled,
+    };
+    return myUser;
   }
 
   @Get('/friends')

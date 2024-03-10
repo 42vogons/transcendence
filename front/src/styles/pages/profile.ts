@@ -60,21 +60,49 @@ export const ProfileDataContainer = styled('div', {
 	},
 })
 
-export const ProfileContainer = styled('section', {
+export const ProfileContainer = styled('button', {
 	// height: '100%',
 	width: '100%',
 	display: 'flex',
 	flexDirection: 'column',
 	alignItems: 'center',
+	paddingTop: '1rem',
+	borderRadius: 16,
+	backgroundColor: 'transparent',
+	cursor: 'pointer',
+	border: '2px solid transparent',
+	transition: '0.2s',
+
+	'&:hover': {
+		backgroundColor: '$blue500',
+		border: '2px solid $white',
+
+		'.icon': {
+			display: 'block',
+		},
+	},
 })
 
 export const ProfileImageContainer = styled('div', {
+	marginBottom: 16,
+	position: 'relative',
 	img: {
 		borderRadius: '50%',
 		border: '4px solid $white',
 	},
 
-	marginBottom: 16,
+	'.icon': {
+		transition: '0.2s',
+		position: 'absolute',
+		bottom: 6,
+		right: 8,
+		display: 'none',
+		backgroundColor: '$blue100',
+		color: '$white',
+		padding: 8,
+		borderRadius: 14,
+		border: '2px solid $white',
+	},
 })
 
 export const TitleContainer = styled('div', {

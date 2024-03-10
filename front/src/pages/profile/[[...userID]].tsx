@@ -15,7 +15,7 @@ import {
 } from '@/styles/pages/profile'
 
 import { FaUserAstronaut } from 'react-icons/fa6'
-import { MdViewList } from 'react-icons/md'
+import { MdEdit, MdViewList } from 'react-icons/md'
 import Stats from '@/components/stats'
 import MatchCard from '@/components/matchCard'
 
@@ -133,7 +133,11 @@ export default function Profile() {
 			</Head>
 			{profileData && matchHistoryData ? (
 				<PageContainer>
-					<ProfileDataContainer>
+					<ProfileDataContainer
+						onClick={() => {
+							router.push('/editProfile')
+						}}
+					>
 						<ProfileContainer>
 							<ProfileImageContainer>
 								<Image
@@ -147,6 +151,9 @@ export default function Profile() {
 									placeholder="blur"
 									blurDataURL={userDefaulAvatar.src}
 								/>
+								<div className="icon">
+									<MdEdit size={32} />
+								</div>
 							</ProfileImageContainer>
 							<TitleContainer>
 								<FaUserAstronaut size={40} />

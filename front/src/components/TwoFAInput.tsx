@@ -1,30 +1,39 @@
-import { TwoFAForm } from '@/styles/components/twoFaInput'
-import { FormEvent, useState } from 'react'
+import { Input } from '@/styles/components/TwoFAInput'
+import { ChangeEvent, Ref, forwardRef } from 'react'
 
 interface TwoFAInputProps {
-	sendTwoFA: (value: string) => void
+	twoFaCode: string
+	setTwoFaCode: (state: string) => void
+	hasError?: boolean
 }
 
-export default function TwoFAInput({ sendTwoFA }: TwoFAInputProps) {
-	const [value, setValue] = useState('')
-	function handleSubmit(e: FormEvent<HTMLFormElement>) {
-		e.preventDefault()
-		console.log('2fa: ', value)
-		if (value) {
-			sendTwoFA(value)
+const TwoFAInput = forwardRef(
+	(
+		{ setTwoFaCode, twoFaCode, hasError = false }: TwoFAInputProps,
+		ref: Ref<HTMLInputElement>,
+	) => {
+		function handleChange(e: ChangeEvent<HTMLInputElement>) {
+			const input = e.target.value.replace(/\D/g, '')
+			setTwoFaCode(input)
 		}
-	}
-	return (
-		<TwoFAForm onSubmit={handleSubmit}>
-			<label htmlFor="2fa">2FA code</label>
-			<input
+
+		return (
+			<Input
+				ref={ref}
 				id="2fa"
-				type="number"
-				max={999999}
-				onChange={(e) => setValue(e.target.value)}
-				value={value}
+				type="text"
+				maxLength={6}
+				minLength={6}
+				pattern="[0-9]*"
+				inputMode="numeric"
+				onChange={handleChange}
+				value={twoFaCode}
+				hasError={hasError}
 			/>
-			<button>Send</button>
-		</TwoFAForm>
-	)
-}
+		)
+	},
+)
+
+TwoFAInput.displayName = 'TwoFAInput'
+
+export default TwoFAInput

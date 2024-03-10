@@ -1,4 +1,4 @@
-import TwoFAInput from '@/components/TwoFAInput'
+import TwoFAInputForm from '@/components/TwoFAInputForm'
 import Loading from '@/components/loading'
 import { UserContext } from '@/contexts/UserContext'
 import { api } from '@/services/api'
@@ -93,7 +93,7 @@ export default function Auth() {
 			</Head>
 			<AuthContainer>
 				{isLoading && <Loading size={200} />}
-				{request2FA && <TwoFAInput sendTwoFA={sendCode} />}
+				{request2FA && <TwoFAInputForm sendTwoFA={sendCode} />}
 
 				{/* <button
 					onClick={() => {
