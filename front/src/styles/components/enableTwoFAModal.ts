@@ -1,6 +1,6 @@
 import { styled } from '..'
 
-export const EnableTwoFAModalContainer = styled('div', {
+export const EnableTwoFAModalContainer = styled('form', {
 	overflowY: 'auto',
 
 	'&::-webkit-scrollbar': {
@@ -16,7 +16,7 @@ export const EnableTwoFAModalContainer = styled('div', {
 	flexDirection: 'column',
 	justifyContent: 'space-between',
 	alignItems: 'center',
-	gap: 32,
+	gap: 8,
 	h2: {
 		fontSize: '$2xl',
 		color: '$blue100',
@@ -27,7 +27,28 @@ export const EnableTwoFAModalContainer = styled('div', {
 		},
 	},
 
+	h3: {
+		fontSize: '$md',
+		textAlign: 'center',
+	},
+
+	label: {
+		fontSize: '$xl',
+		fontWeight: 'bold',
+		color: '$gray300',
+
+		'@bp2': {
+			fontSize: '$2xl',
+		},
+	},
+
+	img: {
+		border: '1px solid $blue200',
+		borderRadius: 16,
+	},
+
 	'.buttonsContainer': {
+		marginTop: 16,
 		width: '100%',
 		display: 'flex',
 		flexDirection: 'column-reverse',

@@ -54,7 +54,7 @@ export default function EditProfile() {
 	const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false)
 	const [isUsernameDisabled, setIsUsernameDisabled] = useState(true)
 	const [qrCodeSrc, setQrCodeSrc] = useState('')
-	const [showEnableTwoFAModal, setShowEnableTwoFAModal] = useState(true)
+	const [showEnableTwoFAModal, setShowEnableTwoFAModal] = useState(false)
 
 	async function handleEditUsername() {
 		setIsUsernameDisabled(false)
@@ -98,6 +98,7 @@ export default function EditProfile() {
 				const { data } = await api.post(`/users/activeTwoFactor`)
 				console.log('activeTwoFactor data:', data)
 				setIsTwoFactorEnabled(false)
+				// setQrCodeSrc('')
 			} catch (error: any) {
 				console.log('error:', error)
 				toast(error.message ? error.message : error, {
