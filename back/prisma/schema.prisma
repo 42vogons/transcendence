@@ -148,6 +148,7 @@ model blocklist {
   userId    Int
   memberId  Int
   blockedAt DateTime @default(now())
+  channelId Int
 
   user_blocker users @relation("block_list_blocker", fields: [userId], references: [user_id], onDelete: Cascade)
   user_blocked users @relation("block_list_blocked", fields: [memberId], references: [user_id], onDelete: Cascade)
