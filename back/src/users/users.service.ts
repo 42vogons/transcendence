@@ -132,16 +132,28 @@ export class UsersService {
     if (!user) {
       throw new Error('User not found');
     }
-    user.two_factor_enabled = !user.two_factor_enabled;
-    if (user.two_factor_enabled) {
-      const { secret, otpauthUrl } =
-        await this.twoFactorAutenticateService.generateSecret(user.email);
-      user.token_secret = secret;
-      await this.update(user.user_id, user);
-      return { enabled: true, otpauthUrl };
-    } else {
-      await this.update(user.user_id, user);
-      return { enabled: false };
+    const { secret, otpauthUrl } =
+      await this.twoFactorAutenticateService.generateSecret(user.email);
+    user.token_secret = secret;
+    await this.update(user.user_id, user);
+    return { enabled: true, otpauthUrl };
+  }
+
+  async firstActiveTwoFactor(user_id: number, code: string) {
+    const user = await this.findOne(user_id);
+    if (!user) {
+      throw new Error('User not found');
     }
+
+    const valid =
+      this.twoFactorAutenticateService.isTwoFactorAuthenticationCodeValid(
+        code,
+        user.token_secret,
+      );
+    if (valid) {
+      user.two_factor_enabled = !user.two_factor_enabled;
+      await this.update(user.user_id, user);
+    }
+    return { two_factor: valid };
   }
 }
