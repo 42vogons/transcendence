@@ -31,7 +31,6 @@ export class UsersService {
   constructor(
     private readonly repository: UsersRepository,
     private readonly twoFactorAutenticateService: TwoFactorAutenticateService,
-    private readonly loginService: LoginService,
   ) {}
 
   createNewUser(profile: any) {
