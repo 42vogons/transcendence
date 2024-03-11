@@ -24,7 +24,10 @@ export class MatchHistoryRespository {
 					player2_user_id: userID
 				}
 			]
-		}
+		},
+    orderBy: {
+      history_id: 'desc',
+    },
 	})
 	return allHistory
   }
