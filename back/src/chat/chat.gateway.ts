@@ -115,11 +115,7 @@ export class ChatGateway
         client.userID,
         channelMembers,
       );
-      msgs.forEach(async msg => {
-        msg.username = await this.usersService.findUsernameByUserID(
-          msg.sender_id,
-        );
-      });
+
       const channel = await this.channelService.findChannel(
         channelMessageDto.channel_id,
       );
