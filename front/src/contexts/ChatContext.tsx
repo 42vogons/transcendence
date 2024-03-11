@@ -73,6 +73,8 @@ interface ChatContextType {
 	hasPriveleges: (userID: number, allowedRoles: string[]) => boolean
 	getUserStatus: (userID: number) => string
 	isUserBlocked: (userID: number) => boolean
+	isUserKicked: (userID: number) => boolean
+	isUserBanned: (userID: number) => boolean
 	closeChatSocket: () => void
 }
 
@@ -365,7 +367,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		const member = (activeChannelData as iChannelData).channelMembers.find(
 			(member) => member.user_id === userID,
 		)
-		console.log('hasPriveleges:', userID, member)
 		return (
 			!!member && !!member.status && allowedRoles.includes(member?.status)
 		)
@@ -378,7 +379,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		if (member) {
 			return member.status
 		} else {
-			return 'undefined'
+			return ''
 		}
 	}
 
@@ -388,6 +389,29 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		)
 		if (member) {
 			return member.blocked
+		} else {
+			return false
+		}
+	}
+
+	function isUserKicked(userID: number) {
+		const member = (activeChannelData as iChannelData).channelMembers.find(
+			(member) => member.user_id === userID,
+		)
+		if (member) {
+			return false
+		} else {
+			return true
+		}
+	}
+
+	function isUserBanned(userID: number) {
+		const member = (activeChannelData as iChannelData).channelMembers.find(
+			(member) => member.user_id === userID,
+		)
+
+		if (member && member.users.action.includes('ban')) {
+			return true
 		} else {
 			return false
 		}
@@ -434,6 +458,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				hasPriveleges,
 				getUserStatus,
 				isUserBlocked,
+				isUserKicked,
+				isUserBanned,
 			}}
 		>
 			{children}
