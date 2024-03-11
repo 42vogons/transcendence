@@ -449,6 +449,8 @@ export class GameService {
     match.ball.direction.y = Math.floor(Math.random() * 100) % 2 == 0 ? 1 : -1;
 
     if (match.score.p1 === this.maxScore || match.score.p2 == this.maxScore) {
+      this.updatePlayerUsernameByUserID(match.player1.userID)
+      this.updatePlayerUsernameByUserID(match.player2.userID)
       match.status = 'end';
     }
   }
@@ -602,14 +604,14 @@ export class GameService {
 
     const player1 = {
       userID: match.player1.userID,
-      username: match.player1.username,
+      username: user1.username,
       score: match.score.p1,
       avatarUrl: user1.avatar_url ?? '',
     };
 
     const player2 = {
       userID: match.player2.userID,
-      username: match.player2.username,
+      username: user2.username,
       score: match.score.p2,
       avatarUrl: user2.avatar_url ?? '',
     };
@@ -639,6 +641,8 @@ export class GameService {
   ) {
     const match = this.findMatchByRoomID(matchData.roomID);
     if (!match || match.isResumed) return;
+    this.updatePlayerUsernameByUserID(match.player1.userID)
+    this.updatePlayerUsernameByUserID(match.player2.userID)
 
     match.status = 'end';
     match.quitterID = client ? client.userID : match.pausedByUserID;
@@ -683,6 +687,8 @@ export class GameService {
     match.pausedByUserID = undefined;
 
     this.updateMatch(match);
+    this.updatePlayerUsernameByUserID(match.player1.userID)
+    this.updatePlayerUsernameByUserID(match.player2.userID)
     this.gameInProgress(player.roomID, io);
   }
 
@@ -953,5 +959,30 @@ export class GameService {
     const user = await this.usersRespository.findOne(userID);
     if (user.status === 'offline') return;
     await this.setStatus(userID, status);
+  }
+
+  async updatePlayerUsernameByUserID(userID: number) {
+    const user = await this.usersRespository.findOne(userID)
+    let player = this.findPlayerByUserID(userID)
+    if (!player)
+      return;
+    if (player.username !== user.username) {
+      player.username = user.username
+      this.updatePlayer(player)
+      if (player.roomID !== '') {
+        let room = this.findRoomByRoomID(player.roomID)
+        room.users[0].userID === player.userID ?
+          room.users[0].username = player.username :
+          room.users[1].username = player.username
+        this.updateRoom(room)
+        let match = this.findMatchByRoomID(player.roomID)
+        if (match) {
+          match.player1.userID === player.userID ?
+            match.player1.username = player.username :
+            match.player2.username = player.username
+          this.updateMatch(match)
+        }
+      }
+    }
   }
 }
