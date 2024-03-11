@@ -40,8 +40,14 @@ export class ChannelService {
     return hash;
   }
 
-  async validatePassword(password: string, hash: string): Promise<boolean> {
-    return await bcrypt.compare(password, hash);
+  async validatePassword(password: string, hash: string) {
+    if (
+      password == null ||
+      hash == null ||
+      !(await bcrypt.compare(password, hash))
+    ) {
+      throw new UnauthorizedException('Invalid password.');
+    }
   }
 
   async createDirect(
@@ -106,12 +112,12 @@ export class ChannelService {
     const userName = await this.userRepository.findUsernameByUserID(userId);
     const msg = `Channel created by ${userName}`;
     this.logger.log(msg);
-    this.sendBroadCast(channel.channel_id, msg);
+    await this.sendBroadCast(channel.channel_id, msg);
     const member = new MemberDto();
     member.channel_id = channel.channel_id;
     member.status = ChannelMemberStatus.OWNER;
     member.member_id = userId;
-    this.addMember(member, userId);
+    await this.addMember(member, userId);
     return channel.channel_id;
   }
 
@@ -168,12 +174,12 @@ export class ChannelService {
       if (member) {
         throw new ConflictException('The member is already in the channel.');
       }
-      this.repository.addUserToChannel(
+      await this.repository.addUserToChannel(
         memberDto.member_id,
         memberDto.channel_id,
         memberDto.status,
       );
-      this.repository.adminActionRemoveKick(
+      await this.repository.adminActionRemoveKick(
         memberDto.member_id,
         memberDto.channel_id,
       );
@@ -220,10 +226,6 @@ export class ChannelService {
         return 'Member muted.';
       }
       if (adminActionDto.action === AdminActionType.BANNED) {
-        /*await this.repository.removeMemberChannel(
-          adminActionDto.member_id,
-          adminActionDto.channel_id,
-        );*/
         return 'Member banned.';
       }
     } else {
@@ -297,7 +299,6 @@ export class ChannelService {
 
   async joinChannel(channelDto: ChannelDto, userId: any) {
     const channel = await this.repository.findChannel(channelDto.channel_id);
-
     const member = await this.repository.checkMember(
       userId,
       channelDto.channel_id,
@@ -320,38 +321,29 @@ export class ChannelService {
     if (member && !isKicked) {
       throw new ConflictException('You are already a member of the channel.');
     }
-    let validPassword = true;
     if (channel.type === ChannelType.PROTECTED) {
-      if (channelDto.password == null) {
-        throw new UnauthorizedException('Invalid password.');
-      }
-      validPassword = await this.validatePassword(
-        channelDto.password,
-        channel.password,
-      );
+      await this.validatePassword(channelDto.password, channel.password);
     }
-    if (!validPassword) {
-      throw new UnauthorizedException('Invalid password.');
-    }
-    if (
-      (validPassword || channel.type === ChannelType.PUBLIC) &&
-      channel.type !== ChannelType.PRIVATE
-    ) {
-      await this.repository.addUserToChannel(
-        userId,
-        channelDto.channel_id,
-        ChannelMemberStatus.MEMBER,
-      );
 
-      this.repository.adminActionRemoveKick(userId, channelDto.channel_id);
-      const memberName = await this.userRepository.findUsernameByUserID(userId);
-      const msg = `${memberName} joined`;
-      this.logger.log(msg + ' on channel ' + channelDto.channel_id);
-      await this.sendBroadCast(channelDto.channel_id, msg);
-      return 'Joined the channel.';
-    } else {
-      throw new UnauthorizedException('Unable to join the channel.');
+    if (
+      channel.type === ChannelType.PRIVATE ||
+      channel.type === ChannelType.DIRECT
+    ) {
+      throw new ConflictException("You can't join on this channel .");
     }
+
+    await this.repository.addUserToChannel(
+      userId,
+      channelDto.channel_id,
+      ChannelMemberStatus.MEMBER,
+    );
+
+    await this.repository.adminActionRemoveKick(userId, channelDto.channel_id);
+    const memberName = await this.userRepository.findUsernameByUserID(userId);
+    const msg = `${memberName} joined`;
+    this.logger.log(msg + ' on channel ' + channelDto.channel_id);
+    await this.sendBroadCast(channelDto.channel_id, msg);
+    return 'Joined the channel.';
   }
 
   async changePassword(password: string, userId: any, channelId: number) {
