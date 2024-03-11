@@ -112,7 +112,7 @@ export class GameService {
     this.removeUserFromRoom(room.ID, player.userID);
     room.users.push(player);
     client.join(room.ID);
-    io.to(client.id).emit('status_changed', `playing`);
+    client.emit('status_changed', `playing`);
     io.to(match.player1.roomID).emit('match_updated', match);
   }
 
@@ -136,7 +136,7 @@ export class GameService {
     this.removeUserFromRoom(player.roomID, leavingPlayer.userID);
     (player.roomID = ''), (player.status = 'idle');
     this.updatePlayer(player);
-    io.to(client.id).emit('status_changed', `connected`);
+    client.emit('status_changed', `connected`);
   }
 
   reconnectUserWhenStatusIsSearching(
@@ -148,7 +148,7 @@ export class GameService {
     player.roomID = '';
     player.status = 'idle';
     this.updatePlayer(player);
-    io.to(client.id).emit('status_changed', `connected`);
+    client.emit('status_changed', `connected`);
   }
 
   populateUserList(
@@ -162,10 +162,11 @@ export class GameService {
         client.username,
       );
       this.players.push(player);
-      io.to(client.id).emit('status_changed', `connected`);
+      client.emit('status_changed', `connected`);
     } else {
       const player = this.findPlayerByUserID(client.userID);
       player.isReconnect = true;
+      player.socketID = client.id;
       this.updatePlayer(player);
       if (player.status === 'playing') {
         this.reconnectUserWhenStatusIsPlaying(player, client, io);
@@ -760,7 +761,7 @@ export class GameService {
     } else if (player.status === 'readyToPlay') {
       const remainingPlayer =
         this.disconnectPlayerWhenStatusIsReadyToPlay(player);
-      io.to(remainingPlayer.socketID).emit('status_changed', 'searching');
+      io.to(this.getSocketIdByUserId(remainingPlayer.userID, io)).emit('status_changed', 'searching');
     } else if (player.status === 'searching') {
       this.deleteRoomByRoomID(player.roomID);
       this.removePlayerFromList(player.userID);
@@ -854,10 +855,7 @@ export class GameService {
     client.emit('status_changed', 'awaiting');
 
     //todo checar se ta emitindo no deploy
-    const socketID = this.getSocketIdByUserId(playerGuest.userID, io);
-    // console.log('playerGuestSocketId:', playerGuest.socketID);
-    // console.log('realSocketID:', socketID);
-    io.to(socketID).emit('request_game', {
+    io.to(this.getSocketIdByUserId(playerGuest.userID, io)).emit('request_game', {
       type: 'request',
       username: playerOwner.username,
     });
@@ -998,6 +996,6 @@ export class GameService {
         return socketId;
       }
     }
-    return null; // If userID is not found in any socket
+    return null;
   }
 }
