@@ -27,6 +27,7 @@ export default function Home() {
 		exitQueue,
 		playing,
 		resume,
+		giveUp,
 		matchResult,
 		isMatchCompleted,
 		clearMatchCompleted,
@@ -154,7 +155,12 @@ export default function Home() {
 					)}
 
 					<div className="buttonsContainer">
-						<Button buttonType="cancel">
+						<Button
+							buttonType="cancel"
+							onMouseUp={() => {
+								giveUp()
+							}}
+						>
 							<MdClose size={40} /> Give up
 						</Button>
 						{match?.pausedByUserID === user?.userID && (
