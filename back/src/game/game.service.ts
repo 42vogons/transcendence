@@ -854,7 +854,7 @@ export class GameService {
     client.emit('status_changed', 'awaiting');
     io.to(playerGuest.socketID).emit('request_game', {
       type: 'request',
-      username: client.username,
+      username: playerOwner.username,
     });
     setTimeout(() => {
       this.cancelRequestMatch(io, playerOwner.userID);
@@ -867,6 +867,8 @@ export class GameService {
   ) {
     const playerOwner = this.findPlayerByUserID(userID);
     const room = this.findRoomByRoomID(playerOwner.roomID);
+    if (!room)
+      return;
     const playerGuest = this.findPlayerByUserID(
       room.users[0].userID === playerOwner.userID
         ? room.users[1].userID
