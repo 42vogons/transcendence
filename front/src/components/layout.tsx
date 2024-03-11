@@ -59,18 +59,19 @@ export default function Layout({ children }: iLayoutProps) {
 
 	const router = useRouter()
 
+	const { handleLogout } = useContext(UserContext)
+
 	const [currentPath, setCurrentPath] = useState('')
 	const [showSidePanel, setShowSidePanel] = useState(false)
 	const [showNewChatModal, setShowNewChatModal] = useState(false)
 	const [showNewFriendModal, setShowNewFriendModal] = useState(false)
 	const [showNewChannelModal, setShowNewChannelModal] = useState(false)
 	const [showJoinChannelModal, setShowJoinChannelModal] = useState(false)
+	const [activePanel, setActivePanel] = useState<activePanelType>('friends')
 
 	useEffect(() => {
 		setCurrentPath(router.asPath)
 	}, [router.asPath])
-
-	const [activePanel, setActivePanel] = useState<activePanelType>('friends')
 
 	function toggleSidePanel() {
 		setShowSidePanel((previousState) => !previousState)
@@ -159,7 +160,7 @@ export default function Layout({ children }: iLayoutProps) {
 			icon: <BiLogOut size={iconSize} />,
 			title: 'Logout',
 			handleOnClick: () => {
-				console.log('logout')
+				handleLogout()
 			},
 		},
 	]

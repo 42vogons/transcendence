@@ -51,7 +51,7 @@ import {
 	BiSolidShieldX,
 	BiVolumeMute,
 } from 'react-icons/bi'
-import { MdBlock } from 'react-icons/md'
+import { MdBlock, MdClose } from 'react-icons/md'
 import ConfirmationModal from '@/components/modals/confirmationModal'
 import AddUserToChannelModal from '@/components/modals/addUserToChannelModal'
 import { GameContext } from '@/contexts/GameContext'
@@ -100,6 +100,8 @@ export default function Chat() {
 		hasPriveleges,
 		getUserStatus,
 		isUserBlocked,
+		isUserKicked,
+		isUserBanned,
 	} = useContext(ChatContext)
 
 	const messages = activeChannelData?.msgs
@@ -340,17 +342,37 @@ export default function Chat() {
 												<SenderMenuWrapper>
 													<SenderMenu
 														title={
-															'Channel ' +
-															capitalize(
-																getUserStatus(
-																	message.sender_id,
-																),
+															getUserStatus(
+																message.sender_id,
 															)
+																? isUserBanned(
+																		message.sender_id,
+																  )
+																	? 'Banned'
+																	: 'Channel ' +
+																	  capitalize(
+																			getUserStatus(
+																				message.sender_id,
+																			),
+																	  )
+																: 'Not in channel anymore'
 														}
 													>
-														{getUserStatus(
+														{isUserKicked(
 															message.sender_id,
-														) === 'owner' ? (
+														) ? (
+															<MdClose
+																size={28}
+															/>
+														) : isUserBanned(
+																message.sender_id,
+														  ) ? (
+															<FaUserSlash
+																size={28}
+															/>
+														) : getUserStatus(
+																message.sender_id,
+														  ) === 'owner' ? (
 															<GiQueenCrown
 																size={28}
 															/>
@@ -427,6 +449,18 @@ export default function Chat() {
 																		'owner',
 																		'admin',
 																	],
+																) &&
+																!isUserKicked(
+																	message.sender_id,
+																) &&
+																!isUserBanned(
+																	message.sender_id,
+																) &&
+																hasPriveleges(
+																	Number(
+																		user?.userID,
+																	),
+																	['owner'],
 																) && (
 																	<>
 																		<MenuItem>
