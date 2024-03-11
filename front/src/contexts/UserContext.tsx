@@ -2,7 +2,11 @@
 import { login, logout } from '@/reducers/User/Action'
 import { UserReducer, isDateExpired } from '@/reducers/User/Reducer'
 import { iUser } from '@/reducers/User/Types'
+import { api } from '@/services/api'
+import { delayMs } from '@/utils/functions'
+import { useRouter } from 'next/router'
 import { ReactNode, createContext, useEffect, useReducer } from 'react'
+import { toast } from 'react-toastify'
 
 interface UserContextType {
 	user: iUser | undefined
@@ -43,16 +47,27 @@ export function UserProvider({ children }: UserProviderProps) {
 
 	const { user } = state
 
-	// function handleUpdateUser() {
-	// 	dispatch(updateUser())
-	// }
+	const router = useRouter()
 
 	function handleLogin(user: iUser | undefined) {
 		dispatch(login(user))
 	}
 
-	function handleLogout() {
-		dispatch(logout())
+	async function handleLogout() {
+		try {
+			await api.post('/logout')
+			router.push('/login')
+			await delayMs(100)
+			dispatch(logout())
+			toast('Logout successful.', {
+				type: 'success',
+			})
+		} catch (error) {
+			console.log('error:', error)
+			toast('An error ocurred.', {
+				type: 'error',
+			})
+		}
 	}
 
 	useEffect(() => {
