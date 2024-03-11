@@ -1,6 +1,6 @@
 import { GameContext } from '@/contexts/GameContext'
 import { Ball, CourtContainer, Paddle, Score } from '@/styles/components/game'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 interface Ball {
 	x: number
@@ -12,9 +12,21 @@ interface Ball {
 }
 
 export default function Game() {
-	const height = 458
-	const width = 928
-	const { match, sendKey } = useContext(GameContext)
+	const { match, sendKey, containerWidth, containerHeight } =
+		useContext(GameContext)
+
+	const [width, setWidth] = useState(928)
+	const [height, setHeight] = useState(458)
+
+	function getScoreDistance() {
+		if (width >= 900) {
+			return Math.round(-0.1 * height)
+		} else if (width >= 400) {
+			return Math.round(-0.2 * height)
+		} else {
+			return Math.round(-0.3 * height)
+		}
+	}
 
 	useEffect(() => {
 		const sendKeyEvent = (e: KeyboardEvent) => {
@@ -51,12 +63,60 @@ export default function Game() {
 		}
 	}, [sendKey])
 
+	useEffect(() => {
+		if (containerWidth > containerHeight) {
+			console.log('width maior')
+			if (containerHeight > 1000) {
+				setWidth(928)
+				setHeight(458)
+			} else {
+				setWidth(Math.round(0.7 * containerHeight) + 8)
+				setHeight(Math.round((0.7 * containerHeight * 450) / 920) + 8)
+			}
+		} else {
+			console.log('height maior')
+			if (containerWidth > 1000) {
+				setWidth(928)
+				setHeight(458)
+			} else {
+				if (containerWidth >= 320) {
+					setWidth(Math.round(0.8 * containerWidth) + 8)
+					setHeight(
+						Math.round((0.8 * containerWidth * 450) / 920) + 8,
+					)
+				} else {
+					setWidth(Math.round(0.7 * containerWidth) + 8)
+					setHeight(
+						Math.round((0.7 * containerWidth * 450) / 920) + 8,
+					)
+				}
+			}
+		}
+	}, [containerWidth, containerHeight])
+
 	return (
-		<CourtContainer css={{ height, width }}>
-			<Score>
+		<CourtContainer
+			css={{
+				height,
+				width,
+				borderRadius: width >= 928 ? 24 : width >= 600 ? 16 : 0,
+			}}
+		>
+			<Score
+				playerType={'first'}
+				gameSize={width >= 400 ? 'l' : 's'}
+				css={{ top: getScoreDistance() }}
+			>
 				<p>
 					{match?.player1?.username} <span>{match?.score?.p1}</span>
 				</p>
+			</Score>
+
+			<Score
+				playerType={'second'}
+				gameSize={width >= 400 ? 'l' : 's'}
+				css={{ bottom: getScoreDistance() - (width >= 400 ? 52 : 36) }}
+			>
 				<p>
 					{match?.player2?.username} <span>{match?.score?.p2}</span>
 				</p>

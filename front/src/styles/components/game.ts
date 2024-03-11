@@ -4,7 +4,7 @@ export const CourtContainer = styled('div', {
 	position: 'relative',
 	backgroundColor: '$blue100',
 	border: '4px solid rgba( 255, 255, 255, 0.9)',
-	borderRadius: 24,
+	// borderRadius: 24,
 
 	'&:before': {
 		position: 'absolute',
@@ -33,22 +33,21 @@ export const Ball = styled('div', {
 
 export const Score = styled('div', {
 	position: 'absolute',
-	display: 'flex',
-	flexDirection: 'row',
-	justifyContent: 'space-around',
-	alignItems: 'center',
-	top: -100,
+	// display: 'flex',
+	// flexDirection: 'row',
+	// justifyContent: 'space-around',
+	// alignItems: 'center',
 	width: '100%',
-	fontSize: '$3xl',
 	fontFamily: 'monospace',
 	fontVariantNnumeric: 'slashed-zero',
 	color: '$blue100',
 	outline: 'none',
 	fontWeight: 'bold',
+	left: '50%',
+	transform: 'translate(-50%, -50%)',
 
 	span: {
 		backgroundColor: '$white',
-		fontSize: '4rem',
 		lineHeight: 1,
 		padding: '8px 16px 4px',
 		borderRadius: '0 8px 8px 0',
@@ -59,20 +58,50 @@ export const Score = styled('div', {
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'space-between',
-		gap: 32,
 		borderRadius: 16,
 		border: '4px solid $white',
 		paddingLeft: '1rem',
 		outline: 'none',
 	},
+	variants: {
+		playerType: {
+			first: {},
+			second: {
+				p: {
+					flexDirection: 'row-reverse',
+					paddingLeft: '0',
+					paddingRight: '1rem',
 
-	'p~p': {
-		flexDirection: 'row-reverse',
-		paddingLeft: '0',
-		paddingRight: '1rem',
-
-		span: {
-			borderRadius: '8px 0 0 8px',
+					span: {
+						borderRadius: '8px 0 0 8px',
+					},
+				},
+			},
+		},
+		gameSize: {
+			l: {
+				fontSize: '$xl',
+				span: {
+					fontSize: '2rem',
+				},
+				p: {
+					gap: 32,
+					// borderRadius: 16,
+					// paddingLeft: '1rem',
+				},
+			},
+			s: {
+				fontSize: 16,
+				span: {
+					fontSize: 'xl',
+					padding: '8px 4px 4px',
+				},
+				p: {
+					gap: 0,
+					// borderRadius: 16,
+					// paddingLeft: '1rem',
+				},
+			},
 		},
 	},
 })

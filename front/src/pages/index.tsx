@@ -3,6 +3,7 @@ import { ReactElement, useContext, useEffect } from 'react'
 import { FaCheck, FaGamepad, FaUserAstronaut, FaX } from 'react-icons/fa6'
 
 import {
+	GameContainer,
 	Header,
 	HomeContainer,
 	LoadingContainer,
@@ -33,6 +34,8 @@ export default function Home() {
 		isMatchCompleted,
 		clearMatchCompleted,
 		sendKey,
+		PageContainerRef,
+		handleUpdateDimensions,
 	} = useContext(GameContext)
 
 	const { user } = useContext(UserContext)
@@ -48,6 +51,16 @@ export default function Home() {
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [status, isMatchCompleted])
+
+	useEffect(() => {
+		if (router.isReady && PageContainerRef && PageContainerRef.current) {
+			const { offsetWidth, offsetHeight } =
+				PageContainerRef.current as unknown as HTMLElement
+
+			handleUpdateDimensions([offsetWidth, offsetHeight])
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [router.isReady])
 
 	return (
 		<>
@@ -72,74 +85,76 @@ export default function Home() {
 						</p>
 					</button>
 				</Header>
-				{isMatchCompleted && (
-					<LoadingContainer>
-						{/* <Loading size={200} /> */}
-						<h3>Game Over</h3>
-						<p>
-							You{' '}
-							{matchResult.winnerID === user?.userID
-								? 'won'
-								: 'lost'}
-						</p>
-						<Button
-							buttonType={
-								matchResult.winnerID === user?.userID
-									? 'default'
-									: 'cancel'
-							}
-							onMouseUp={() => clearMatchCompleted()}
+				<GameContainer>
+					{isMatchCompleted && (
+						<LoadingContainer>
+							{/* <Loading size={200} /> */}
+							<h3>Game Over</h3>
+							<p>
+								You{' '}
+								{matchResult.winnerID === user?.userID
+									? 'won'
+									: 'lost'}
+							</p>
+							<Button
+								buttonType={
+									matchResult.winnerID === user?.userID
+										? 'default'
+										: 'cancel'
+								}
+								onMouseUp={() => clearMatchCompleted()}
+							>
+								<FaCheck /> OK
+							</Button>
+						</LoadingContainer>
+					)}
+					{!isMatchCompleted && status === 'connected' && (
+						<PlayButton
+							onClick={() => {
+								joinQueue()
+							}}
 						>
-							<FaCheck /> OK
-						</Button>
-					</LoadingContainer>
-				)}
-				{!isMatchCompleted && status === 'connected' && (
-					<PlayButton
-						onClick={() => {
-							joinQueue()
-						}}
-					>
-						<FaGamepad size={40} />
-						Play
-					</PlayButton>
-				)}
-				{!isMatchCompleted && status === 'searching' && (
-					<LoadingContainer>
-						<Loading size={200} />
-						<h3>Looking for a match...</h3>
-						<Button
-							buttonType="cancel"
-							onMouseUp={() => exitQueue()}
-						>
-							<MdClose size={40} />
-							Cancel
-						</Button>
-					</LoadingContainer>
-				)}
+							<FaGamepad size={40} />
+							Play
+						</PlayButton>
+					)}
+					{!isMatchCompleted && status === 'searching' && (
+						<LoadingContainer>
+							<Loading size={200} />
+							<h3>Looking for a match...</h3>
+							<Button
+								buttonType="cancel"
+								onMouseUp={() => exitQueue()}
+							>
+								<MdClose size={40} />
+								Cancel
+							</Button>
+						</LoadingContainer>
+					)}
 
-				{!isMatchCompleted && status === 'readyToPlay' && (
-					<LoadingContainer>
-						{/* <Loading size={200} /> */}
-						<h3>Ready?</h3>
-						<Button onMouseUp={() => playing()}>
-							<FaCheck /> Ready
-						</Button>
-					</LoadingContainer>
-				)}
+					{!isMatchCompleted && status === 'readyToPlay' && (
+						<LoadingContainer>
+							{/* <Loading size={200} /> */}
+							<h3>Ready?</h3>
+							<Button onMouseUp={() => playing()}>
+								<FaCheck /> Ready
+							</Button>
+						</LoadingContainer>
+					)}
 
-				{!isMatchCompleted && status === 'awaiting' && (
-					<LoadingContainer>
-						<h3>Awaiting for the other player.</h3>
-						<Button
-							buttonType="cancel"
-							onMouseUp={() => cancelRequestMatch()}
-						>
-							<FaX /> cancel
-						</Button>
-					</LoadingContainer>
-				)}
-				{!isMatchCompleted && status === 'playing' && <Game />}
+					{!isMatchCompleted && status === 'awaiting' && (
+						<LoadingContainer>
+							<h3>Awaiting for the other player.</h3>
+							<Button
+								buttonType="cancel"
+								onMouseUp={() => cancelRequestMatch()}
+							>
+								<FaX /> cancel
+							</Button>
+						</LoadingContainer>
+					)}
+					{!isMatchCompleted && status === 'playing' && <Game />}
+				</GameContainer>
 			</HomeContainer>
 			<Modal
 				isOpen={

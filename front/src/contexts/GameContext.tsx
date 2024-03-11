@@ -4,16 +4,19 @@ import {
 	matchUpdate,
 	requestGame,
 	statusChange,
+	updateDimensions,
 } from '@/reducers/Game/Action'
 import { GameReducer } from '@/reducers/Game/Reducer'
 import { MatchData, MatchResult, RequestGame } from '@/reducers/Game/Types'
 import { useRouter } from 'next/router'
 import {
+	MutableRefObject,
 	ReactNode,
 	createContext,
 	useContext,
 	useEffect,
 	useReducer,
+	useRef,
 } from 'react'
 import { toast } from 'react-toastify'
 import socketClient from 'socket.io-client'
@@ -27,6 +30,9 @@ interface GameContextType {
 	matchResult: MatchResult
 	isMatchCompleted: boolean
 	gameRequest: RequestGame
+	containerWidth: number
+	containerHeight: number
+	PageContainerRef: MutableRefObject<null>
 	sendKey: (type: string, key: string) => void
 	joinQueue: () => void
 	exitQueue: () => void
@@ -38,6 +44,7 @@ interface GameContextType {
 	cancelRequestMatch: () => void
 	resetGameRequest: () => void
 	clearMatchCompleted: () => void
+	handleUpdateDimensions: (dimensions: number[]) => void
 	closeGameSocket: () => void
 }
 
@@ -61,12 +68,24 @@ export function GameProvider({ children }: GameProviderProps) {
 		matchResult: {} as MatchResult,
 		isMatchCompleted: false,
 		gameRequest: {} as RequestGame,
+		containerWidth: 0,
+		containerHeight: 0,
 	})
 
 	const { user } = useContext(UserContext)
 	const { getFriends } = useContext(ChatContext)
 
-	const { status, match, matchResult, isMatchCompleted, gameRequest } = state
+	const PageContainerRef = useRef(null)
+
+	const {
+		status,
+		match,
+		matchResult,
+		isMatchCompleted,
+		gameRequest,
+		containerWidth,
+		containerHeight,
+	} = state
 
 	const router = useRouter()
 
@@ -202,6 +221,11 @@ export function GameProvider({ children }: GameProviderProps) {
 		dispatch(clearMatch())
 	}
 
+	function handleUpdateDimensions(dimensions: number[]) {
+		console.log('dimensions:', dimensions)
+		dispatch(updateDimensions(dimensions))
+	}
+
 	function closeGameSocket() {
 		socket.close()
 	}
@@ -212,6 +236,8 @@ export function GameProvider({ children }: GameProviderProps) {
 				status,
 				match,
 				matchResult,
+				containerWidth,
+				containerHeight,
 				isMatchCompleted,
 				sendKey,
 				joinQueue,
@@ -225,7 +251,9 @@ export function GameProvider({ children }: GameProviderProps) {
 				cancelRequestMatch,
 				resetGameRequest,
 				clearMatchCompleted,
+				handleUpdateDimensions,
 				closeGameSocket,
+				PageContainerRef,
 			}}
 		>
 			{children}

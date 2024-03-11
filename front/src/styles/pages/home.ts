@@ -9,7 +9,6 @@ export const HomeContainer = styled('main', {
 	width: '100%',
 	display: 'flex',
 	flexDirection: 'column',
-	justifyContent: 'center',
 	alignItems: 'center',
 	fontSize: '$2xl',
 	borderRadius: 32,
@@ -35,9 +34,6 @@ export const HomeContainer = styled('main', {
 })
 
 export const Header = styled('header', {
-	position: 'absolute',
-	top: 0,
-	left: 0,
 	width: '100%',
 	height: 78,
 	backgroundColor: '$blue300',
@@ -78,6 +74,15 @@ export const Header = styled('header', {
 	'@bp3': {
 		borderTopRightRadius: 26,
 	},
+})
+
+export const GameContainer = styled('div', {
+	height: '100%',
+	width: '100%',
+	display: 'flex',
+	flexDirection: 'column',
+	alignItems: 'center',
+	justifyContent: 'center',
 })
 
 const pulse = keyframes({

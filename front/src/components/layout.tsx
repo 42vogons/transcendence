@@ -60,6 +60,7 @@ export default function Layout({ children }: iLayoutProps) {
 	const router = useRouter()
 
 	const { handleLogout } = useContext(UserContext)
+	const { handleUpdateDimensions, PageContainerRef } = useContext(GameContext)
 
 	const [currentPath, setCurrentPath] = useState('')
 	const [showSidePanel, setShowSidePanel] = useState(false)
@@ -85,23 +86,20 @@ export default function Layout({ children }: iLayoutProps) {
 
 	const ref = useOutsideMenuClick(closeSidePanel)
 
-	const PageContainerRef = useRef(null)
-
 	useEffect(() => {
 		function handleResize() {
 			if (PageContainerRef) {
-				// console.log(
-				// 	'PageContainerRef:',
-				// 	(PageContainerRef.current as unknown as HTMLElement)
-				// 		?.offsetWidth,
-				// 	(PageContainerRef.current as unknown as HTMLElement)
-				// 		?.offsetHeight,
-				// )
+				if (PageContainerRef.current) {
+					const { offsetWidth, offsetHeight } =
+						PageContainerRef.current as unknown as HTMLElement
+
+					handleUpdateDimensions([offsetWidth, offsetHeight])
+				}
 			}
 
-			if (window.innerWidth < 1024) {
-				setShowSidePanel(false)
+			if (window.innerWidth <= 1024) {
 				setActivePanel('menu')
+				setShowSidePanel(false)
 			} else {
 				setShowSidePanel(true)
 				if (router.asPath.includes('/chat')) {
@@ -112,8 +110,10 @@ export default function Layout({ children }: iLayoutProps) {
 			}
 		}
 		handleResize()
+
 		window.addEventListener('resize', handleResize)
 		return () => window.removeEventListener('resize', handleResize)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [router.asPath])
 
 	const menuItems: iMenuItemType[] = [

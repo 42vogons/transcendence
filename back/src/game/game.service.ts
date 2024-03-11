@@ -20,7 +20,7 @@ export class GameService {
   private players: UserData[] = [];
   private rooms: Room[] = [];
   private matchs: MatchData[] = [];
-  private maxScore = 5;
+  private maxScore = 5000;
   private court = { width: 200, height: 100 };
   private paddle = {
     width: this.court.width * 0.01,
@@ -139,11 +139,7 @@ export class GameService {
     client.emit('status_changed', `connected`);
   }
 
-  reconnectUserWhenStatusIsSearching(
-    player: UserData,
-    client: SocketWithAuth,
-    io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
-  ) {
+  reconnectUserWhenStatusIsSearching(player: UserData, client: SocketWithAuth) {
     this.deleteRoomByRoomID(player.roomID);
     player.roomID = '';
     player.status = 'idle';
@@ -173,7 +169,7 @@ export class GameService {
       } else if (player.status === 'readyToPlay') {
         this.reconnectUserWhenStatusIsReadyToPlay(player, client, io);
       } else if (player.status === 'searching') {
-        this.reconnectUserWhenStatusIsSearching(player, client, io);
+        this.reconnectUserWhenStatusIsSearching(player, client);
       }
     }
     return this.players;
@@ -761,7 +757,10 @@ export class GameService {
     } else if (player.status === 'readyToPlay') {
       const remainingPlayer =
         this.disconnectPlayerWhenStatusIsReadyToPlay(player);
-      io.to(this.getSocketIdByUserId(remainingPlayer.userID, io)).emit('status_changed', 'searching');
+      io.to(this.getSocketIdByUserId(remainingPlayer.userID, io)).emit(
+        'status_changed',
+        'searching',
+      );
     } else if (player.status === 'searching') {
       this.deleteRoomByRoomID(player.roomID);
       this.removePlayerFromList(player.userID);
@@ -855,10 +854,13 @@ export class GameService {
     client.emit('status_changed', 'awaiting');
 
     //todo checar se ta emitindo no deploy
-    io.to(this.getSocketIdByUserId(playerGuest.userID, io)).emit('request_game', {
-      type: 'request',
-      username: playerOwner.username,
-    });
+    io.to(this.getSocketIdByUserId(playerGuest.userID, io)).emit(
+      'request_game',
+      {
+        type: 'request',
+        username: playerOwner.username,
+      },
+    );
     setTimeout(() => {
       this.cancelRequestMatch(io, playerOwner.userID);
     }, this.timeToReturnRequestMatch);
