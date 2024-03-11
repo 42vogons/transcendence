@@ -65,12 +65,9 @@ export class LoginService {
     }
   }
 
-  async insertToken(
-    profile: any,
-    expiresAt: Date,
-    @Response() res,
-    action: string,
-  ) {
+  async insertToken(profile: any, @Response() res, action: string) {
+    const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
+
     const payload = {
       id: profile.user_id,
       login: profile.username,
@@ -83,6 +80,11 @@ export class LoginService {
       httpOnly: true,
       domain: process.env.BACK_DOMAIN,
     });
+    const username = profile.username;
+    const userId = profile.user_id;
+    return res
+      .status(200)
+      .send({ action, user: { userId, username, expiresAt } });
   }
 
   async checkUser(profile: any): Promise<UserEntity | null> {
@@ -127,12 +129,10 @@ export class LoginService {
       } else {
         action = 'authenticate-fail';
       }
-      const userID = user.user_id;
-      const username = user.username;
-      const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
-      await this.insertToken(user, expiresAt, res, action);
-      res.status(200).send({ action, user: { userID, username, expiresAt } });
-      return valid;
+
+      return await this.insertToken(user, res, action);
+      //res.status(200).send({ action, user: { userID, username, expiresAt } });
+      //return valid;
     } catch {
       throw new UnauthorizedException();
     }
@@ -142,16 +142,11 @@ export class LoginService {
     const token = await this.getToken(body.code);
     const profile = await this.getInfo(token);
     const user = await this.checkUser(profile);
-    const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
     let action = 'logged';
-    const { user_id: userID, username } = user;
     if (user.two_factor_enabled) {
       action = 'authenticate';
     }
-    await this.insertToken(user, expiresAt, res, action);
-    return res
-      .status(200)
-      .send({ action, user: { userID, username, expiresAt } });
+    return await this.insertToken(user, res, action);
   }
 
   async generateToken(payload: any): Promise<string> {
