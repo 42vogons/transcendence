@@ -129,10 +129,7 @@ export class LoginService {
       } else {
         action = 'authenticate-fail';
       }
-
       return await this.insertToken(user, res, action);
-      //res.status(200).send({ action, user: { userID, username, expiresAt } });
-      //return valid;
     } catch {
       throw new UnauthorizedException();
     }

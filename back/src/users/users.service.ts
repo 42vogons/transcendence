@@ -1,21 +1,37 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Injectable,
+  Logger,
+  Response,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './repositories/users.repository';
-import { JwtService } from '@nestjs/jwt';
 
 import { NotFoundError } from '../common/errors/types/NotFoundError';
 import { UserEntity } from './entities/user.entity';
 import { BlockUserDto } from './dto/blockUser.dto';
 import { ProfileDto } from './dto/profile.dto';
 import { TwoFactorAutenticateService } from 'src/two-factor-autenticate/two-factor-autenticate.service';
+import { z } from 'zod';
+import { LoginService } from 'src/login/login.service';
+
+const UpdateUserSchema = z.object({
+  username: z
+    .string()
+    .length(8, { message: 'Username must be exactly 8 characters long' })
+    .regex(/^[a-zA-Z0-9-]+$/, {
+      message: 'Username must contain only letters, numbers or hyphen',
+    }),
+});
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly repository: UsersRepository,
-    private readonly jwtService: JwtService,
     private readonly twoFactorAutenticateService: TwoFactorAutenticateService,
+    private readonly loginService: LoginService,
   ) {}
 
   createNewUser(profile: any) {
@@ -162,5 +178,22 @@ export class UsersService {
       return true;
     }
     return false;
+  }
+
+  async updateUser(
+    user_id: number,
+    @Body() updateUserDto: UpdateUserDto,
+    @Response() res,
+  ) {
+    const user = await this.findOne(user_id);
+    try {
+      UpdateUserSchema.parse(updateUserDto);
+    } catch (error) {
+      Logger.error(`400 Error to update user: ${error.errors[0]?.message}`);
+      throw new BadRequestException(error.errors);
+    }
+    await this.update(user.user_id, updateUserDto);
+    return res;
+    //await this.loginService.insertToken(updatedUser, res, 'logged');
   }
 }

@@ -13,8 +13,6 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   ParseFilePipe,
-  BadRequestException,
-  Logger,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,19 +20,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { TwoFactorAutenticateService } from '../two-factor-autenticate/two-factor-autenticate.service';
 import { AuthGuard } from 'src/login/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { z } from 'zod';
+
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
-
-const UpdateUserSchema = z.object({
-  username: z
-    .string()
-    .length(8, { message: 'Username must be exactly 8 characters long' })
-    .regex(/^[a-zA-Z0-9-]+$/, {
-      message: 'Username must contain only letters, numbers or hyphen',
-    }),
-});
 
 @Controller('users')
 export class UsersController {
@@ -69,15 +58,21 @@ export class UsersController {
 
   @Patch()
   @UseGuards(AuthGuard)
-  async update(@Req() request, @Body() updateUserDto: UpdateUserDto) {
-    const user = await this.usersService.findOne(request.user.id);
+  async update(
+    @Req() request,
+    @Body() updateUserDto: UpdateUserDto,
+    @Response() res,
+  ) {
+    return this.usersService.updateUser(request.user.id, updateUserDto, res);
+
+    /*const user = await this.usersService.findOne(request.user.id);
     try {
       UpdateUserSchema.parse(updateUserDto);
     } catch (error) {
       Logger.error(`400 Error to update user: ${error.errors[0]?.message}`);
       throw new BadRequestException(error.errors);
     }
-    return this.usersService.update(user.user_id, updateUserDto);
+    return this.usersService.update(user.user_id, updateUserDto);*/
   }
 
   @UseGuards(AuthGuard)
