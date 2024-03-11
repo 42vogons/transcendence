@@ -95,15 +95,27 @@ export class ChannelController {
     }
   }
 
-  @Patch('/changePassword')
-  async changePassword(@Req() request, @Body() channel: ChannelDto) {
-    console.log('channel:', channel);
+  @Patch('/changePassword/:channelId')
+  async changePassword(
+    @Req() request,
+    @Param('channelId') channelId: number,
+    @Body('password') password: string,
+  ) {
     try {
-      await this.channelService.changePassword(channel, request.user.id);
-      this.logger.log(`Password was changed ${channel.channel_id}.`);
+      await this.channelService.changePassword(
+        password,
+        request.user.id,
+        channelId,
+      );
+      this.logger.log(`Password was changed for channel ${channelId}.`);
     } catch (error) {
-      this.logger.error(error.response.message);
-      throw new BadRequestException(error.response);
+      if (error instanceof UnauthorizedException) {
+        this.logger.error('Change password Unauthorized: ' + error.message);
+        throw error;
+      } else {
+        this.logger.error('Change password Bad Request: ' + error.message);
+        throw new BadRequestException(error.response);
+      }
     }
   }
 }

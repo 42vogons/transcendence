@@ -354,17 +354,22 @@ export class ChannelService {
     }
   }
 
-  async changePassword(channelDto: ChannelDto, userId: any) {
-    const isOwner = await this.checkOwner(channelDto.channel_id, userId);
+  async changePassword(password: string, userId: any, channelId: number) {
+    if (!channelId || !password) {
+      throw new BadRequestException(
+        'Channel_id and new password are mandatory.',
+      );
+    }
+    const isOwner = await this.checkOwner(channelId, userId);
     if (isOwner) {
-      this.checkValidPassword(channelDto.password);
-      const hashPassword = await this.hashPassword(channelDto.password);
-      channelDto.password = hashPassword;
-      await this.repository.changePassword(channelDto);
-      const memberName = this.userRepository.findUsernameByUserID(userId);
+      this.checkValidPassword(password);
+      const hashPassword = await this.hashPassword(password);
+      password = hashPassword;
+      await this.repository.changePassword(password, channelId);
+      const memberName = await this.userRepository.findUsernameByUserID(userId);
       const msg = `${memberName} changed password`;
-      this.logger.log(msg + ' on channel ' + channelDto.channel_id);
-      await this.sendBroadCast(channelDto.channel_id, msg);
+      this.logger.log(msg + ' on channel ' + channelId);
+      await this.sendBroadCast(channelId, msg);
       return 'Password changed.';
     } else {
       throw new UnauthorizedException('You are not an owner of this channel.');

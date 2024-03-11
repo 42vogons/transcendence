@@ -2,7 +2,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { channels } from '@prisma/client';
 import { CreateChannelDto } from '../dto/create-channel.dto';
-import { ChannelDto } from '../dto/channel.dto';
 import { MemberDto } from '../dto/member.dto';
 import { AdminActionType, ChannelMemberStatus } from '../constants';
 import { AdminActionDto } from '../dto/adminAction.dto';
@@ -200,13 +199,13 @@ export class ChannelRepository {
     });
   }
 
-  async changePassword(channelDto: ChannelDto) {
+  async changePassword(password: string, channelId: number) {
     return await this.prisma.channels.update({
       where: {
-        channel_id: channelDto.channel_id,
+        channel_id: channelId,
       },
       data: {
-        password: channelDto.password,
+        password: password,
       },
     });
   }
