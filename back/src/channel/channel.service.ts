@@ -330,7 +330,9 @@ export class ChannelService {
         channel.password,
       );
     }
-
+    if (!validPassword) {
+      throw new UnauthorizedException('Invalid password.');
+    }
     if (
       (validPassword || channel.type === ChannelType.PUBLIC) &&
       channel.type !== ChannelType.PRIVATE

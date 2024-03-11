@@ -9,6 +9,7 @@ import {
   BadRequestException,
   Logger,
   Param,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { MemberDto } from './dto/member.dto';
@@ -84,8 +85,13 @@ export class ChannelController {
       await this.channelService.joinChannel(channel, request.user.id);
       this.logger.log(`Joined on changed ${channel.channel_id}.`);
     } catch (error) {
-      this.logger.error(error.response.message);
-      throw new BadRequestException(error.response);
+      if (error instanceof UnauthorizedException) {
+        this.logger.error('Join channel Unauthorized: ' + error.message);
+        throw error;
+      } else {
+        this.logger.error('Join channel Bad Request: ' + error.message);
+        throw new BadRequestException(error.response);
+      }
     }
   }
 
