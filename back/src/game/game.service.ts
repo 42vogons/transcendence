@@ -854,7 +854,10 @@ export class GameService {
     client.emit('status_changed', 'awaiting');
 
     //todo checar se ta emitindo no deploy
-    io.to(playerGuest.socketID).emit('request_game', {
+    const socketID = this.getSocketIdByUserId(playerGuest.userID, io);
+    // console.log('playerGuestSocketId:', playerGuest.socketID);
+    // console.log('realSocketID:', socketID);
+    io.to(socketID).emit('request_game', {
       type: 'request',
       username: playerOwner.username,
     });
@@ -987,5 +990,14 @@ export class GameService {
         }
       }
     }
+  }
+
+  getSocketIdByUserId(userId, io: any) {
+    for (const [socketId, socket] of io.server.of('/game').sockets) {
+      if (socket.userID === userId) {
+        return socketId;
+      }
+    }
+    return null; // If userID is not found in any socket
   }
 }
