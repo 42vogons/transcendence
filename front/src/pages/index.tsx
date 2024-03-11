@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { ReactElement, useContext, useEffect } from 'react'
-import { FaCheck, FaGamepad, FaUserAstronaut } from 'react-icons/fa6'
+import { FaCheck, FaGamepad, FaUserAstronaut, FaX } from 'react-icons/fa6'
 
 import {
 	Header,
@@ -28,6 +28,7 @@ export default function Home() {
 		playing,
 		resume,
 		giveUp,
+		cancelRequestMatch,
 		matchResult,
 		isMatchCompleted,
 		clearMatchCompleted,
@@ -129,8 +130,13 @@ export default function Home() {
 
 				{!isMatchCompleted && status === 'awaiting' && (
 					<LoadingContainer>
-						{/* <Loading size={200} /> */}
 						<h3>Awaiting for the other player.</h3>
+						<Button
+							buttonType="cancel"
+							onMouseUp={() => cancelRequestMatch()}
+						>
+							<FaX /> cancel
+						</Button>
 					</LoadingContainer>
 				)}
 				{!isMatchCompleted && status === 'playing' && <Game />}

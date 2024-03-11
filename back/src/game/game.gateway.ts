@@ -46,7 +46,7 @@ export class GameGateway
 
   @SubscribeMessage('join_queue')
   handleJoinQueueEvent(client: SocketWithAuth) {
-    this.gameService.updatePlayerUsernameByUserID(client.userID)
+    this.gameService.updatePlayerUsernameByUserID(client.userID);
     this.players = this.gameService.joinQueue(client);
     let availablePlayers = this.gameService.findPlayerByStatus('searching');
     availablePlayers = availablePlayers.filter(p => {
@@ -86,7 +86,7 @@ export class GameGateway
 
   @SubscribeMessage('playing')
   async handlePlayingEvent(client: SocketWithAuth) {
-    this.gameService.updatePlayerUsernameByUserID(client.userID)
+    this.gameService.updatePlayerUsernameByUserID(client.userID);
     const player = this.gameService.findPlayerByUserID(client.userID);
     const room = this.gameService.findRoomByRoomID(player.roomID);
     room.IsReady = true;
@@ -133,22 +133,22 @@ export class GameGateway
   @SubscribeMessage('give_up')
   handleGiveUpMatch(client: SocketWithAuth) {
     const match = this.gameService.findMatchByUserID(client.userID);
-    this.gameService.updatePlayerUsernameByUserID(match.player1.userID)
-    this.gameService.updatePlayerUsernameByUserID(match.player2.userID)
+    this.gameService.updatePlayerUsernameByUserID(match.player1.userID);
+    this.gameService.updatePlayerUsernameByUserID(match.player2.userID);
     this.gameService.giveUpMatch(match, this.io, client);
   }
 
   @SubscribeMessage('request_match')
   handleRequestMatch(client: SocketWithAuth, data) {
     const { guestID } = data;
-    this.gameService.updatePlayerUsernameByUserID(client.userID)
-    this.gameService.updatePlayerUsernameByUserID(guestID)
+    this.gameService.updatePlayerUsernameByUserID(client.userID);
+    this.gameService.updatePlayerUsernameByUserID(guestID);
     this.gameService.requestMatch(this.io, client, guestID);
   }
 
   @SubscribeMessage('cancel_request_match')
-  handleCancelRequestMatch(client: SocketWithAuth) {
-    this.gameService.cancelRequestMatch(this.io, client.userID);
+  handleCancelRequestMatch(client: SocketWithAuth, data) {
+    this.gameService.cancelRequestMatch(this.io, client.userID, data.type);
   }
 
   @SubscribeMessage('response_resquest_match')

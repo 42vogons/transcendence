@@ -35,6 +35,7 @@ interface GameContextType {
 	giveUp: () => void
 	requestMatch: (guestID: number | undefined) => void
 	answerRequestMatch: (response: 'accept' | 'refused') => void
+	cancelRequestMatch: () => void
 	resetGameRequest: () => void
 	clearMatchCompleted: () => void
 	closeGameSocket: () => void
@@ -189,6 +190,10 @@ export function GameProvider({ children }: GameProviderProps) {
 		})
 	}
 
+	function cancelRequestMatch() {
+		emitSocketIfUserIsNotExpired('cancel_request_match', { type: 'abort' })
+	}
+
 	function exitQueue() {
 		emitSocketIfUserIsNotExpired('exit_queue', '')
 	}
@@ -217,6 +222,7 @@ export function GameProvider({ children }: GameProviderProps) {
 				requestMatch,
 				gameRequest,
 				answerRequestMatch,
+				cancelRequestMatch,
 				resetGameRequest,
 				clearMatchCompleted,
 				closeGameSocket,

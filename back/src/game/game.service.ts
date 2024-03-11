@@ -449,8 +449,8 @@ export class GameService {
     match.ball.direction.y = Math.floor(Math.random() * 100) % 2 == 0 ? 1 : -1;
 
     if (match.score.p1 === this.maxScore || match.score.p2 == this.maxScore) {
-      this.updatePlayerUsernameByUserID(match.player1.userID)
-      this.updatePlayerUsernameByUserID(match.player2.userID)
+      this.updatePlayerUsernameByUserID(match.player1.userID);
+      this.updatePlayerUsernameByUserID(match.player2.userID);
       match.status = 'end';
     }
   }
@@ -641,8 +641,8 @@ export class GameService {
   ) {
     const match = this.findMatchByRoomID(matchData.roomID);
     if (!match || match.isResumed) return;
-    this.updatePlayerUsernameByUserID(match.player1.userID)
-    this.updatePlayerUsernameByUserID(match.player2.userID)
+    this.updatePlayerUsernameByUserID(match.player1.userID);
+    this.updatePlayerUsernameByUserID(match.player2.userID);
 
     match.status = 'end';
     match.quitterID = client ? client.userID : match.pausedByUserID;
@@ -687,8 +687,8 @@ export class GameService {
     match.pausedByUserID = undefined;
 
     this.updateMatch(match);
-    this.updatePlayerUsernameByUserID(match.player1.userID)
-    this.updatePlayerUsernameByUserID(match.player2.userID)
+    this.updatePlayerUsernameByUserID(match.player1.userID);
+    this.updatePlayerUsernameByUserID(match.player2.userID);
     this.gameInProgress(player.roomID, io);
   }
 
@@ -852,6 +852,8 @@ export class GameService {
     this.updateRoom(room);
 
     client.emit('status_changed', 'awaiting');
+
+    //todo checar se ta emitindo no deploy
     io.to(playerGuest.socketID).emit('request_game', {
       type: 'request',
       username: playerOwner.username,
@@ -864,11 +866,11 @@ export class GameService {
   cancelRequestMatch(
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
     userID: number,
+    type?: string,
   ) {
     const playerOwner = this.findPlayerByUserID(userID);
     const room = this.findRoomByRoomID(playerOwner.roomID);
-    if (!room)
-      return;
+    if (!room) return;
     const playerGuest = this.findPlayerByUserID(
       room.users[0].userID === playerOwner.userID
         ? room.users[1].userID
@@ -883,7 +885,7 @@ export class GameService {
 
     io.to(room.ID).emit(
       'request_game_error',
-      'The request was not responded in time.',
+      type ? 'Request canceled.' : 'The request was not responded in time.',
     );
     io.to(room.ID).emit('status_changed', 'connected');
 
@@ -964,25 +966,24 @@ export class GameService {
   }
 
   async updatePlayerUsernameByUserID(userID: number) {
-    const user = await this.usersRespository.findOne(userID)
-    let player = this.findPlayerByUserID(userID)
-    if (!player)
-      return;
+    const user = await this.usersRespository.findOne(userID);
+    const player = this.findPlayerByUserID(userID);
+    if (!player) return;
     if (player.username !== user.username) {
-      player.username = user.username
-      this.updatePlayer(player)
+      player.username = user.username;
+      this.updatePlayer(player);
       if (player.roomID !== '') {
-        let room = this.findRoomByRoomID(player.roomID)
-        room.users[0].userID === player.userID ?
-          room.users[0].username = player.username :
-          room.users[1].username = player.username
-        this.updateRoom(room)
-        let match = this.findMatchByRoomID(player.roomID)
+        const room = this.findRoomByRoomID(player.roomID);
+        room.users[0].userID === player.userID
+          ? (room.users[0].username = player.username)
+          : (room.users[1].username = player.username);
+        this.updateRoom(room);
+        const match = this.findMatchByRoomID(player.roomID);
         if (match) {
-          match.player1.userID === player.userID ?
-            match.player1.username = player.username :
-            match.player2.username = player.username
-          this.updateMatch(match)
+          match.player1.userID === player.userID
+            ? (match.player1.username = player.username)
+            : (match.player2.username = player.username);
+          this.updateMatch(match);
         }
       }
     }
