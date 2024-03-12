@@ -111,6 +111,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		console.log('error:', err)
 		toast(err.message ? err.message : err, {
 			type: 'error',
+			toastId: err.message ? err.message : err,
 		})
 	}
 

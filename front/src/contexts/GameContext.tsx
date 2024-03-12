@@ -98,6 +98,7 @@ export function GameProvider({ children }: GameProviderProps) {
 		console.log('error:', err)
 		toast(err.toString(), {
 			type: 'error',
+			toastId: err.toString(),
 		})
 	}
 
