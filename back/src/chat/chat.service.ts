@@ -5,6 +5,7 @@ import { ChannelRepository } from 'src/channel/repository/channel.repository';
 import { UsersService } from 'src/users/users.service';
 import { BlockUserDto } from 'src/users/dto/blockUser.dto';
 import { ChannelService } from 'src/channel/channel.service';
+import { AdminActionType } from 'src/channel/constants';
 
 @Injectable()
 export class ChatService {
@@ -31,17 +32,19 @@ export class ChatService {
     if (!isMember && chatDto.sender_id != 0) {
       throw new NotFoundException('You are not a member of this channel.');
     }
-    await this.channelService.checkMuted(chatDto.sender_id, chatDto.channel_id);
     await this.repository.saveMessage(chatDto);
     const members = await this.channelRepository.listMembers(
       chatDto.channel_id,
     );
-    // se for DM precisa verificar se a msg não está bloqueada para não notificar o user.
     return members.map(member => member.user_id);
   }
 
-  async getChatMessage(channel_id: number, user_id: number): Promise<any> {
-    const members = await this.channelRepository.listMembers(channel_id);
+  async getChatMessage(
+    channel_id: number,
+    user_id: number,
+    members: any,
+  ): Promise<any> {
+    //const members = await this.channelRepository.listMembers(channel_id);
     const isMember = members.some(member => member.users.user_id === user_id);
     if (!isMember) {
       throw new NotFoundException('You are not a member of this channel.');
@@ -49,6 +52,31 @@ export class ChatService {
 
     const channel = await this.channelRepository.findChannel(channel_id);
     if (channel.type !== 'direct') {
+      const isBanned = await this.channelService.checkAction(
+        user_id,
+        channel_id,
+        AdminActionType.BANNED,
+        'status',
+      );
+
+      const isKicked = await this.channelService.checkAction(
+        user_id,
+        channel_id,
+        AdminActionType.KICKED,
+        'status',
+      );
+      if (isBanned != null) {
+        return await this.repository.getChatMessageBefore(
+          channel_id,
+          isBanned.end_time,
+        );
+      }
+      if (isKicked != null) {
+        return await this.repository.getChatMessageBefore(
+          channel_id,
+          isKicked.end_time,
+        );
+      }
       return await this.repository.getChatMessage(channel_id);
     }
     const blockUserDto = new BlockUserDto();

@@ -34,15 +34,11 @@ export class LoginService {
       formData.append('client_secret', clientSecret);
       formData.append('code', authorizationCode);
       formData.append('redirect_uri', redirectUri);
-      const response = await axios.post(
-        'https://api.intra.42.fr/oauth/token',
-        formData,
-        {
-          headers: {
-            ...formData.getHeaders(),
-          },
+      const response = await axios.post(process.env.INTRA_URL_TOKEN, formData, {
+        headers: {
+          ...formData.getHeaders(),
         },
-      );
+      });
       if (response.data && response.data.access_token) {
         return response.data.access_token;
       } else {
@@ -58,7 +54,7 @@ export class LoginService {
   async getInfo(token: string): Promise<any> {
     try {
       Logger.log('token ' + token);
-      return await axios.get('https://api.intra.42.fr/v2/me', {
+      return await axios.get(process.env.INTRA_URL_PROFILE, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -69,24 +65,27 @@ export class LoginService {
     }
   }
 
-  async insertToken(
-    profile: any,
-    expiresAt: Date,
-    @Response() res,
-    action: string,
-  ) {
+  async insertToken(profile: any, @Response() res, action: string) {
+    const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
     const payload = {
       id: profile.user_id,
       login: profile.username,
       action: action,
     };
     const token = await this.generateToken(payload);
+    const { user_id: userID, username } = profile;
+
     Logger.log('cookie=' + token);
     res.cookie('accessToken', token, {
       expires: expiresAt,
       httpOnly: true,
-      domain: 'localhost',
+      domain: process.env.BACK_DOMAIN,
     });
+    //const username = profile.username;
+    //const user_Id = profile.user_id;
+    return res
+      .status(200)
+      .send({ action, user: { userID, username, expiresAt } });
   }
 
   async checkUser(profile: any): Promise<UserEntity | null> {
@@ -127,33 +126,25 @@ export class LoginService {
         );
       let action = '';
       if (valid) {
-        action = 'Logged';
+        action = 'logged';
       } else {
         action = 'authenticate-fail';
       }
-      const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
-      await this.insertToken(user, expiresAt, res, action);
-      return valid;
+      return await this.insertToken(user, res, action);
     } catch {
       throw new UnauthorizedException();
     }
-    //return false;
   }
 
   async login(@Body() body: any, @Response() res) {
     const token = await this.getToken(body.code);
     const profile = await this.getInfo(token);
     const user = await this.checkUser(profile);
-    const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
     let action = 'logged';
-    const { user_id: userID, username } = user;
     if (user.two_factor_enabled) {
       action = 'authenticate';
     }
-    await this.insertToken(user, expiresAt, res, action);
-    return res
-      .status(200)
-      .send({ action, user: { userID, username, expiresAt } });
+    return await this.insertToken(user, res, action);
   }
 
   async generateToken(payload: any): Promise<string> {

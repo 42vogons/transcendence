@@ -27,22 +27,4 @@ export const TwoFAForm = styled('form', {
 		textAlign: 'center',
 		padding: '0.5rem 1rem',
 	},
-
-	button: {
-		margin: '2rem 0 1rem',
-		backgroundColor: '$green500',
-		color: '$white',
-		fontSize: '$2xl',
-		padding: '0.5rem 1rem',
-		borderRadius: 32,
-		border: '4px solid transparent',
-		cursor: 'pointer',
-		transition: '0.2s',
-
-		'&:hover': {
-			backgroundColor: '$white',
-			color: '$green300',
-			border: '4px solid $green300',
-		},
-	},
 })

@@ -31,8 +31,8 @@ const UpdateUserSchema = z.object({
   username: z
     .string()
     .length(8, { message: 'Username must be exactly 8 characters long' })
-    .regex(/^\w+$/, {
-      message: 'Username must not contain spaces or special characters',
+    .regex(/^[a-zA-Z0-9-]+$/, {
+      message: 'Username must contain only letters, numbers or hyphen',
     }),
 });
 
@@ -48,6 +48,19 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @Get('/me')
+  @UseGuards(AuthGuard)
+  async findMe(@Req() request) {
+    const user = await this.usersService.findOne(request.user.id);
+    const myUser = {
+      user_id: user.user_id,
+      username: user.username,
+      avatar_url: user.avatar_url,
+      two_factor_enabled: user.two_factor_enabled,
+    };
+    return myUser;
+  }
+
   @Get('/friends')
   @UseGuards(AuthGuard)
   async findFriend(@Req() request) {
@@ -56,7 +69,21 @@ export class UsersController {
 
   @Patch()
   @UseGuards(AuthGuard)
-  async update(@Req() request, @Body() updateUserDto: UpdateUserDto) {
+  async update(
+    @Req() request,
+    @Body() updateUserDto: UpdateUserDto,
+    @Response() res,
+  ) {
+    try {
+      UpdateUserSchema.parse(updateUserDto);
+      this.usersService.updateUser(request.user.id, updateUserDto, res);
+    } catch (error) {
+      Logger.error(`400 Error to update user: ${error.errors[0]?.message}`);
+      throw new BadRequestException(error.errors);
+    }
+
+
+    /*
     const user = await this.usersService.findOne(request.user.id);
     try {
       UpdateUserSchema.parse(updateUserDto);
@@ -64,7 +91,7 @@ export class UsersController {
       Logger.error(`400 Error to update user: ${error.errors[0]?.message}`);
       throw new BadRequestException(error.errors);
     }
-    return this.usersService.update(user.user_id, updateUserDto);
+    return this.usersService.update(user.user_id, updateUserDto);*/
   }
 
   @UseGuards(AuthGuard)
@@ -91,6 +118,19 @@ export class UsersController {
     } else {
       return response.status(200).send('2FA successfully disabled.');
     }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/firstActiveTwoFactor')
+  async firstActiveTwoFactor(@Req() request, @Body() body, @Response() res) {
+    const result = await this.usersService.firstActiveTwoFactor(
+      request.user.id,
+      body.code,
+    );
+    if (result) {
+      return res.status(200).send('Actived');
+    }
+    return res.status(400).send('Fail');
   }
 
   @Post('upload-avatar')

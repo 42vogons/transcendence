@@ -2,7 +2,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { channels } from '@prisma/client';
 import { CreateChannelDto } from '../dto/create-channel.dto';
-import { ChannelDto } from '../dto/channel.dto';
 import { MemberDto } from '../dto/member.dto';
 import { AdminActionType, ChannelMemberStatus } from '../constants';
 import { AdminActionDto } from '../dto/adminAction.dto';
@@ -213,13 +212,13 @@ export class ChannelRepository {
     });
   }
 
-  async changePassword(channelDto: ChannelDto) {
+  async changePassword(password: string, channelId: number) {
     return await this.prisma.channels.update({
       where: {
-        channel_id: channelDto.channel_id,
+        channel_id: channelId,
       },
       data: {
-        password: channelDto.password,
+        password: password,
       },
     });
   }
@@ -236,14 +235,45 @@ export class ChannelRepository {
   }
 
   async listMembers(channel_id: number) {
-    return await this.prisma.channel_members.findMany({
+    const members = await this.prisma.channel_members.findMany({
       where: {
         channel_id: channel_id,
       },
       include: {
-        users: { select: { username: true, user_id: true, avatar_url: true } },
+        users: {
+          select: {
+            username: true,
+            user_id: true,
+            avatar_url: true,
+            admin_actions_admin_actions_target_user_idTousers: {
+              where: {
+                channel_id: channel_id,
+              },
+              select: {
+                action_type: true,
+              },
+            },
+          },
+        },
       },
     });
+
+    const modifiedMembers = members.map(member => {
+      const actions =
+        member.users.admin_actions_admin_actions_target_user_idTousers.map(
+          action => action.action_type,
+        );
+      return {
+        ...member,
+        users: {
+          ...member.users,
+          action: actions,
+          admin_actions_admin_actions_target_user_idTousers: undefined,
+        },
+      };
+    });
+
+    return modifiedMembers;
   }
 
   async adminAction(adminActionDto: AdminActionDto, user_id: number) {
@@ -261,11 +291,26 @@ export class ChannelRepository {
     });
   }
 
-  async getLastAdminActionByUser(member_id: number, channel_id: number) {
+  async adminActionRemoveKick(user_id: number, channel_id: number) {
+    await this.prisma.admin_actions.deleteMany({
+      where: {
+        channel_id: channel_id,
+        target_user_id: user_id,
+        action_type: AdminActionType.KICKED,
+      },
+    });
+  }
+
+  async getLastAdminActionByUser(
+    member_id: number,
+    channel_id: number,
+    action: string,
+  ) {
     return await this.prisma.admin_actions.findFirst({
       where: {
         target_user_id: member_id,
         channel_id: channel_id,
+        action_type: action,
       },
       orderBy: {
         action_id: 'desc',
@@ -362,5 +407,15 @@ export class ChannelRepository {
     );
     lastMessages.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     return lastMessages.filter(message => message !== undefined);
+  }
+
+  async findBlocked(member_id: number, channel_id: number): Promise<boolean> {
+    const blockedEntry = await this.prisma.blocklist.findFirst({
+      where: {
+        memberId: member_id,
+        channelId: channel_id,
+      },
+    });
+    return blockedEntry !== null;
   }
 }

@@ -89,16 +89,18 @@ model games {
 }
 
 model match_history {
-  history_id       Int      @id @default(autoincrement())
-  player1_user_id  Int
-  player1_username String   @db.VarChar(50)
-  player1_score    Int
-  player2_user_id  Int
-  player2_username String   @db.VarChar(50)
-  player2_score    Int
-  winner_id        Int
-  looser_id        Int
-  ended_at         DateTime @db.Timestamp(6)
+  history_id         Int      @id @default(autoincrement())
+  player1_user_id    Int
+  player1_username   String   @db.VarChar(50)
+  player1_score      Int
+  player1_avatar_url String   @db.VarChar(255)
+  player2_user_id    Int
+  player2_username   String   @db.VarChar(50)
+  player2_score      Int
+  player2_avatar_url String   @db.VarChar(255)
+  winner_id          Int
+  looser_id          Int
+  ended_at           DateTime @db.Timestamp(6)
 }
 
 model user_achievements {
@@ -146,6 +148,7 @@ model blocklist {
   userId    Int
   memberId  Int
   blockedAt DateTime @default(now())
+  channelId Int
 
   user_blocker users @relation("block_list_blocker", fields: [userId], references: [user_id], onDelete: Cascade)
   user_blocked users @relation("block_list_blocked", fields: [memberId], references: [user_id], onDelete: Cascade)

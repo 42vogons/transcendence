@@ -13,6 +13,7 @@ export type Room = {
   users: UserData[];
   IsReady: boolean;
   ExpiredAt?: Date;
+  WasRequestReturned: boolean;
 };
 
 export type Ball = {
@@ -64,13 +65,15 @@ export type MatchData = {
 export type MatchResult = {
   player1: {
     userID: number;
-	username: string;
+    username: string;
     score: number;
+    avatarUrl: string;
   };
   player2: {
-	userID: number;
-	username: string;
+    userID: number;
+    username: string;
     score: number;
+    avatarUrl: string;
   };
   winnerID: number;
   looserID: number;

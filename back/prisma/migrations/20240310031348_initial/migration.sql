@@ -88,9 +88,11 @@ CREATE TABLE "match_history" (
     "player1_user_id" INTEGER NOT NULL,
     "player1_username" VARCHAR(50) NOT NULL,
     "player1_score" INTEGER NOT NULL,
+    "player1_avatar_url" VARCHAR(255) NOT NULL,
     "player2_user_id" INTEGER NOT NULL,
     "player2_username" VARCHAR(50) NOT NULL,
     "player2_score" INTEGER NOT NULL,
+    "player2_avatar_url" VARCHAR(255) NOT NULL,
     "winner_id" INTEGER NOT NULL,
     "looser_id" INTEGER NOT NULL,
     "ended_at" TIMESTAMP(6) NOT NULL,
@@ -132,6 +134,7 @@ CREATE TABLE "blocklist" (
     "userId" INTEGER NOT NULL,
     "memberId" INTEGER NOT NULL,
     "blockedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "channelId" INTEGER NOT NULL,
 
     CONSTRAINT "blocklist_pkey" PRIMARY KEY ("id")
 );

@@ -7,6 +7,9 @@ interface GameState {
 	matchResult: MatchResult
 	isMatchCompleted: boolean
 	gameRequest: RequestGame | undefined
+	containerWidth: number
+	containerHeight: number
+	courtColor: string
 }
 
 export function GameReducer(state: GameState, action: any) {
@@ -49,6 +52,21 @@ export function GameReducer(state: GameState, action: any) {
 				...state,
 				matchResult: {} as MatchResult,
 				isMatchCompleted: false,
+			}
+			return newState
+		}
+		case ActionTypes.UPDATE_GAME_CONTAINER_DIMENSIONS: {
+			const newState = {
+				...state,
+				containerWidth: action.payload.dimensions[0],
+				containerHeight: action.payload.dimensions[1],
+			}
+			return newState
+		}
+		case ActionTypes.UPDATE_COURT_COLOR: {
+			const newState = {
+				...state,
+				courtColor: action.payload.color,
 			}
 			return newState
 		}

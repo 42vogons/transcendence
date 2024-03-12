@@ -4,16 +4,20 @@ import {
 	matchUpdate,
 	requestGame,
 	statusChange,
+	updateCourtColor,
+	updateDimensions,
 } from '@/reducers/Game/Action'
 import { GameReducer } from '@/reducers/Game/Reducer'
 import { MatchData, MatchResult, RequestGame } from '@/reducers/Game/Types'
 import { useRouter } from 'next/router'
 import {
+	MutableRefObject,
 	ReactNode,
 	createContext,
 	useContext,
 	useEffect,
 	useReducer,
+	useRef,
 } from 'react'
 import { toast } from 'react-toastify'
 import socketClient from 'socket.io-client'
@@ -27,15 +31,23 @@ interface GameContextType {
 	matchResult: MatchResult
 	isMatchCompleted: boolean
 	gameRequest: RequestGame
+	containerWidth: number
+	containerHeight: number
+	courtColor: string
+	PageContainerRef: MutableRefObject<null>
 	sendKey: (type: string, key: string) => void
 	joinQueue: () => void
 	exitQueue: () => void
 	playing: () => void
 	resume: () => void
-	requestMatch: (guestID: number) => void
+	giveUp: () => void
+	requestMatch: (guestID: number | undefined) => void
 	answerRequestMatch: (response: 'accept' | 'refused') => void
+	cancelRequestMatch: () => void
 	resetGameRequest: () => void
 	clearMatchCompleted: () => void
+	handleUpdateDimensions: (dimensions: number[]) => void
+	handleChangeColor: (color: string) => void
 	closeGameSocket: () => void
 }
 
@@ -59,12 +71,26 @@ export function GameProvider({ children }: GameProviderProps) {
 		matchResult: {} as MatchResult,
 		isMatchCompleted: false,
 		gameRequest: {} as RequestGame,
+		containerWidth: 0,
+		containerHeight: 0,
+		courtColor: '$blue100',
 	})
 
 	const { user } = useContext(UserContext)
 	const { getFriends } = useContext(ChatContext)
 
-	const { status, match, matchResult, isMatchCompleted, gameRequest } = state
+	const PageContainerRef = useRef(null)
+
+	const {
+		status,
+		match,
+		matchResult,
+		isMatchCompleted,
+		gameRequest,
+		containerWidth,
+		containerHeight,
+		courtColor,
+	} = state
 
 	const router = useRouter()
 
@@ -118,15 +144,6 @@ export function GameProvider({ children }: GameProviderProps) {
 		) {
 			toast('The game is paused.', { type: 'info' })
 		}
-		return () => {
-			if (
-				!isMatchCompleted &&
-				status === 'playing' &&
-				match.status === 'pause'
-			) {
-				toast('The game restarted.', { type: 'success' })
-			}
-		}
 	}, [status, isMatchCompleted, match?.status])
 
 	function emitSocketIfUserIsNotExpired(ev: string, ...args: any[]) {
@@ -168,7 +185,11 @@ export function GameProvider({ children }: GameProviderProps) {
 		emitSocketIfUserIsNotExpired('resume', '')
 	}
 
-	function requestMatch(guestID: number) {
+	function giveUp() {
+		emitSocketIfUserIsNotExpired('give_up', '')
+	}
+
+	function requestMatch(guestID: number | undefined) {
 		emitSocketIfUserIsNotExpired('request_match', { guestID })
 	}
 
@@ -184,12 +205,24 @@ export function GameProvider({ children }: GameProviderProps) {
 		})
 	}
 
+	function cancelRequestMatch() {
+		emitSocketIfUserIsNotExpired('cancel_request_match', { type: 'abort' })
+	}
+
 	function exitQueue() {
 		emitSocketIfUserIsNotExpired('exit_queue', '')
 	}
 
 	function clearMatchCompleted() {
 		dispatch(clearMatch())
+	}
+
+	function handleUpdateDimensions(dimensions: number[]) {
+		dispatch(updateDimensions(dimensions))
+	}
+
+	function handleChangeColor(color: string) {
+		dispatch(updateCourtColor(color))
 	}
 
 	function closeGameSocket() {
@@ -202,18 +235,26 @@ export function GameProvider({ children }: GameProviderProps) {
 				status,
 				match,
 				matchResult,
+				containerWidth,
+				containerHeight,
+				courtColor,
 				isMatchCompleted,
 				sendKey,
 				joinQueue,
 				exitQueue,
 				playing,
 				resume,
+				giveUp,
 				requestMatch,
 				gameRequest,
 				answerRequestMatch,
+				cancelRequestMatch,
 				resetGameRequest,
 				clearMatchCompleted,
+				handleUpdateDimensions,
+				handleChangeColor,
 				closeGameSocket,
+				PageContainerRef,
 			}}
 		>
 			{children}

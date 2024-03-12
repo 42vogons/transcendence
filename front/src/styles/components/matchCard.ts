@@ -1,6 +1,7 @@
 import { styled } from '..'
 
 export const MatchCardContainer = styled('div', {
+	position: 'relative',
 	width: '100%',
 	display: 'flex',
 	flexDirection: 'column',
@@ -72,7 +73,7 @@ export const Card = styled('button', {
 	},
 
 	'@bp1': {
-		margin: '1rem',
+		// margin: '1rem',
 		flexDirection: 'row',
 		padding: '0.5rem',
 		'&:nth-child(3)': {
@@ -109,6 +110,7 @@ export const UserContainer = styled('div', {
 
 export const UserImageContainer = styled('div', {
 	img: {
+		backgroundColor: '$blue800',
 		borderRadius: '50%',
 		border: '2px solid $white',
 	},
@@ -147,5 +149,21 @@ export const Score = styled('h3', {
 
 	'@bp1': {
 		fontSize: '6rem',
+	},
+})
+
+export const MatchTimestamp = styled('div', {
+	position: 'absolute',
+	color: '$white',
+	width: 220,
+	fontSize: 16,
+	fontWeight: 'bold',
+	top: '98%',
+	left: '50%',
+	transform: 'translate(-50%, -50%)',
+	textAlign: 'center',
+
+	'@bp2': {
+		top: '95.75%',
 	},
 })

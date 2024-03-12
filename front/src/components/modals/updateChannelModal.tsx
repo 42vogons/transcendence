@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import Button from '../button'
 import { MdClose, MdGroupAdd } from 'react-icons/md'
 import { NewChannelModalForm } from '@/styles/components/newChannelModal'
@@ -6,15 +7,17 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { api } from '@/services/api'
 import { toast } from 'react-toastify'
-import { useRouter } from 'next/router'
 import { ChatContext } from '@/contexts/ChatContext'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import ModalWithCloseOutside from './modalWithCloseOutside'
 import { delayMs } from '@/utils/functions'
 
-interface iNewChannelModal {
-	showNewChannelModal: boolean
-	setShowNewChannelModal: (state: boolean) => void
+interface iUpdateChannelModal {
+	showUpdateChannelModal: boolean
+	setShowUpdateChannelModal: (state: boolean) => void
+	channel_id: number
+	channel_name: string
+	channel_type: 'public' | 'private' | 'protected'
 }
 
 const newChannelSchema = z.discriminatedUnion(
@@ -53,17 +56,20 @@ const newChannelSchema = z.discriminatedUnion(
 
 type NewChannelSchema = z.infer<typeof newChannelSchema>
 
-export default function NewChannelModal({
-	showNewChannelModal,
-	setShowNewChannelModal,
-}: iNewChannelModal) {
-	const router = useRouter()
-	const { getChannelList } = useContext(ChatContext)
+export default function UpdateChannelModal({
+	showUpdateChannelModal,
+	setShowUpdateChannelModal,
+	channel_id,
+	channel_name,
+	channel_type,
+}: iUpdateChannelModal) {
+	const { getChannelList, getChannelMessages } = useContext(ChatContext)
 
 	const {
 		register,
 		handleSubmit,
 		watch,
+		setValue,
 		reset,
 		formState: { errors, isSubmitting },
 	} = useForm<NewChannelSchema>({
@@ -72,17 +78,20 @@ export default function NewChannelModal({
 
 	function handleClose() {
 		reset()
-		setShowNewChannelModal(false)
+		setShowUpdateChannelModal(false)
 	}
 
-	async function handleCreateNewChannel(formData: NewChannelSchema) {
+	async function handleUpdateChannel(formData: NewChannelSchema) {
 		try {
-			const { data } = await api.post('/channel/create-channel', formData)
+			await api.patch(`/channel/${channel_id}`, formData)
 			await delayMs(500)
 			getChannelList()
+			getChannelMessages(channel_id)
 			reset()
-			setShowNewChannelModal(false)
-			router.push('/chat/' + data)
+			setShowUpdateChannelModal(false)
+			toast('Channel updated.', {
+				type: 'info',
+			})
 		} catch (error: any) {
 			console.log('error:', error)
 			toast(error.message ? error.message : error, {
@@ -93,15 +102,20 @@ export default function NewChannelModal({
 
 	const type = watch('type')
 
+	useEffect(() => {
+		if (showUpdateChannelModal) {
+			setValue('name', channel_name)
+			setValue('type', channel_type)
+		}
+	}, [channel_name, channel_type, setValue, showUpdateChannelModal])
+
 	return (
 		<ModalWithCloseOutside
-			isOpen={showNewChannelModal}
-			setIsOpen={setShowNewChannelModal}
+			isOpen={showUpdateChannelModal}
+			setIsOpen={setShowUpdateChannelModal}
 		>
-			<NewChannelModalForm
-				onSubmit={handleSubmit(handleCreateNewChannel)}
-			>
-				<h2>New Channel</h2>
+			<NewChannelModalForm onSubmit={handleSubmit(handleUpdateChannel)}>
+				<h2>Update Channel</h2>
 				<div className="inputContainer">
 					<select
 						{...register('type')}

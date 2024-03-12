@@ -34,6 +34,7 @@ import {
 	FaUserShield,
 	FaUserSlash,
 } from 'react-icons/fa6'
+import { CgUnblock } from 'react-icons/cg'
 import { GiQueenCrown } from 'react-icons/gi'
 import { GrUpdate } from 'react-icons/gr'
 import { UserContext } from '@/contexts/UserContext'
@@ -50,7 +51,7 @@ import {
 	BiSolidShieldX,
 	BiVolumeMute,
 } from 'react-icons/bi'
-import { MdBlock } from 'react-icons/md'
+import { MdBlock, MdClose } from 'react-icons/md'
 import ConfirmationModal from '@/components/modals/confirmationModal'
 import AddUserToChannelModal from '@/components/modals/addUserToChannelModal'
 import { GameContext } from '@/contexts/GameContext'
@@ -60,6 +61,8 @@ import Loading from '@/components/loading'
 import MuteChannelUserModal, {
 	iMuteData,
 } from '@/components/modals/muteChannelUserModal'
+import { FaCog } from 'react-icons/fa'
+import UpdateChannelModal from '@/components/modals/updateChannelModal'
 
 export default function Chat() {
 	const [showLeaveChannelModal, setShowLeaveChannelModal] = useState(false)
@@ -69,6 +72,7 @@ export default function Chat() {
 		useState(false)
 	const [showMuteChannelUserModal, setShowMuteChannelUserModal] =
 		useState(false)
+	const [showUpdateChannelModal, setShowUpdateChannelModal] = useState(false)
 	const [muteData, setMuteData] = useState<iMuteData>({
 		channel_id: 0,
 		channelName: '',
@@ -85,14 +89,19 @@ export default function Chat() {
 		activeChannel,
 		activeChannelData,
 		leaveChannel,
+		blockUser,
+		unBlockUser,
 		adminAtion,
 		changeChannelMemberStatus,
-		getUsernameFromChannelMembers,
+		getTheOtherChannelMember,
 		getActiveChannelName,
 		getActiveChannelAvatar,
 		updateActiveChannel,
 		hasPriveleges,
 		getUserStatus,
+		isUserBlocked,
+		isUserKicked,
+		isUserBanned,
 	} = useContext(ChatContext)
 
 	const messages = activeChannelData?.msgs
@@ -105,10 +114,6 @@ export default function Chat() {
 		(messagesEndRef.current as unknown as HTMLElement)?.scrollIntoView({
 			behavior,
 		})
-	}
-
-	function DirectChannelBlockUser(userID: number) {
-		console.log('direct block', userID)
 	}
 
 	useEffect(() => {
@@ -168,80 +173,154 @@ export default function Chat() {
 								</ChatTitle>
 								{/* <ChatSubTitle>online</ChatSubTitle> */}
 							</ChatHeaderTextContainer>
-							{activeChannelData.channel.type !== 'direct' && (
-								<ChatMenuWrapper>
-									<ChatMenu>
-										<SlOptionsVertical size={28} />
-									</ChatMenu>
-									<MenuPortal>
-										<MenuContent
-											style={{
-												zIndex: 1,
-											}}
-										>
-											<MenuArrow />
-											<MenuItem>
-												<MenuAction
-													onClick={() => {
-														setShowLeaveChannelModal(
-															true,
-														)
-													}}
-												>
-													<BiExit
-														size={menuIconSize}
-													/>
-													Channel
-												</MenuAction>
-											</MenuItem>
-											{hasPriveleges(
-												Number(user?.userID),
-												['owner', 'admin'],
-											) && (
+							<ChatMenuWrapper>
+								<ChatMenu>
+									<SlOptionsVertical size={28} />
+								</ChatMenu>
+								<MenuPortal>
+									<MenuContent
+										style={{
+											zIndex: 1,
+										}}
+									>
+										<MenuArrow />
+										{activeChannelData.channel.type !==
+										'direct' ? (
+											<>
 												<MenuItem>
 													<MenuAction
-														isAdmin="true"
 														onClick={() => {
-															setShowAddUserToChannelModal(
+															setShowLeaveChannelModal(
 																true,
 															)
 														}}
 													>
-														<FaUserPlus
+														<BiExit
 															size={menuIconSize}
 														/>
-														Member
+														Channel
 													</MenuAction>
 												</MenuItem>
-											)}
-											{activeChannelData.channel.type ===
-												'protected' &&
-												hasPriveleges(
+												{hasPriveleges(
 													Number(user?.userID),
-													['owner'],
+													['owner', 'admin'],
 												) && (
 													<MenuItem>
 														<MenuAction
 															isAdmin="true"
 															onClick={() => {
-																setShowChangeChannelPasswordModal(
+																setShowAddUserToChannelModal(
 																	true,
 																)
 															}}
 														>
-															<GrUpdate
+															<FaUserPlus
 																size={
 																	menuIconSize
 																}
 															/>
-															Password
+															Member
 														</MenuAction>
 													</MenuItem>
 												)}
-										</MenuContent>
-									</MenuPortal>
-								</ChatMenuWrapper>
-							)}
+												{hasPriveleges(
+													Number(user?.userID),
+													['owner'],
+												) && (
+													<>
+														{activeChannelData
+															.channel.type ===
+															'protected' && (
+															<MenuItem>
+																<MenuAction
+																	isAdmin="true"
+																	onClick={() => {
+																		setShowChangeChannelPasswordModal(
+																			true,
+																		)
+																	}}
+																>
+																	<GrUpdate
+																		size={
+																			menuIconSize
+																		}
+																	/>
+																	Password
+																</MenuAction>
+															</MenuItem>
+														)}
+														<MenuItem>
+															<MenuAction
+																isAdmin="true"
+																onClick={() => {
+																	setShowUpdateChannelModal(
+																		true,
+																	)
+																}}
+															>
+																<FaCog
+																	size={
+																		menuIconSize
+																	}
+																/>
+																Channel
+															</MenuAction>
+														</MenuItem>
+													</>
+												)}
+											</>
+										) : (
+											<>
+												<MenuItem>
+													<MenuAction
+														onClick={() => {
+															requestMatch(
+																getTheOtherChannelMember(
+																	user?.userID,
+																	activeChannelData.channelMembers,
+																)?.user_id,
+															)
+															router.push('/')
+															toast(
+																`You invited ${getTheOtherChannelMember(
+																	user?.userID,
+																	activeChannelData.channelMembers,
+																)
+																	?.username} to play`,
+																{
+																	type: 'info',
+																},
+															)
+														}}
+													>
+														<FaGamepad
+															size={menuIconSize}
+														/>{' '}
+														Play
+													</MenuAction>
+												</MenuItem>
+												<MenuItem>
+													<MenuAction
+														onClick={() => {
+															router.push(
+																`/profile/${getTheOtherChannelMember(
+																	user?.userID,
+																	activeChannelData.channelMembers,
+																)?.user_id}`,
+															)
+														}}
+													>
+														<FaUserAstronaut
+															size={menuIconSize}
+														/>
+														Profile
+													</MenuAction>
+												</MenuItem>
+											</>
+										)}
+									</MenuContent>
+								</MenuPortal>
+							</ChatMenuWrapper>
 						</ChatHeader>
 						<ChatMessageContainer>
 							{messages && messages?.length > 0 ? (
@@ -263,17 +342,37 @@ export default function Chat() {
 												<SenderMenuWrapper>
 													<SenderMenu
 														title={
-															'Channel ' +
-															capitalize(
-																getUserStatus(
-																	message.sender_id,
-																),
+															getUserStatus(
+																message.sender_id,
 															)
+																? isUserBanned(
+																		message.sender_id,
+																  )
+																	? 'Banned'
+																	: 'Channel ' +
+																	  capitalize(
+																			getUserStatus(
+																				message.sender_id,
+																			),
+																	  )
+																: 'Not in channel anymore'
 														}
 													>
-														{getUserStatus(
+														{isUserKicked(
 															message.sender_id,
-														) === 'owner' ? (
+														) ? (
+															<MdClose
+																size={28}
+															/>
+														) : isUserBanned(
+																message.sender_id,
+														  ) ? (
+															<FaUserSlash
+																size={28}
+															/>
+														) : getUserStatus(
+																message.sender_id,
+														  ) === 'owner' ? (
 															<GiQueenCrown
 																size={28}
 															/>
@@ -288,10 +387,7 @@ export default function Chat() {
 																size={28}
 															/>
 														)}
-
-														{getUsernameFromChannelMembers(
-															message.sender_id,
-														)}
+														{message.username}
 													</SenderMenu>
 													<MenuPortal>
 														<MenuContent
@@ -310,9 +406,7 @@ export default function Chat() {
 																			'/',
 																		)
 																		toast(
-																			`You invited ${getUsernameFromChannelMembers(
-																				message.sender_id,
-																			)} to play`,
+																			`You invited ${message.username} to play`,
 																			{
 																				type: 'info',
 																			},
@@ -355,6 +449,18 @@ export default function Chat() {
 																		'owner',
 																		'admin',
 																	],
+																) &&
+																!isUserKicked(
+																	message.sender_id,
+																) &&
+																!isUserBanned(
+																	message.sender_id,
+																) &&
+																!hasPriveleges(
+																	Number(
+																		message.sender_id,
+																	),
+																	['owner'],
 																) && (
 																	<>
 																		<MenuItem>
@@ -374,9 +480,7 @@ export default function Chat() {
 																							user_id:
 																								message.sender_id,
 																							username:
-																								getUsernameFromChannelMembers(
-																									message.sender_id,
-																								),
+																								message.username,
 																						},
 																					)
 																					setShowMuteChannelUserModal(
@@ -480,24 +584,46 @@ export default function Chat() {
 															{activeChannelData
 																.channel
 																.type ===
-																'direct' && (
-																<MenuItem>
-																	<MenuAction
-																		onClick={() => {
-																			DirectChannelBlockUser(
-																				message.sender_id,
-																			)
-																		}}
-																	>
-																		<MdBlock
-																			size={
-																				menuIconSize
-																			}
-																		/>
-																		Block
-																	</MenuAction>
-																</MenuItem>
-															)}
+																'direct' &&
+																(isUserBlocked(
+																	message.sender_id,
+																) ? (
+																	<MenuItem>
+																		<MenuAction
+																			onClick={() => {
+																				unBlockUser(
+																					message.sender_id,
+																					message.channel_id,
+																				)
+																			}}
+																		>
+																			<CgUnblock
+																				size={
+																					menuIconSize
+																				}
+																			/>
+																			Unblock
+																		</MenuAction>
+																	</MenuItem>
+																) : (
+																	<MenuItem>
+																		<MenuAction
+																			onClick={() => {
+																				blockUser(
+																					message.sender_id,
+																					message.channel_id,
+																				)
+																			}}
+																		>
+																			<MdBlock
+																				size={
+																					menuIconSize
+																				}
+																			/>
+																			Block
+																		</MenuAction>
+																	</MenuItem>
+																))}
 														</MenuContent>
 													</MenuPortal>
 												</SenderMenuWrapper>
@@ -543,7 +669,7 @@ export default function Chat() {
 								''
 							}
 							message="Are you sure o want to leave this Channel?"
-							onConfirmation={() =>
+							onConfirmation={async () =>
 								leaveChannel(
 									activeChannelData?.channel.channel_id,
 								)
@@ -567,7 +693,25 @@ export default function Chat() {
 							showChangeChannelPasswordModal={
 								showChangeChannelPasswordModal
 							}
+							channel_id={Number(
+								activeChannelData?.channel.channel_id,
+							)}
 						/>
+
+						{activeChannelData?.channel.type !== 'direct' && (
+							<UpdateChannelModal
+								setShowUpdateChannelModal={
+									setShowUpdateChannelModal
+								}
+								showUpdateChannelModal={showUpdateChannelModal}
+								channel_id={Number(
+									activeChannelData?.channel.channel_id,
+								)}
+								channel_name={activeChannelData?.channel.name}
+								channel_type={activeChannelData?.channel.type}
+							/>
+						)}
+
 						<MuteChannelUserModal
 							setShowMuteChannelUserModal={
 								setShowMuteChannelUserModal

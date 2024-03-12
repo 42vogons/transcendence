@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import Button from '../button'
 import { MdClose } from 'react-icons/md'
 import { ChangeChannelPasswordModalContainer } from '../../styles/components/changeChannelPasswordModal'
@@ -7,6 +7,10 @@ import { ChangeChannelPasswordModalContainer } from '../../styles/components/cha
 import { z } from 'zod'
 import { GrUpdate } from 'react-icons/gr'
 import ModalWithCloseOutside from './modalWithCloseOutside'
+import { ChatContext } from '@/contexts/ChatContext'
+import { api } from '@/services/api'
+import { toast } from 'react-toastify'
+import { delayMs } from '@/utils/functions'
 
 const passwordSchema = z
 	.string()
@@ -24,11 +28,14 @@ const passwordSchema = z
 interface iChangeChannelPasswordModal {
 	showChangeChannelPasswordModal: boolean
 	setShowChangeChannelPasswordModal: (state: boolean) => void
+	channel_id: number
 }
 export default function ChangeChannelPasswordModal({
 	showChangeChannelPasswordModal,
 	setShowChangeChannelPasswordModal,
+	channel_id,
 }: iChangeChannelPasswordModal) {
+	const { getChannelList, getChannelMessages } = useContext(ChatContext)
 	const [password, setPassword] = useState('')
 	const [error, setError] = useState('')
 
@@ -39,20 +46,34 @@ export default function ChangeChannelPasswordModal({
 		setShowChangeChannelPasswordModal(false)
 	}
 
-	function handleChangeChannelPassword() {
+	async function handleChangeChannelPassword() {
 		console.log('ChangeChannelPassowrd:', password)
 
 		const validatePassword = passwordSchema.safeParse(password)
 		if (!validatePassword.success) {
 			const errors = (validatePassword as any).error.format()._errors
 			setError(errors[0])
-			return
 		} else {
 			console.log('password changed to: ', password)
 			setError('')
+			try {
+				const data = { password }
+				console.log('data :', data)
+				await api.patch(`/channel/changePassword/${channel_id}`, data)
+				await delayMs(500)
+				getChannelList()
+				getChannelMessages(channel_id)
+				setShowChangeChannelPasswordModal(false)
+				toast('Password changed.', {
+					type: 'info',
+				})
+			} catch (error: any) {
+				console.log('error:', error)
+				toast(error.message ? error.message : error, {
+					type: 'error',
+				})
+			}
 		}
-
-		setShowChangeChannelPasswordModal(false)
 	}
 
 	useEffect(() => {

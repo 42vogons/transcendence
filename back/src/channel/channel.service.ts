@@ -22,6 +22,7 @@ import { ChatDto } from 'src/chat/dto/chat.dto';
 import { ChatRepository } from 'src/chat/repository/chat.repository';
 import { z } from 'zod';
 import { UpdateChannelDto } from './dto/update-channel.dto';
+import { admin_actions } from '@prisma/client';
 
 @Injectable()
 export class ChannelService {
@@ -39,8 +40,14 @@ export class ChannelService {
     return hash;
   }
 
-  async validatePassword(password: string, hash: string): Promise<boolean> {
-    return await bcrypt.compare(password, hash);
+  async validatePassword(password: string, hash: string) {
+    if (
+      password == null ||
+      hash == null ||
+      !(await bcrypt.compare(password, hash))
+    ) {
+      throw new UnauthorizedException('Invalid password.');
+    }
   }
 
   async createDirect(
@@ -105,12 +112,12 @@ export class ChannelService {
     const userName = await this.userRepository.findUsernameByUserID(userId);
     const msg = `Channel created by ${userName}`;
     this.logger.log(msg);
-    this.sendBroadCast(channel.channel_id, msg);
+    await this.sendBroadCast(channel.channel_id, msg);
     const member = new MemberDto();
     member.channel_id = channel.channel_id;
     member.status = ChannelMemberStatus.OWNER;
     member.member_id = userId;
-    this.addMember(member, userId);
+    await this.addMember(member, userId);
     return channel.channel_id;
   }
 
@@ -152,6 +159,7 @@ export class ChannelService {
       memberDto.channel_id,
       userId,
     );
+
     const isOwner = await this.checkOwner(memberDto.channel_id, userId);
 
     if (isAdmin || isOwner) {
@@ -166,11 +174,16 @@ export class ChannelService {
       if (member) {
         throw new ConflictException('The member is already in the channel.');
       }
-      this.repository.addUserToChannel(
+      await this.repository.addUserToChannel(
         memberDto.member_id,
         memberDto.channel_id,
         memberDto.status,
       );
+      await this.repository.adminActionRemoveKick(
+        memberDto.member_id,
+        memberDto.channel_id,
+      );
+
       return 'Successfully added.';
     } else {
       throw new UnauthorizedException(
@@ -213,10 +226,6 @@ export class ChannelService {
         return 'Member muted.';
       }
       if (adminActionDto.action === AdminActionType.BANNED) {
-        await this.repository.removeMemberChannel(
-          adminActionDto.member_id,
-          adminActionDto.channel_id,
-        );
         return 'Member banned.';
       }
     } else {
@@ -290,70 +299,128 @@ export class ChannelService {
 
   async joinChannel(channelDto: ChannelDto, userId: any) {
     const channel = await this.repository.findChannel(channelDto.channel_id);
-
     const member = await this.repository.checkMember(
       userId,
       channelDto.channel_id,
     );
 
-    if (member) {
+    await this.checkAction(
+      userId,
+      channelDto.channel_id,
+      AdminActionType.BANNED,
+      'error',
+    );
+
+    const isKicked = await this.checkAction(
+      userId,
+      channelDto.channel_id,
+      AdminActionType.KICKED,
+      'status',
+    );
+
+    if (member && !isKicked) {
       throw new ConflictException('You are already a member of the channel.');
     }
-    await this.checkBanned(userId, channelDto.channel_id);
-
-    const validPassword = await this.validatePassword(
-      channelDto.password,
-      channel.password,
-    );
-    if (
-      (validPassword || channel.type === ChannelType.PUBLIC) &&
-      channel.type !== ChannelType.PRIVATE
-    ) {
-      await this.repository.addUserToChannel(
-        userId,
-        channelDto.channel_id,
-        ChannelMemberStatus.MEMBER,
-      );
-
-      const memberName = await this.userRepository.findUsernameByUserID(userId);
-      const msg = `${memberName} joined`;
-      this.logger.log(msg + ' on channel ' + channelDto.channel_id);
-      await this.sendBroadCast(channelDto.channel_id, msg);
-      return 'Joined the channel.';
-    } else {
-      throw new UnauthorizedException('Unable to join the channel.');
+    if (channel.type === ChannelType.PROTECTED) {
+      await this.validatePassword(channelDto.password, channel.password);
     }
+
+    if (
+      channel.type === ChannelType.PRIVATE ||
+      channel.type === ChannelType.DIRECT
+    ) {
+      throw new ConflictException("You can't join on this channel .");
+    }
+
+    await this.repository.addUserToChannel(
+      userId,
+      channelDto.channel_id,
+      ChannelMemberStatus.MEMBER,
+    );
+
+    await this.repository.adminActionRemoveKick(userId, channelDto.channel_id);
+    const memberName = await this.userRepository.findUsernameByUserID(userId);
+    const msg = `${memberName} joined`;
+    this.logger.log(msg + ' on channel ' + channelDto.channel_id);
+    await this.sendBroadCast(channelDto.channel_id, msg);
+    return 'Joined the channel.';
   }
 
-  async changePassword(channelDto: ChannelDto, userId: any) {
-    const isOwner = await this.checkOwner(channelDto.channel_id, userId);
+  async changePassword(password: string, userId: any, channelId: number) {
+    if (!channelId || !password) {
+      throw new BadRequestException(
+        'Channel_id and new password are mandatory.',
+      );
+    }
+    const isOwner = await this.checkOwner(channelId, userId);
     if (isOwner) {
-      this.checkValidPassword(channelDto.password);
-      const hashPassword = await this.hashPassword(channelDto.password);
-      channelDto.password = hashPassword;
-      await this.repository.changePassword(channelDto);
-      const memberName = this.userRepository.findUsernameByUserID(userId);
+      this.checkValidPassword(password);
+      const hashPassword = await this.hashPassword(password);
+      password = hashPassword;
+      await this.repository.changePassword(password, channelId);
+      const memberName = await this.userRepository.findUsernameByUserID(userId);
       const msg = `${memberName} changed password`;
-      this.logger.log(msg + ' on channel ' + channelDto.channel_id);
-      await this.sendBroadCast(channelDto.channel_id, msg);
+      this.logger.log(msg + ' on channel ' + channelId);
+      await this.sendBroadCast(channelId, msg);
       return 'Password changed.';
     } else {
       throw new UnauthorizedException('You are not an owner of this channel.');
     }
   }
 
-  async checkBanned(member_id: number, channel_id: number) {
-    const adminAction = await this.checkAdminActions(member_id, channel_id);
+  /*async checkBanned(member_id: number, channel_id: number) {
+    const adminAction = await this.checkAdminActions(
+      member_id,
+      channel_id,
+      AdminActionType.BANNED,
+    );
     if (adminAction == null) {
       return null;
     }
     if (adminAction.action_type === AdminActionType.BANNED) {
       throw new ForbiddenException('Member is banned.');
     }
+  }*/
+
+  async checkAction(
+    member_id: number,
+    channel_id: number,
+    action: AdminActionType,
+    output: string,
+  ): Promise<admin_actions> {
+    const adminAction = await this.checkAdminActions(
+      member_id,
+      channel_id,
+      action,
+    );
+    if (adminAction == null) {
+      return null;
+    }
+    if (output === 'status') {
+      return adminAction;
+    }
+
+    if (adminAction.action_type == AdminActionType.BANNED) {
+      throw new ForbiddenException('Member is banned.');
+    }
+
+    if (adminAction.action_type == AdminActionType.MUTED) {
+      if (adminAction.end_time > new Date()) {
+        throw new ForbiddenException('Member is muted.');
+      }
+    }
+    if (adminAction.action_type == AdminActionType.KICKED) {
+      throw new ForbiddenException('Member is kicked.');
+    }
+    return null;
   }
 
-  async checkMuted(member_id: number, channel_id: number) {
-    const adminAction = await this.checkAdminActions(member_id, channel_id);
+  /*async checkMuted(member_id: number, channel_id: number) {
+    const adminAction = await this.checkAdminActions(
+      member_id,
+      channel_id,
+      AdminActionType.MUTED,
+    );
     if (adminAction == null) {
       return null;
     }
@@ -362,12 +429,17 @@ export class ChannelService {
         throw new ForbiddenException('Member is muted.');
       }
     }
-  }
+  }*/
 
-  async checkAdminActions(member_id: number, channel_id: number) {
+  async checkAdminActions(
+    member_id: number,
+    channel_id: number,
+    action: string,
+  ) {
     return await this.repository.getLastAdminActionByUser(
       member_id,
       channel_id,
+      action,
     );
   }
 
@@ -405,5 +477,9 @@ export class ChannelService {
         'The password must contain 6 characters, including 1 special character, 1 numeric character and 1 upper',
       );
     }
+  }
+
+  async findBlocked(member_id: number, channel_id: number): Promise<boolean> {
+    return await this.repository.findBlocked(member_id, channel_id);
   }
 }

@@ -15,7 +15,7 @@ import {
 } from '@/styles/pages/profile'
 
 import { FaUserAstronaut } from 'react-icons/fa6'
-import { MdViewList } from 'react-icons/md'
+import { MdEdit, MdViewList } from 'react-icons/md'
 import Stats from '@/components/stats'
 import MatchCard from '@/components/matchCard'
 
@@ -31,6 +31,7 @@ interface Player {
 	userID: number
 	username: string
 	score: number
+	avatarUrl: string
 }
 
 interface ProfileData {
@@ -132,8 +133,15 @@ export default function Profile() {
 			</Head>
 			{profileData && matchHistoryData ? (
 				<PageContainer>
-					<ProfileDataContainer>
-						<ProfileContainer>
+					<ProfileDataContainer
+						onClick={() => {
+							profileData.user_id === user?.userID &&
+								router.push('/editProfile')
+						}}
+					>
+						<ProfileContainer
+							isMyProfile={profileData.user_id === user?.userID}
+						>
 							<ProfileImageContainer>
 								<Image
 									src={
@@ -146,6 +154,9 @@ export default function Profile() {
 									placeholder="blur"
 									blurDataURL={userDefaulAvatar.src}
 								/>
+								<div className="icon">
+									<MdEdit size={32} />
+								</div>
 							</ProfileImageContainer>
 							<TitleContainer>
 								<FaUserAstronaut size={40} />
@@ -168,6 +179,7 @@ export default function Profile() {
 									key={match.id}
 									players={[match.player1, match.player2]}
 									winnerID={match.winnerID}
+									timestamp={match.endedAt}
 								/>
 							))}
 						</MatchCardsContainer>

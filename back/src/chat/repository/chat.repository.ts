@@ -16,25 +16,56 @@ export class ChatRepository {
   }
 
   async getChatMessage(channel_id: number) {
-    return this.prisma.chat_messages.findMany({
+    const messages = await this.prisma.chat_messages.findMany({
       where: {
         channel_id: channel_id,
+      },
+      include: {
+        users_chat_messages_sender_idTousers: {
+          select: {
+            username: true,
+          },
+        },
       },
       orderBy: {
         timestamp: 'asc',
       },
     });
+
+    return messages.map(message => ({
+      message_id: message.message_id,
+      sender_id: message.sender_id,
+      channel_id: message.channel_id,
+      content: message.content,
+      timestamp: message.timestamp,
+      username: message.users_chat_messages_sender_idTousers.username,
+    }));
   }
 
   async getChatMessageBefore(channel_id: number, blockEntry: Date) {
-    return this.prisma.chat_messages.findMany({
+    const messages = await this.prisma.chat_messages.findMany({
       where: {
         channel_id: channel_id,
         timestamp: { lt: blockEntry },
       },
+      include: {
+        users_chat_messages_sender_idTousers: {
+          select: {
+            username: true,
+          },
+        },
+      },
       orderBy: {
-        timestamp: 'desc',
+        timestamp: 'asc',
       },
     });
+    return messages.map(message => ({
+      message_id: message.message_id,
+      sender_id: message.sender_id,
+      channel_id: message.channel_id,
+      content: message.content,
+      timestamp: message.timestamp,
+      username: message.users_chat_messages_sender_idTousers.username,
+    }));
   }
 }

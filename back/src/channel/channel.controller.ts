@@ -9,6 +9,7 @@ import {
   BadRequestException,
   Logger,
   Param,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { MemberDto } from './dto/member.dto';
@@ -33,6 +34,7 @@ export class ChannelController {
         request.user.id,
       );
       this.logger.log(`Channel created by id ${channel_id}.`);
+      return channel_id;
     } catch (error) {
       this.logger.error(error.response.message);
       throw new BadRequestException(error.response);
@@ -83,19 +85,37 @@ export class ChannelController {
       await this.channelService.joinChannel(channel, request.user.id);
       this.logger.log(`Joined on changed ${channel.channel_id}.`);
     } catch (error) {
-      this.logger.error(error.response.message);
-      throw new BadRequestException(error.response);
+      if (error instanceof UnauthorizedException) {
+        this.logger.error('Join channel Unauthorized: ' + error.message);
+        throw error;
+      } else {
+        this.logger.error('Join channel Bad Request: ' + error.message);
+        throw new BadRequestException(error.response);
+      }
     }
   }
 
-  @Patch('/changePassword')
-  async changePassword(@Req() request, @Body() channel: ChannelDto) {
+  @Patch('/changePassword/:channelId')
+  async changePassword(
+    @Req() request,
+    @Param('channelId') channelId: number,
+    @Body('password') password: string,
+  ) {
     try {
-      await this.channelService.changePassword(channel, request.user.id);
-      this.logger.log(`Password was changed ${channel.channel_id}.`);
+      await this.channelService.changePassword(
+        password,
+        request.user.id,
+        channelId,
+      );
+      this.logger.log(`Password was changed for channel ${channelId}.`);
     } catch (error) {
-      this.logger.error(error.response.message);
-      throw new BadRequestException(error.response);
+      if (error instanceof UnauthorizedException) {
+        this.logger.error('Change password Unauthorized: ' + error.message);
+        throw error;
+      } else {
+        this.logger.error('Change password Bad Request: ' + error.message);
+        throw new BadRequestException(error.response);
+      }
     }
   }
 }

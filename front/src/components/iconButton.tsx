@@ -18,6 +18,7 @@ export default function IconButton({
 }: iIconButtonProps) {
 	return (
 		<IconButtonContainer
+			title={title}
 			isActive={isActive}
 			type={type || 'desktop'}
 			onClick={
@@ -29,7 +30,6 @@ export default function IconButton({
 			}
 		>
 			{children}
-			{title && <div className="tooltip">{title}</div>}
 		</IconButtonContainer>
 	)
 }

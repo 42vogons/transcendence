@@ -21,12 +21,6 @@ export const TitleContainer = styled('div', {
 		textAlign: 'center',
 		fontSize: '$2xl',
 	},
-
-	'@bp1': {
-		h2: {
-			fontSize: '$3xl',
-		},
-	},
 })
 
 export const StatsPanelContainer = styled('div', {
@@ -67,7 +61,7 @@ export const StatsPanel = styled('div', {
 
 		'@bp1': {
 			h2: {
-				fontSize: '$2xl',
+				fontSize: '$xl',
 			},
 		},
 	},
@@ -79,8 +73,5 @@ export const StatsPanel = styled('div', {
 
 	'@bp1': {
 		flexDirection: 'row',
-		p: {
-			fontSize: '$2xl',
-		},
 	},
 })

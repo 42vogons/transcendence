@@ -1,4 +1,4 @@
-import { ReactNode, useContext, useEffect, useRef, useState } from 'react'
+import { ReactNode, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { FaGamepad, FaUserAstronaut, FaUserPlus } from 'react-icons/fa6'
 import { FaUserFriends } from 'react-icons/fa'
@@ -59,46 +59,45 @@ export default function Layout({ children }: iLayoutProps) {
 
 	const router = useRouter()
 
+	const { handleLogout } = useContext(UserContext)
+	const { handleUpdateDimensions, PageContainerRef } = useContext(GameContext)
+
 	const [currentPath, setCurrentPath] = useState('')
 	const [showSidePanel, setShowSidePanel] = useState(false)
 	const [showNewChatModal, setShowNewChatModal] = useState(false)
 	const [showNewFriendModal, setShowNewFriendModal] = useState(false)
 	const [showNewChannelModal, setShowNewChannelModal] = useState(false)
 	const [showJoinChannelModal, setShowJoinChannelModal] = useState(false)
+	const [activePanel, setActivePanel] = useState<activePanelType>('friends')
 
 	useEffect(() => {
 		setCurrentPath(router.asPath)
 	}, [router.asPath])
-
-	const [activePanel, setActivePanel] = useState<activePanelType>('friends')
 
 	function toggleSidePanel() {
 		setShowSidePanel((previousState) => !previousState)
 	}
 
 	function closeSidePanel() {
-		if (window.innerWidth < 1024) {
+		if (window.innerWidth < 1100) {
 			setShowSidePanel(false)
 		}
 	}
 
 	const ref = useOutsideMenuClick(closeSidePanel)
 
-	const PageContainerRef = useRef(null)
-
 	useEffect(() => {
 		function handleResize() {
 			if (PageContainerRef) {
-				// console.log(
-				// 	'PageContainerRef:',
-				// 	(PageContainerRef.current as unknown as HTMLElement)
-				// 		?.offsetWidth,
-				// 	(PageContainerRef.current as unknown as HTMLElement)
-				// 		?.offsetHeight,
-				// )
+				if (PageContainerRef.current) {
+					const { offsetWidth, offsetHeight } =
+						PageContainerRef.current as unknown as HTMLElement
+
+					handleUpdateDimensions([offsetWidth, offsetHeight])
+				}
 			}
 
-			if (window.innerWidth < 1024) {
+			if (window.innerWidth <= 1100) {
 				setShowSidePanel(false)
 				setActivePanel('menu')
 			} else {
@@ -111,8 +110,10 @@ export default function Layout({ children }: iLayoutProps) {
 			}
 		}
 		handleResize()
+
 		window.addEventListener('resize', handleResize)
 		return () => window.removeEventListener('resize', handleResize)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [router.asPath])
 
 	const menuItems: iMenuItemType[] = [
@@ -141,14 +142,24 @@ export default function Layout({ children }: iLayoutProps) {
 			title: 'Chat',
 			isActive: currentPath.includes('/chat'),
 			handleOnClick: () => {
-				setActivePanel('chat')
+				if (!showSidePanel) {
+					toggleSidePanel()
+					setActivePanel('chat')
+				} else if (activePanel === 'chat') {
+					toggleSidePanel()
+				} else {
+					setActivePanel('chat')
+				}
 			},
 		},
 		{
 			icon: <FaUserFriends size={iconSize} />,
 			title: 'Friends',
 			handleOnClick: () => {
-				if (activePanel === 'friends') {
+				if (!showSidePanel) {
+					toggleSidePanel()
+					setActivePanel('friends')
+				} else if (activePanel === 'friends') {
 					toggleSidePanel()
 				} else {
 					setActivePanel('friends')
@@ -159,7 +170,7 @@ export default function Layout({ children }: iLayoutProps) {
 			icon: <BiLogOut size={iconSize} />,
 			title: 'Logout',
 			handleOnClick: () => {
-				console.log('logout')
+				handleLogout()
 			},
 		},
 	]
@@ -199,17 +210,18 @@ export default function Layout({ children }: iLayoutProps) {
 		<LayoutContainer>
 			<ApplicationContainer>
 				<SidebarContainer>
-					{menuItems.map((item: iMenuItemType) => (
-						<IconButton
-							key={item.title}
-							title={item.title}
-							isActive={item.isActive}
-							handleOnClick={item.handleOnClick}
-							type="desktop"
-						>
-							{item.icon}
-						</IconButton>
-					))}
+					{window.innerWidth >= 100 &&
+						menuItems.map((item: iMenuItemType) => (
+							<IconButton
+								key={item.title}
+								title={item.title}
+								isActive={item.isActive}
+								handleOnClick={item.handleOnClick}
+								type="desktop"
+							>
+								{item.icon}
+							</IconButton>
+						))}
 					<IconButton
 						title="Menu"
 						type="mobile"
@@ -274,6 +286,7 @@ export default function Layout({ children }: iLayoutProps) {
 													console.log('new Friend')
 													setShowNewFriendModal(true)
 												}}
+												title="Add Friend"
 											>
 												<FaUserPlus
 													size={iconSizeMenuOptions}
@@ -297,7 +310,7 @@ export default function Layout({ children }: iLayoutProps) {
 												),
 											)
 										) : (
-											<p>vazio</p>
+											<></>
 										)}
 									</>
 								)}
@@ -307,6 +320,7 @@ export default function Layout({ children }: iLayoutProps) {
 									<>
 										<div className="menuOptions">
 											<IconButton
+												title="Create Direct Chat"
 												handleOnClick={() => {
 													console.log('new chat')
 													setShowNewChatModal(true)
@@ -317,6 +331,7 @@ export default function Layout({ children }: iLayoutProps) {
 												/>
 											</IconButton>
 											<IconButton
+												title="Create Channel"
 												handleOnClick={() => {
 													console.log('new channel')
 													setShowNewChannelModal(true)
@@ -327,6 +342,7 @@ export default function Layout({ children }: iLayoutProps) {
 												/>
 											</IconButton>
 											<IconButton
+												title="Join Channel"
 												handleOnClick={() => {
 													console.log('join channel')
 													setShowJoinChannelModal(

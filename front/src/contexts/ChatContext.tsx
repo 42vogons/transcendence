@@ -42,6 +42,8 @@ interface ChatContextType {
 	getChannelList: () => void
 	addMemberToChannel: (member_id: number, channel_id: number) => void
 	leaveChannel: (channel_id: number) => Promise<void>
+	blockUser: (member_id: number, channel_id: number) => void
+	unBlockUser: (member_id: number, channel_id: number) => void
 	changeChannelMemberStatus: (
 		member_id: number,
 		channel_id: number,
@@ -55,6 +57,10 @@ interface ChatContextType {
 	) => void
 	getUsernameFromChannelMembers: (userID: number) => string
 	updateActiveChannel: (channel_id: number) => void
+	getTheOtherChannelMember: (
+		userID: number | undefined,
+		channelMembers: iChannelMember[],
+	) => iChannelMember['users'] | undefined
 	getActiveChannelName: (
 		channelName: string,
 		channelType: 'direct' | 'public' | 'protected' | 'private',
@@ -66,6 +72,10 @@ interface ChatContextType {
 	) => string
 	hasPriveleges: (userID: number, allowedRoles: string[]) => boolean
 	getUserStatus: (userID: number) => string
+	isUserBlocked: (userID: number) => boolean
+	isUserKicked: (userID: number) => boolean
+	isUserBanned: (userID: number) => boolean
+	notifyChannelMembers: (channel_id: number) => void
 	closeChatSocket: () => void
 }
 
@@ -138,6 +148,11 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			getChannelList()
 			dispatch(updateChannel(undefined))
 			router.push('/chat')
+		})
+		socket.on('announcement', (msg) => {
+			toast(msg, {
+				type: 'info',
+			})
 		})
 		socket.on('connect_error', (err) => handleErrors(err))
 		socket.on('connect_failed', (err) => handleErrors(err))
@@ -236,6 +251,20 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			channel_id,
 		})
 		await delayMs(500)
+	}
+
+	function blockUser(member_id: number, channel_id: number) {
+		emitSocketIfUserIsNotExpired('block_user', {
+			member_id,
+			channel_id,
+		})
+	}
+
+	function unBlockUser(member_id: number, channel_id: number) {
+		emitSocketIfUserIsNotExpired('un_block_user', {
+			member_id,
+			channel_id,
+		})
 	}
 
 	function changeChannelMemberStatus(
@@ -339,7 +368,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		const member = (activeChannelData as iChannelData).channelMembers.find(
 			(member) => member.user_id === userID,
 		)
-		console.log('hasPriveleges:', userID, member)
 		return (
 			!!member && !!member.status && allowedRoles.includes(member?.status)
 		)
@@ -352,8 +380,46 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		if (member) {
 			return member.status
 		} else {
-			return 'undefined'
+			return ''
 		}
+	}
+
+	function isUserBlocked(userID: number) {
+		const member = (activeChannelData as iChannelData).channelMembers.find(
+			(member) => member.user_id === userID,
+		)
+		if (member) {
+			return member.blocked
+		} else {
+			return false
+		}
+	}
+
+	function isUserKicked(userID: number) {
+		const member = (activeChannelData as iChannelData).channelMembers.find(
+			(member) => member.user_id === userID,
+		)
+		if (member) {
+			return false
+		} else {
+			return true
+		}
+	}
+
+	function isUserBanned(userID: number) {
+		const member = (activeChannelData as iChannelData).channelMembers.find(
+			(member) => member.user_id === userID,
+		)
+
+		if (member && member.users.action.includes('ban')) {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	function notifyChannelMembers(channel_id: number) {
+		emitSocketIfUserIsNotExpired('notify_members', channel_id)
 	}
 
 	function closeChatSocket() {
@@ -385,14 +451,21 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				getChannelList,
 				addMemberToChannel,
 				leaveChannel,
+				blockUser,
+				unBlockUser,
 				changeChannelMemberStatus,
 				adminAtion,
+				getTheOtherChannelMember,
 				getUsernameFromChannelMembers,
 				getActiveChannelName,
 				getActiveChannelAvatar,
 				updateActiveChannel,
 				hasPriveleges,
 				getUserStatus,
+				isUserBlocked,
+				isUserKicked,
+				isUserBanned,
+				notifyChannelMembers,
 			}}
 		>
 			{children}

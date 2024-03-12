@@ -7,7 +7,7 @@ export const ButtonContainer = styled('button', {
 	alignItems: 'center',
 	gap: 16,
 	color: '$white',
-	fontSize: '$xl',
+	fontSize: '$lg',
 	fontWeight: 'bold',
 	padding: '0.5rem 1rem',
 	borderRadius: 32,
@@ -21,11 +21,16 @@ export const ButtonContainer = styled('button', {
 	},
 
 	'@bp1': {
-		fontSize: '$2xl',
+		// fontSize: '$xl',
 	},
 
 	'@bp2': {
 		width: 230,
+		fontSize: '$xl',
+	},
+
+	'@bp3': {
+		fontSize: '$2xl',
 	},
 
 	variants: {
