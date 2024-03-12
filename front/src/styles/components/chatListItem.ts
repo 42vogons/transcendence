@@ -35,6 +35,7 @@ export const ChatAvatarContainer = styled('div', {
 	alignItems: 'center',
 
 	img: {
+		backgroundColor: '$blue800',
 		borderRadius: '50%',
 		border: '2px $blue600 solid',
 	},
