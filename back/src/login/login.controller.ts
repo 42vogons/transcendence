@@ -7,32 +7,29 @@ import {
   Req,
 } from '@nestjs/common';
 import { LoginService } from './login.service';
-import { TwoFactorAutenticateService } from '../two-factor-autenticate/two-factor-autenticate.service';
 
 @Controller('')
 export class LoginController {
-  constructor(
-    private readonly loginService: LoginService,
-    private readonly twoFactorService: TwoFactorAutenticateService,
-  ) {}
+  constructor(private readonly loginService: LoginService) {}
 
   @Post('/auth/user')
   @HttpCode(200)
   async getToken(@Body() body: any, @Response() res): Promise<Response> {
-    return await this.loginService.login(body, res);
+    try {
+      return await this.loginService.login(body, res);
+    } catch (error) {
+      throw new Error('Failed to login: ' + error.message);
+    }
   }
 
   @Post('/checkTwoFactor')
   @HttpCode(200)
   async checkTwoFactor(@Req() request, @Body() body: any, @Response() res) {
-    console.log(request.cookies.accessToken);
     return await this.loginService.checkTwoFactor(
       request.cookies.accessToken,
       body.code,
       res,
     );
-    /*if (valid) res.status(200).send('{"action":"logged"}');
-    else res.status(401).send('{"action":"authenticate-fail"}');*/
   }
 
   @Post('/logout')

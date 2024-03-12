@@ -111,7 +111,6 @@ export class ChatGateway
     client: SocketWithAuth,
     channelMessageDto: ChannelMessageDto,
   ): Promise<void> {
-    console.log('getchannelMessageDto:', channelMessageDto);
     try {
       let channelMembers = await this.channelService.getChannelMembers(
         channelMessageDto.channel_id,
