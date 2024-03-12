@@ -16,14 +16,12 @@ import { ChatGateway } from './chat/chat.gateway';
 import { ChatModule } from './chat/chat.module';
 import { ChatService } from './chat/chat.service';
 
-const secretJwt = process.env.SECRET_JWT;
-
 @Module({
   imports: [
     LoginModule,
     UsersModule,
     JwtModule.register({
-      secret: secretJwt,
+      secret: process.env.SECRET_JWT,
       signOptions: { expiresIn: '48h' },
     }),
     FriendsModule,
