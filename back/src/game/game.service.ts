@@ -433,8 +433,8 @@ export class GameService {
 
       if (player.position.y < 0) {
         player.position.y = 0;
-      } else if (player.position.y + player.height * 1.05 > this.court.height) {
-        player.position.y = this.court.height - player.height * 1.05;
+      } else if (player.position.y + player.height * 1.15 > this.court.height) {
+        player.position.y = this.court.height - player.height * 1.15;
       }
     });
   }
@@ -456,7 +456,7 @@ export class GameService {
     const ball = matchData.ball;
 
     if (
-      ball.position.y > matchData.court.height - 2.5 * this.ballRadius ||
+      ball.position.y > matchData.court.height - 3.5 * this.ballRadius ||
       ball.position.y < 0
     ) {
       matchData.ball.direction.y *= -1;
