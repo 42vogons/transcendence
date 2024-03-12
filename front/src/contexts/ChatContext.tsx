@@ -75,6 +75,7 @@ interface ChatContextType {
 	isUserBlocked: (userID: number) => boolean
 	isUserKicked: (userID: number) => boolean
 	isUserBanned: (userID: number) => boolean
+	notifyChannelMembers: (channel_id: number) => void
 	closeChatSocket: () => void
 }
 
@@ -417,6 +418,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		}
 	}
 
+	function notifyChannelMembers(channel_id: number) {
+		emitSocketIfUserIsNotExpired('notify_members', channel_id)
+	}
+
 	function closeChatSocket() {
 		socket.close()
 	}
@@ -460,6 +465,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 				isUserBlocked,
 				isUserKicked,
 				isUserBanned,
+				notifyChannelMembers,
 			}}
 		>
 			{children}

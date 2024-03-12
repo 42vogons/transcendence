@@ -54,7 +54,7 @@ export default function JoinChannelModal({
 	setShowJoinChannelModal,
 }: iJoinChannelModal) {
 	const router = useRouter()
-	const { getChannelList } = useContext(ChatContext)
+	const { notifyChannelMembers } = useContext(ChatContext)
 
 	const [channelName, setChannelName] = useState('')
 	const [password, setPassword] = useState('')
@@ -135,7 +135,7 @@ export default function JoinChannelModal({
 			try {
 				await api.post('/channel/joinChannel', formData)
 				await delayMs(500)
-				getChannelList()
+				notifyChannelMembers(channel_id)
 				setShowJoinChannelModal(false)
 				router.push('/chat/' + channel_id)
 			} catch (error: any) {
