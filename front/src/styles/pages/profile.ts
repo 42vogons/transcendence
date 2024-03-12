@@ -69,16 +69,22 @@ export const ProfileContainer = styled('button', {
 	paddingTop: '1rem',
 	borderRadius: 16,
 	backgroundColor: 'transparent',
-	cursor: 'pointer',
 	border: '2px solid transparent',
 	transition: '0.2s',
 
-	'&:hover': {
-		backgroundColor: '$blue500',
-		border: '2px solid $white',
+	variants: {
+		isMyProfile: {
+			true: {
+				cursor: 'pointer',
+				'&:hover': {
+					backgroundColor: '$blue500',
+					border: '2px solid $white',
 
-		'.icon': {
-			display: 'block',
+					'.icon': {
+						display: 'block',
+					},
+				},
+			},
 		},
 	},
 })

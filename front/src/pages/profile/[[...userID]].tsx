@@ -135,10 +135,13 @@ export default function Profile() {
 				<PageContainer>
 					<ProfileDataContainer
 						onClick={() => {
-							router.push('/editProfile')
+							profileData.user_id === user?.userID &&
+								router.push('/editProfile')
 						}}
 					>
-						<ProfileContainer>
+						<ProfileContainer
+							isMyProfile={profileData.user_id === user?.userID}
+						>
 							<ProfileImageContainer>
 								<Image
 									src={
