@@ -7,6 +7,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { LoginService } from './login.service';
+import { UnauthorizedError } from 'src/common/errors/types/UnauthorizedError';
 
 @Controller('')
 export class LoginController {
@@ -18,7 +19,7 @@ export class LoginController {
     try {
       return await this.loginService.login(body, res);
     } catch (error) {
-      throw new Error('Failed to login: ' + error.message);
+      throw new UnauthorizedError('Failed to login: ' + error.message);
     }
   }
 
