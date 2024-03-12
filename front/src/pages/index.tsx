@@ -58,7 +58,6 @@ export default function Home() {
 	const router = useRouter()
 
 	useEffect(() => {
-		console.log('rodou effect game')
 		setIsDisabled(false)
 		return () => {
 			if (!isMatchCompleted && status === 'playing') {

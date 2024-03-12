@@ -59,7 +59,6 @@ export default function UserInput({
 					setIsOptionsLoading(false)
 				} catch (error: any) {
 					setIsOptionsLoading(false)
-					console.log('error:', error)
 					toast(error.message ? error.message : error, {
 						type: 'error',
 					})

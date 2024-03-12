@@ -43,23 +43,18 @@ export default function MuteChannelUserModal({
 	const iconSize = 40
 
 	function handleClose() {
-		console.log('close')
 		setShowMuteChannelUserModal(false)
 	}
 
 	function handleMuteUser() {
-		console.log('muteDuration:', muteDuration)
-
 		const validatePassword = muteDurationSchema.safeParse(
 			Number(muteDuration),
 		)
 		if (!validatePassword.success) {
 			const errors = (validatePassword as any).error.format()._errors
-			console.log('errors:', errors)
 			setError(errors[0])
 			return
 		} else {
-			console.log('muteDuration: ', muteDuration, channel_id, user_id)
 			setError('')
 			adminAtion(user_id, channel_id, 'mute', muteDuration)
 		}

@@ -17,8 +17,6 @@ export default function Auth() {
 	const [isLoading, setIsLoading] = useState(false)
 	const [request2FA, setRequest2FA] = useState(false)
 
-	console.log(router.query.code)
-
 	useEffect(() => {
 		async function authUser(code: string) {
 			setIsLoading(true)
@@ -35,7 +33,6 @@ export default function Auth() {
 					router.push('/')
 				}
 			} catch (error) {
-				console.log('error:', error)
 				toast('An error occurred during authentication', {
 					type: 'error',
 				})
@@ -44,7 +41,6 @@ export default function Auth() {
 			}
 		}
 		const code = router.query.code as string
-		console.log('code:', code)
 		if (code) {
 			authUser(code)
 		}
@@ -56,15 +52,12 @@ export default function Auth() {
 		setRequest2FA(false)
 		try {
 			const res = await api.post('/checkTwoFactor', { code: twoFAcode })
-			console.log('res:', res)
 			const { action, user } = res.data
 			if (action === 'logged') {
 				toast('Login was successful', { type: 'success' })
-				console.log('action login:', action)
 				handleLogin(user)
 				router.push('/')
 			} else {
-				console.log('erro action:', action)
 				setIsLoading(false)
 				setRequest2FA(true)
 				toast('Invalid code', {
@@ -72,7 +65,6 @@ export default function Auth() {
 				})
 			}
 		} catch (error) {
-			console.log('error:', error)
 			toast('An error occurred during authentication', {
 				type: 'error',
 			})

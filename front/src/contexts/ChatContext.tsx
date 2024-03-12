@@ -108,7 +108,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	const router = useRouter()
 
 	function handleErrors(err: any) {
-		console.log('error:', err)
 		toast(err.message ? err.message : err, {
 			type: 'error',
 			toastId: err.message ? err.message : err,
@@ -124,14 +123,11 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			getFriends()
 		})
 		socket.on('refresh_chat', (data: { channelID: number }) => {
-			console.log('refresh_channel data:', data)
 			const { channelID } = data
-			console.log('refresh_channel:', channelID)
 			getChannelMessages(channelID)
 		})
 
 		socket.on('update_channel', (activeChannelData) => {
-			console.log('update_channel:', activeChannelData)
 			dispatch(updateChannel(activeChannelData))
 		})
 
@@ -192,12 +188,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	}
 
 	function removeFriend(userID: number) {
-		console.log('removeFriend:', userID)
 		emitSocketIfUserIsNotExpired('remove_friend', { member_id: userID })
 	}
 
 	function createDirectChat(userID: number) {
-		console.log('createDirectChat:', userID)
 		emitSocketIfUserIsNotExpired('create_direct', {
 			member_id: userID,
 			type: 'direct',
@@ -239,7 +233,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
 	function addMemberToChannel(member_id: number, channel_id: number) {
 		const status = 'member'
-		console.log('addMemmberToChannel:', member_id, channel_id, status)
 		emitSocketIfUserIsNotExpired('add_member', {
 			member_id,
 			channel_id,
@@ -286,16 +279,13 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		action: 'ban' | 'kick' | 'mute',
 		end_date?: number,
 	) {
-		console.log('adminAtion:', member_id, channel_id, action)
 		if (action !== 'mute') {
-			console.log('action not mute:', action)
 			emitSocketIfUserIsNotExpired('admin_action', {
 				member_id,
 				channel_id,
 				action,
 			})
 		} else {
-			console.log('action mute:', action, end_date)
 			emitSocketIfUserIsNotExpired('admin_action', {
 				member_id,
 				channel_id,
@@ -428,7 +418,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
 	}
 
 	useEffect(() => {
-		console.log('activeChannel:', activeChannel)
 		if (activeChannel) {
 			getChannelMessages(activeChannel)
 		}

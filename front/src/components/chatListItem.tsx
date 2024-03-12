@@ -36,7 +36,6 @@ export function ChatListItem({
 				handleOnClick
 					? () => {
 							handleOnClick()
-							// console.log('handleOnClick:', handleOnClick)
 					  }
 					: () => null
 			}

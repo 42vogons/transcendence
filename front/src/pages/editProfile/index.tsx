@@ -68,7 +68,6 @@ export default function EditProfile() {
 
 	async function handleSubmitEditUsername(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault()
-		console.log('submit')
 		const validateUsername = editUsernameSchema.safeParse(username)
 		if (!validateUsername.success) {
 			const errors = (validateUsername as any).error.format()._errors
@@ -87,7 +86,6 @@ export default function EditProfile() {
 				})
 				setIsUsernameDisabled(true)
 			} catch (error: any) {
-				console.log('error:', error)
 				toast(error.response.data.message, {
 					type: 'error',
 				})
@@ -96,21 +94,16 @@ export default function EditProfile() {
 	}
 
 	async function handleToogleTwoFA() {
-		console.log('handleToogleTwoFA:', isTwoFactorEnabled)
 		if (isTwoFactorEnabled) {
-			console.log('fazer req')
 			try {
-				const { data } = await api.post(`/users/activeTwoFactor`)
-				console.log('activeTwoFactor data:', data)
+				await api.post(`/users/activeTwoFactor`)
 				setIsTwoFactorEnabled(false)
 			} catch (error: any) {
-				console.log('error:', error)
 				toast(error.message ? error.message : error, {
 					type: 'error',
 				})
 			}
 		} else {
-			console.log('abrir modal')
 			setShowEnableTwoFAModal(true)
 		}
 	}
@@ -150,7 +143,6 @@ export default function EditProfile() {
 					type: 'success',
 				})
 			} catch (error: any) {
-				console.log('error:', error)
 				toast(error.response.data.message, {
 					type: 'error',
 				})
@@ -168,7 +160,6 @@ export default function EditProfile() {
 				setIsTwoFactorEnabled(userData.two_factor_enabled)
 				setIsLoading(false)
 			} catch (error: any) {
-				console.log('error:', error)
 				setUsername('')
 				setAvatarUrl('')
 				setIsTwoFactorEnabled(false)

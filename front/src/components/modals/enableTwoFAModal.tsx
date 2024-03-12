@@ -39,7 +39,6 @@ export default function EnableTwoFAModal({
 				setShowEnableTwoFAModal(false)
 				setTwoFaCode('')
 			} catch (error: any) {
-				console.log('error:', error)
 				toast(error.message ? error.message : error, {
 					type: 'error',
 				})
@@ -72,7 +71,6 @@ export default function EnableTwoFAModal({
 			)
 			setQrCodeSrc(`data:image/png;base64,${base64String}`)
 		} catch (error: any) {
-			console.log('error:', error)
 			toast(error.message ? error.message : error, {
 				type: 'error',
 			})

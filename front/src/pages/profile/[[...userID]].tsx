@@ -79,7 +79,6 @@ export default function Profile() {
 			setMatchHistoryData(matchData)
 			setIsLoading(false)
 		} catch (error: any) {
-			console.log('error:', error)
 			setProfileData(undefined)
 			setMatchHistoryData(undefined)
 			setIsLoading(false)

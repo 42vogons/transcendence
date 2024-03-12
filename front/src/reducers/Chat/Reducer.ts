@@ -15,9 +15,6 @@ export interface ChatState {
 }
 
 export function ChatReducer(state: ChatState, action: any) {
-	console.log('chat action:', action)
-	console.log('chat state:', state)
-
 	switch (action.type) {
 		case ActionTypes.UPDATE_FRIEND_LIST: {
 			const newState = {

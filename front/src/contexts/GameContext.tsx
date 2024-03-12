@@ -95,7 +95,6 @@ export function GameProvider({ children }: GameProviderProps) {
 	const router = useRouter()
 
 	function handleErrors(err: any) {
-		console.log('error:', err)
 		toast(err.toString(), {
 			type: 'error',
 			toastId: err.toString(),
@@ -103,7 +102,6 @@ export function GameProvider({ children }: GameProviderProps) {
 	}
 
 	useEffect(() => {
-		console.log('user game:', user)
 		socket.on('status_changed', (status) => {
 			dispatch(statusChange(status))
 			if (status === 'readyToPlay') {
@@ -117,7 +115,6 @@ export function GameProvider({ children }: GameProviderProps) {
 			dispatch(requestGame(request))
 		})
 		socket.on('end_match', (matchResult: MatchResult) => {
-			console.log('end_match: ', matchResult)
 			dispatch(endMatch(matchResult))
 		})
 		socket.on('refresh_list', () => {

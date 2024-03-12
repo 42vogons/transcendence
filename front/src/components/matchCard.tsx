@@ -38,7 +38,6 @@ export default function MatchCard({
 	const player2 = players[1]
 
 	function handleOnClick(userID: number) {
-		console.log('click userID:', userID)
 		router.push('/profile/' + userID)
 	}
 

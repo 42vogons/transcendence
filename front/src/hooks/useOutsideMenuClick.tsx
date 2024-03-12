@@ -10,7 +10,6 @@ export const useOutsideMenuClick = (callback: () => void) => {
 				!ref.current.contains(event.target) &&
 				(event.target as HTMLElement).closest('.pageContainer')
 			) {
-				// console.log('click outside with ignore')
 				callback()
 			}
 		}

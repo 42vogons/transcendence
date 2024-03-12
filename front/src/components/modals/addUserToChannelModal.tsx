@@ -24,11 +24,6 @@ export default function AddUserToChannelModal({
 
 	function handleCreateAddUserToChannel() {
 		if (selectedUser) {
-			console.log(
-				'add to channel selectedUser:',
-				channel_id,
-				selectedUser,
-			)
 			addMemberToChannel(selectedUser.user_id, channel_id)
 			setShowAddUserToChannelModal(false)
 		}
@@ -55,7 +50,6 @@ export default function AddUserToChannelModal({
 					<Button
 						buttonType="cancel"
 						onClick={() => {
-							console.log('close')
 							setShowAddUserToChannelModal(false)
 						}}
 					>

@@ -68,7 +68,6 @@ export default function JoinChannelModal({
 	const [isOptionsLoading, setIsOptionsLoading] = useState(false)
 
 	function handleClose() {
-		console.log('close')
 		setShowJoinChannelModal(false)
 	}
 
@@ -81,11 +80,9 @@ export default function JoinChannelModal({
 		setIsOptionsLoading(true)
 		try {
 			const { data } = await api.get('/channel/channels')
-			console.log('channelList:', data)
 			setChannelList(data)
 			setIsOptionsLoading(false)
 		} catch (error: any) {
-			console.log('error:', error)
 			toast(error.message ? error.message : error, {
 				type: 'error',
 			})
@@ -104,15 +101,11 @@ export default function JoinChannelModal({
 	}
 
 	function handleSelect(channel: iChannel) {
-		console.log('channel selected', channel)
 		setSelectedChannel(channel)
 		setChannelName(channel.name)
 	}
 
 	async function handleJoinChannel() {
-		console.log('CreateJoinChannel:')
-		console.log('channelName:', channelName, selectedChannel, password)
-
 		let formData
 
 		if (selectedChannel) {
@@ -139,7 +132,6 @@ export default function JoinChannelModal({
 				setShowJoinChannelModal(false)
 				router.push('/chat/' + channel_id)
 			} catch (error: any) {
-				console.log('error:', error)
 				toast(error.response.data.message, {
 					type: 'error',
 				})
@@ -174,10 +166,6 @@ export default function JoinChannelModal({
 		setIsOptionsLoading(true)
 		setFilteredChannelList(filterChannelsByName(channelName))
 		setIsOptionsLoading(false)
-		console.log(
-			'filterChannelsByName(channelName):',
-			filterChannelsByName(channelName),
-		)
 	}, [channelName, channelList])
 
 	return (
