@@ -69,7 +69,7 @@ export default function Login({ clientID, frontDomain }: LoginProps) {
 
 export async function getStaticProps() {
 	const clientID = process.env.CLIENT_ID
-	const frontDomain = process.env.FRONT_DOMAIN
+	const frontDomain = process.env.NEXT_PUBLIC_FRONT_DOMAIN
 	return {
 		props: {
 			clientID,
