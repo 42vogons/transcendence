@@ -38,6 +38,7 @@ export class GameService {
   private paddleSpeed = this.paddle.height * 0.2;
   private timeToBeReady = 60 * 1000;
   private timeToReturnRequestMatch = 60 * 1000;
+  private defaultErrorMsg = "Something went wrong";
 
   throwError(client: SocketWithAuth, msg: string) {
     let player = this.findPlayerByUserID(client.userID);
@@ -107,13 +108,17 @@ export class GameService {
     client: SocketWithAuth,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const match = this.findMatchByUserID(player.userID);
-    const room = this.findRoomByRoomID(player.roomID);
-    this.removeUserFromRoom(room.ID, player.userID);
-    room.users.push(player);
-    client.join(room.ID);
-    client.emit('status_changed', `playing`);
-    io.to(match.player1.roomID).emit('match_updated', match);
+    try {
+      const match = this.findMatchByUserID(player.userID);
+      const room = this.findRoomByRoomID(player.roomID);
+      this.removeUserFromRoom(room.ID, player.userID);
+      room.users.push(player);
+      client.join(room.ID);
+      client.emit('status_changed', `playing`);
+      io.to(match.player1.roomID).emit('match_updated', match);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   reconnectUserWhenStatusIsReadyToPlay(
@@ -121,22 +126,26 @@ export class GameService {
     client: SocketWithAuth,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const room = this.findRoomByRoomID(player.roomID);
-    let remainingPlayer: UserData;
-    const leavingPlayer = player;
-    if (room.users[0].userID === player.userID) {
-      remainingPlayer = this.findPlayerByUserID(room.users[1].userID);
-    } else {
-      remainingPlayer = this.findPlayerByUserID(room.users[0].userID);
+    try {
+      const room = this.findRoomByRoomID(player.roomID);
+      let remainingPlayer: UserData;
+      const leavingPlayer = player;
+      if (room.users[0].userID === player.userID) {
+        remainingPlayer = this.findPlayerByUserID(room.users[1].userID);
+      } else {
+        remainingPlayer = this.findPlayerByUserID(room.users[0].userID);
+      }
+      this.removeUserFromQueue(leavingPlayer.userID);
+      remainingPlayer.status = 'searching';
+      this.updatePlayer(remainingPlayer);
+      io.to(room.ID).emit('status_changed', 'searching');
+      this.removeUserFromRoom(player.roomID, leavingPlayer.userID);
+      (player.roomID = ''), (player.status = 'idle');
+      this.updatePlayer(player);
+      client.emit('status_changed', `connected`);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
-    this.removeUserFromQueue(leavingPlayer.userID);
-    remainingPlayer.status = 'searching';
-    this.updatePlayer(remainingPlayer);
-    io.to(room.ID).emit('status_changed', 'searching');
-    this.removeUserFromRoom(player.roomID, leavingPlayer.userID);
-    (player.roomID = ''), (player.status = 'idle');
-    this.updatePlayer(player);
-    client.emit('status_changed', `connected`);
   }
 
   reconnectUserWhenStatusIsSearching(player: UserData, client: SocketWithAuth) {
@@ -151,28 +160,32 @@ export class GameService {
     client: SocketWithAuth,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ): UserData[] {
-    if (!this.isPlayerUserIDOnList(client.userID)) {
-      const player = this.createNewPlayer(
-        client.id,
-        client.userID,
-        client.username,
-      );
-      this.players.push(player);
-      client.emit('status_changed', `connected`);
-    } else {
-      const player = this.findPlayerByUserID(client.userID);
-      player.isReconnect = true;
-      player.socketID = client.id;
-      this.updatePlayer(player);
-      if (player.status === 'playing') {
-        this.reconnectUserWhenStatusIsPlaying(player, client, io);
-      } else if (player.status === 'readyToPlay') {
-        this.reconnectUserWhenStatusIsReadyToPlay(player, client, io);
-      } else if (player.status === 'searching') {
-        this.reconnectUserWhenStatusIsSearching(player, client);
+    try {
+      if (!this.isPlayerUserIDOnList(client.userID)) {
+        const player = this.createNewPlayer(
+          client.id,
+          client.userID,
+          client.username,
+        );
+        this.players.push(player);
+        client.emit('status_changed', `connected`);
+      } else {
+        const player = this.findPlayerByUserID(client.userID);
+        player.isReconnect = true;
+        player.socketID = client.id;
+        this.updatePlayer(player);
+        if (player.status === 'playing') {
+          this.reconnectUserWhenStatusIsPlaying(player, client, io);
+        } else if (player.status === 'readyToPlay') {
+          this.reconnectUserWhenStatusIsReadyToPlay(player, client, io);
+        } else if (player.status === 'searching') {
+          this.reconnectUserWhenStatusIsSearching(player, client);
+        }
       }
+      return this.players;
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
-    return this.players;
   }
 
   removePlayerFromList(userID: number): UserData[] {
@@ -246,40 +259,48 @@ export class GameService {
   }
 
   joinQueue(client: SocketWithAuth): UserData[] {
-    const player: UserData = this.findPlayerByUserID(client.userID);
-    if (!player || player.status !== 'idle') {
-      this.throwError(client, 'error on join queue');
+    try {
+      const player: UserData = this.findPlayerByUserID(client.userID);
+      if (!player || player.status !== 'idle') {
+        this.throwError(client, 'error on join queue');
+        return this.players;
+      }
+      player.status = 'searching';
+      this.updatePlayer(player);
       return this.players;
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
-    player.status = 'searching';
-    this.updatePlayer(player);
-    return this.players;
   }
 
   notReadyInTime(
     roomID: string,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const room = this.findRoomByRoomID(roomID);
-    if (!room || room.IsReady) return;
+    try {
+      const room = this.findRoomByRoomID(roomID);
+      if (!room || room.IsReady) return;
 
-    const player1 = this.createNewPlayer(
-      room.users[0].socketID,
-      room.users[0].userID,
-      room.users[0].username,
-    );
-    const player2 = this.createNewPlayer(
-      room.users[1].socketID,
-      room.users[1].userID,
-      room.users[1].username,
-    );
-    this.updatePlayer(player1);
-    this.updatePlayer(player2);
+      const player1 = this.createNewPlayer(
+        room.users[0].socketID,
+        room.users[0].userID,
+        room.users[0].username,
+      );
+      const player2 = this.createNewPlayer(
+        room.users[1].socketID,
+        room.users[1].userID,
+        room.users[1].username,
+      );
+      this.updatePlayer(player1);
+      this.updatePlayer(player2);
 
-    io.to(room.ID).emit('not_ready_in_time', 'true');
-    io.to(room.ID).emit('status_changed', 'connected');
-    io.in(room.ID).socketsLeave(room.ID);
-    this.deleteRoomByRoomID(room.ID);
+      io.to(room.ID).emit('not_ready_in_time', 'true');
+      io.to(room.ID).emit('status_changed', 'connected');
+      io.in(room.ID).socketsLeave(room.ID);
+      this.deleteRoomByRoomID(room.ID);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   joinRoom(
@@ -287,38 +308,42 @@ export class GameService {
     roomID: string,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ): Room {
-    const room = this.findRoomByRoomID(roomID);
-    if (!room) {
-      this.throwError(client, 'error on join room');
-      return;
+    try {
+      const room = this.findRoomByRoomID(roomID);
+      if (!room) {
+        this.throwError(client, 'error on join room');
+        return;
+      }
+
+      const player1 = this.findPlayerByUserID(client.userID);
+      const player2 = this.findPlayerByUserID(room.users[0].userID);
+      if (!player1 || !player2) {
+        this.throwError(client, 'error on join room');
+        return;
+      }
+
+      player1.status = 'readyToPlay';
+      player1.roomID = roomID;
+      this.updatePlayer(player1);
+
+      player2.status = 'readyToPlay';
+      player2.roomID = roomID;
+      this.updatePlayer(player2);
+
+      client.join(roomID);
+      room.users.push(player1);
+
+      const now = new Date();
+      room.ExpiredAt = new Date(now.getTime() + this.timeToBeReady);
+      this.updateRoom(room);
+      setTimeout(() => {
+        this.notReadyInTime(room.ID, io);
+      }, this.timeToBeReady);
+
+      return room;
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
-
-    const player1 = this.findPlayerByUserID(client.userID);
-    const player2 = this.findPlayerByUserID(room.users[0].userID);
-    if (!player1 || !player2) {
-      this.throwError(client, 'error on join room');
-      return;
-    }
-
-    player1.status = 'readyToPlay';
-    player1.roomID = roomID;
-    this.updatePlayer(player1);
-
-    player2.status = 'readyToPlay';
-    player2.roomID = roomID;
-    this.updatePlayer(player2);
-
-    client.join(roomID);
-    room.users.push(player1);
-
-    const now = new Date();
-    room.ExpiredAt = new Date(now.getTime() + this.timeToBeReady);
-    this.updateRoom(room);
-    setTimeout(() => {
-      this.notReadyInTime(room.ID, io);
-    }, this.timeToBeReady);
-
-    return room;
   }
 
   createRoom(client: SocketWithAuth): Room {
@@ -358,54 +383,58 @@ export class GameService {
   }
 
   loadGame(room: Room): MatchData {
-    const matchData: MatchData = {
-      roomID: room.ID,
-      player1: {
-        ...room.users[0],
-        position: {
-          x: this.paddleInitialPosition.x - this.paddle.width,
-          y: this.paddleInitialPosition.y,
+    try {
+      const matchData: MatchData = {
+        roomID: room.ID,
+        player1: {
+          ...room.users[0],
+          position: {
+            x: this.paddleInitialPosition.x - this.paddle.width,
+            y: this.paddleInitialPosition.y,
+          },
+          width: this.paddle.width,
+          height: this.paddle.height,
+          direction: 'STOP',
         },
-        width: this.paddle.width,
-        height: this.paddle.height,
-        direction: 'STOP',
-      },
-      player2: {
-        ...room.users[1],
-        position: {
-          x:
-            this.court.width - this.paddleInitialPosition.x - this.paddle.width,
-          y: this.paddleInitialPosition.y,
+        player2: {
+          ...room.users[1],
+          position: {
+            x:
+              this.court.width - this.paddleInitialPosition.x - this.paddle.width,
+            y: this.paddleInitialPosition.y,
+          },
+          width: this.paddle.width,
+          height: this.paddle.height,
+          direction: 'STOP',
         },
-        width: this.paddle.width,
-        height: this.paddle.height,
-        direction: 'STOP',
-      },
-      court: this.court,
-      ball: {
-        position: {
-          x: this.court.width / 2 - this.ballRadius,
-          y: this.court.height / 2 - this.ballRadius,
+        court: this.court,
+        ball: {
+          position: {
+            x: this.court.width / 2 - this.ballRadius,
+            y: this.court.height / 2 - this.ballRadius,
+          },
+          radius: this.ballRadius,
+          speed: this.ballSpeed,
+          direction: {
+            x: Math.floor(Math.random() * 100) % 2 == 0 ? 1 : -1,
+            y: Math.floor(Math.random() * 100) % 2 == 0 ? 1 : -1,
+          },
         },
-        radius: this.ballRadius,
-        speed: this.ballSpeed,
-        direction: {
-          x: Math.floor(Math.random() * 100) % 2 == 0 ? 1 : -1,
-          y: Math.floor(Math.random() * 100) % 2 == 0 ? 1 : -1,
+        score: {
+          p1: 0,
+          p2: 0,
         },
-      },
-      score: {
-        p1: 0,
-        p2: 0,
-      },
-      status: 'play',
-      pausedByUserID: undefined,
-      pausedAt: undefined,
-      quitterID: undefined,
-      isResumed: false,
-    };
-    this.matchs.push(matchData);
-    return matchData;
+        status: 'play',
+        pausedByUserID: undefined,
+        pausedAt: undefined,
+        quitterID: undefined,
+        isResumed: false,
+      };
+      this.matchs.push(matchData);
+      return matchData;
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   moveBall(matchData: MatchData) {
@@ -419,81 +448,93 @@ export class GameService {
   }
 
   movePaddle(match: MatchData) {
-    [1, 2].forEach(i => {
-      const player: UserData & Paddle = match[`player${i}`];
+    try {
+      [1, 2].forEach(i => {
+        const player: UserData & Paddle = match[`player${i}`];
 
-      switch (player.direction) {
-        case 'UP':
-          player.position.y -= this.paddleSpeed;
-          break;
-        case 'DOWN':
-          player.position.y += this.paddleSpeed;
-          break;
-      }
+        switch (player.direction) {
+          case 'UP':
+            player.position.y -= this.paddleSpeed;
+            break;
+          case 'DOWN':
+            player.position.y += this.paddleSpeed;
+            break;
+        }
 
-      if (player.position.y < 0) {
-        player.position.y = 0;
-      } else if (player.position.y + player.height * 1.15 > this.court.height) {
-        player.position.y = this.court.height - player.height * 1.15;
-      }
-    });
+        if (player.position.y < 0) {
+          player.position.y = 0;
+        } else if (player.position.y + player.height * 1.15 > this.court.height) {
+          player.position.y = this.court.height - player.height * 1.15;
+        }
+      });
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   restartMatch(match: MatchData) {
-    match.ball.position.x = this.court.width / 2 - this.ballRadius;
-    match.ball.position.y = this.court.height / 2 - this.ballRadius;
-    match.ball.direction.x *= -1;
-    match.ball.direction.y = Math.floor(Math.random() * 100) % 2 == 0 ? 1 : -1;
+    try {
+      match.ball.position.x = this.court.width / 2 - this.ballRadius;
+      match.ball.position.y = this.court.height / 2 - this.ballRadius;
+      match.ball.direction.x *= -1;
+      match.ball.direction.y = Math.floor(Math.random() * 100) % 2 == 0 ? 1 : -1;
 
-    if (match.score.p1 === this.maxScore || match.score.p2 == this.maxScore) {
-      this.updatePlayerUsernameByUserID(match.player1.userID);
-      this.updatePlayerUsernameByUserID(match.player2.userID);
-      match.status = 'end';
+      if (match.score.p1 === this.maxScore || match.score.p2 == this.maxScore) {
+        this.updatePlayerUsernameByUserID(match.player1.userID);
+        this.updatePlayerUsernameByUserID(match.player2.userID);
+        match.status = 'end';
+      }
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
   }
 
   checkCollision(matchData: MatchData) {
-    const ball = matchData.ball;
+    try {
+      const ball = matchData.ball;
 
-    if (
-      ball.position.y > matchData.court.height - 3.5 * this.ballRadius ||
-      ball.position.y < 0
-    ) {
-      matchData.ball.direction.y *= -1;
-    }
+      if (
+        ball.position.y > matchData.court.height - 3.5 * this.ballRadius ||
+        ball.position.y < 0
+      ) {
+        matchData.ball.direction.y *= -1;
+      }
 
-    if (ball.position.y < this.ballRadius) {
-      ball.position.y = this.ballRadius * 2;
-      ball.direction.y = 1;
-    }
+      if (ball.position.y < this.ballRadius) {
+        ball.position.y = this.ballRadius * 2;
+        ball.direction.y = 1;
+      }
 
-    const { x: bx, y: by } = ball.position;
-    const br = this.ballRadius;
+      const { x: bx, y: by } = ball.position;
+      const br = this.ballRadius;
 
-    const playerNumber = bx < this.court.width / 2 ? 1 : 2;
-    const player = `player${playerNumber}`;
-    const { x: px, y: py } = matchData[player].position;
-    const { width: pw, height: ph } = matchData[player];
+      const playerNumber = bx < this.court.width / 2 ? 1 : 2;
+      const player = `player${playerNumber}`;
+      const { x: px, y: py } = matchData[player].position;
+      const { width: pw, height: ph } = matchData[player];
 
-    if (
-      by >= py &&
-      by <= py + ph &&
-      ((playerNumber === 1 && bx < px + pw) ||
-        (playerNumber === 2 && bx > px - 2 * br))
-    ) {
-      ball.direction.x *= -1;
-      ball.position.x =
-        playerNumber === 1
-          ? matchData[player].position.x + matchData[player].width + br * 0.2
-          : matchData[player].position.x - br * 2;
+      if (
+        by >= py &&
+        by <= py + ph &&
+        ((playerNumber === 1 && bx < px + pw) ||
+          (playerNumber === 2 && bx > px - 2 * br))
+      ) {
+        ball.direction.x *= -1;
+        ball.position.x =
+          playerNumber === 1
+            ? matchData[player].position.x + matchData[player].width + br * 0.2
+            : matchData[player].position.x - br * 2;
 
-      matchData = { ...matchData, ball };
-    } else if (ball.position.x < matchData.player1.position.x - pw) {
-      matchData.score.p2++;
-      this.restartMatch(matchData);
-    } else if (ball.position.x > matchData.player2.position.x + pw - br) {
-      matchData.score.p1++;
-      this.restartMatch(matchData);
+        matchData = { ...matchData, ball };
+      } else if (ball.position.x < matchData.player1.position.x - pw) {
+        matchData.score.p2++;
+        this.restartMatch(matchData);
+      } else if (ball.position.x > matchData.player2.position.x + pw - br) {
+        matchData.score.p1++;
+        this.restartMatch(matchData);
+      }
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
   }
 
@@ -501,134 +542,158 @@ export class GameService {
     matchData: MatchData,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    this.updateMatch(matchData);
-    io.to(matchData.player1.roomID).emit('match_updated', matchData);
+    try {
+      this.updateMatch(matchData);
+      io.to(matchData.player1.roomID).emit('match_updated', matchData);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   removeMatchFromList(matchData: MatchData): MatchData[] {
-    const match = this.findMatchByRoomID(matchData.roomID);
-    if (!match) return this.matchs;
+    try {
+      const match = this.findMatchByRoomID(matchData.roomID);
+      if (!match) return this.matchs;
 
-    const room = this.findRoomByRoomID(matchData.roomID);
-    if (room) this.deleteRoomByRoomID(room.ID);
+      const room = this.findRoomByRoomID(matchData.roomID);
+      if (room) this.deleteRoomByRoomID(room.ID);
 
-    const player1 = match.player1;
-    const player2 = match.player2;
+      const player1 = match.player1;
+      const player2 = match.player2;
 
-    player1.roomID = '';
-    player2.roomID = '';
-    player1.status = 'idle';
-    player2.status = 'idle';
+      player1.roomID = '';
+      player2.roomID = '';
+      player1.status = 'idle';
+      player2.status = 'idle';
 
-    this.updatePlayer(player1);
-    this.updatePlayer(player2);
+      this.updatePlayer(player1);
+      this.updatePlayer(player2);
 
-    this.matchs = this.matchs.filter(m => {
-      return m.roomID !== match.roomID;
-    });
-    return this.matchs;
+      this.matchs = this.matchs.filter(m => {
+        return m.roomID !== match.roomID;
+      });
+      return this.matchs;
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   async updateUser(matchResult: MatchResult) {
-    const winner = await this.usersRespository.findOne(matchResult.winnerID);
-    const looser = await this.usersRespository.findOne(matchResult.looserID);
-    winner.total_games++;
-    looser.total_games++;
-    winner.total_wins++;
-    looser.total_losses++;
-    const winnerDto: UpdateUserGameStatisticDto =
-      new UpdateUserGameStatisticDto();
-    winnerDto.total_games = winner.total_games;
-    winnerDto.total_wins = winner.total_wins;
-    winnerDto.total_losses = winner.total_losses;
-    await this.usersRespository.updateUserGameStatistic(
-      winner.user_id,
-      winnerDto,
-    );
-    const looserDto: UpdateUserGameStatisticDto =
-      new UpdateUserGameStatisticDto();
-    looserDto.total_games = looser.total_games;
-    looserDto.total_wins = looser.total_wins;
-    looserDto.total_losses = looser.total_losses;
-    await this.usersRespository.updateUserGameStatistic(
-      looser.user_id,
-      looserDto,
-    );
+    try {
+      const winner = await this.usersRespository.findOne(matchResult.winnerID);
+      const looser = await this.usersRespository.findOne(matchResult.looserID);
+      winner.total_games++;
+      looser.total_games++;
+      winner.total_wins++;
+      looser.total_losses++;
+      const winnerDto: UpdateUserGameStatisticDto =
+        new UpdateUserGameStatisticDto();
+      winnerDto.total_games = winner.total_games;
+      winnerDto.total_wins = winner.total_wins;
+      winnerDto.total_losses = winner.total_losses;
+      await this.usersRespository.updateUserGameStatistic(
+        winner.user_id,
+        winnerDto,
+      );
+      const looserDto: UpdateUserGameStatisticDto =
+        new UpdateUserGameStatisticDto();
+      looserDto.total_games = looser.total_games;
+      looserDto.total_wins = looser.total_wins;
+      looserDto.total_losses = looser.total_losses;
+      await this.usersRespository.updateUserGameStatistic(
+        looser.user_id,
+        looserDto,
+      );
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   async saveMatchResult(matchResult: MatchResult) {
-    const matchHistoryDto: CreateMatchHistoryDto = new CreateMatchHistoryDto();
-    matchHistoryDto.player1_user_id = matchResult.player1.userID;
-    matchHistoryDto.player1_username = matchResult.player1.username;
-    matchHistoryDto.player1_score = matchResult.player1.score;
-    matchHistoryDto.player1_avatar_url = matchResult.player1.avatarUrl;
-    matchHistoryDto.player2_user_id = matchResult.player2.userID;
-    matchHistoryDto.player2_username = matchResult.player2.username;
-    matchHistoryDto.player2_score = matchResult.player2.score;
-    matchHistoryDto.player2_avatar_url = matchResult.player2.avatarUrl;
-    matchHistoryDto.winner_id = matchResult.winnerID;
-    matchHistoryDto.looser_id = matchResult.looserID;
-    matchHistoryDto.ended_at = matchResult.endedAt;
-    await this.matchRepository.create(matchHistoryDto);
-    await this.updateUser(matchResult);
+    try {
+      const matchHistoryDto: CreateMatchHistoryDto = new CreateMatchHistoryDto();
+      matchHistoryDto.player1_user_id = matchResult.player1.userID;
+      matchHistoryDto.player1_username = matchResult.player1.username;
+      matchHistoryDto.player1_score = matchResult.player1.score;
+      matchHistoryDto.player1_avatar_url = matchResult.player1.avatarUrl;
+      matchHistoryDto.player2_user_id = matchResult.player2.userID;
+      matchHistoryDto.player2_username = matchResult.player2.username;
+      matchHistoryDto.player2_score = matchResult.player2.score;
+      matchHistoryDto.player2_avatar_url = matchResult.player2.avatarUrl;
+      matchHistoryDto.winner_id = matchResult.winnerID;
+      matchHistoryDto.looser_id = matchResult.looserID;
+      matchHistoryDto.ended_at = matchResult.endedAt;
+      await this.matchRepository.create(matchHistoryDto);
+      await this.updateUser(matchResult);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   async endMatch(match: MatchData): Promise<MatchResult> {
-    const endedAt = new Date();
-    let winnerID: number;
-    let looserID: number;
+    try {
+      const endedAt = new Date();
+      let winnerID: number;
+      let looserID: number;
 
-    if (!match.quitterID) {
-      if (match.score.p1 === this.maxScore) {
-        winnerID = match.player1.userID;
-        looserID = match.player2.userID;
+      if (!match.quitterID) {
+        if (match.score.p1 === this.maxScore) {
+          winnerID = match.player1.userID;
+          looserID = match.player2.userID;
+        } else {
+          looserID = match.player1.userID;
+          winnerID = match.player2.userID;
+        }
       } else {
-        looserID = match.player1.userID;
-        winnerID = match.player2.userID;
+        if (match.quitterID === match.player2.userID) {
+          winnerID = match.player1.userID;
+          looserID = match.player2.userID;
+        } else {
+          looserID = match.player1.userID;
+          winnerID = match.player2.userID;
+        }
       }
-    } else {
-      if (match.quitterID === match.player2.userID) {
-        winnerID = match.player1.userID;
-        looserID = match.player2.userID;
-      } else {
-        looserID = match.player1.userID;
-        winnerID = match.player2.userID;
-      }
+
+      const user1 = await this.usersRespository.findOne(match.player1.userID);
+      const user2 = await this.usersRespository.findOne(match.player2.userID);
+
+      const player1 = {
+        userID: match.player1.userID,
+        username: user1.username,
+        score: match.score.p1,
+        avatarUrl: user1.avatar_url ?? '',
+      };
+
+      const player2 = {
+        userID: match.player2.userID,
+        username: user2.username,
+        score: match.score.p2,
+        avatarUrl: user2.avatar_url ?? '',
+      };
+
+      const matchResult: MatchResult = {
+        player1,
+        player2,
+        winnerID,
+        looserID,
+        endedAt,
+      };
+
+      await this.saveMatchResult(matchResult);
+      return matchResult;
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
-
-    const user1 = await this.usersRespository.findOne(match.player1.userID);
-    const user2 = await this.usersRespository.findOne(match.player2.userID);
-
-    const player1 = {
-      userID: match.player1.userID,
-      username: user1.username,
-      score: match.score.p1,
-      avatarUrl: user1.avatar_url ?? '',
-    };
-
-    const player2 = {
-      userID: match.player2.userID,
-      username: user2.username,
-      score: match.score.p2,
-      avatarUrl: user2.avatar_url ?? '',
-    };
-
-    const matchResult: MatchResult = {
-      player1,
-      player2,
-      winnerID,
-      looserID,
-      endedAt,
-    };
-
-    await this.saveMatchResult(matchResult);
-    return matchResult;
   }
 
   findMatchByUserID(userID: number): MatchData {
-    const player = this.findPlayerByUserID(userID);
-    const match = this.findMatchByRoomID(player.roomID);
-    return match;
+    try {
+      const player = this.findPlayerByUserID(userID);
+      const match = this.findMatchByRoomID(player.roomID);
+      return match;
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   giveUpMatch(
@@ -636,36 +701,44 @@ export class GameService {
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
     client?: SocketWithAuth,
   ) {
-    const match = this.findMatchByRoomID(matchData.roomID);
-    if (!match || match.isResumed) return;
-    this.updatePlayerUsernameByUserID(match.player1.userID);
-    this.updatePlayerUsernameByUserID(match.player2.userID);
+    try {
+      const match = this.findMatchByRoomID(matchData.roomID);
+      if (!match || match.isResumed) return;
+      this.updatePlayerUsernameByUserID(match.player1.userID);
+      this.updatePlayerUsernameByUserID(match.player2.userID);
 
-    match.status = 'end';
-    match.quitterID = client ? client.userID : match.pausedByUserID;
-    this.updateMatch(match);
-    this.gameInProgress(match.roomID, io);
+      match.status = 'end';
+      match.quitterID = client ? client.userID : match.pausedByUserID;
+      this.updateMatch(match);
+      this.gameInProgress(match.roomID, io);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   pauseMatch(
     userID: number,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const player = this.findPlayerByUserID(userID);
-    const match = this.findMatchByRoomID(player.roomID);
+    try {
+      const player = this.findPlayerByUserID(userID);
+      const match = this.findMatchByRoomID(player.roomID);
 
-    if (match && match.status === 'play') {
-      match.isResumed = false;
-      match.status = 'pause';
-      match.pausedAt = new Date();
-      match.pausedByUserID = player.userID;
-      this.updateMatch(match);
+      if (match && match.status === 'play') {
+        match.isResumed = false;
+        match.status = 'pause';
+        match.pausedAt = new Date();
+        match.pausedByUserID = player.userID;
+        this.updateMatch(match);
 
-      setTimeout(() => {
-        this.giveUpMatch(match, io);
-      }, 100 * 1000);
+        setTimeout(() => {
+          this.giveUpMatch(match, io);
+        }, 100 * 1000);
 
-      this.updateMatch(match);
+        this.updateMatch(match);
+      }
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
   }
 
@@ -673,99 +746,119 @@ export class GameService {
     userID: number,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const player = this.findPlayerByUserID(userID);
-    const match = this.findMatchByRoomID(player.roomID);
+    try {
+      const player = this.findPlayerByUserID(userID);
+      const match = this.findMatchByRoomID(player.roomID);
 
-    if (match.pausedByUserID !== player.userID) return;
+      if (match.pausedByUserID !== player.userID) return;
 
-    match.isResumed = true;
-    match.status = 'play';
-    match.pausedAt = undefined;
-    match.pausedByUserID = undefined;
+      match.isResumed = true;
+      match.status = 'play';
+      match.pausedAt = undefined;
+      match.pausedByUserID = undefined;
 
-    this.updateMatch(match);
-    this.updatePlayerUsernameByUserID(match.player1.userID);
-    this.updatePlayerUsernameByUserID(match.player2.userID);
-    this.gameInProgress(player.roomID, io);
+      this.updateMatch(match);
+      this.updatePlayerUsernameByUserID(match.player1.userID);
+      this.updatePlayerUsernameByUserID(match.player2.userID);
+      this.gameInProgress(player.roomID, io);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   removeUserFromRoom(roomID: string, userID: number) {
-    const room = this.findRoomByRoomID(roomID);
-    if (!room) return;
-    room.users = room.users.filter(u => {
-      if (u.userID !== userID) return u;
-    });
-    this.updateRoom(room);
+    try {
+      const room = this.findRoomByRoomID(roomID);
+      if (!room) return;
+      room.users = room.users.filter(u => {
+        if (u.userID !== userID) return u;
+      });
+      this.updateRoom(room);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   waitReconnect(
     client: SocketWithAuth,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const player = this.findPlayerByUserID(client.userID);
-    if (!player) return;
-    player.waitingReconnect = true;
-    this.updatePlayer(player);
+    try {
+      const player = this.findPlayerByUserID(client.userID);
+      if (!player) return;
+      player.waitingReconnect = true;
+      this.updatePlayer(player);
 
-    if (player.status === 'playing') {
-      this.pauseMatch(player.userID, io);
-      client.leave(player.roomID);
+      if (player.status === 'playing') {
+        this.pauseMatch(player.userID, io);
+        client.leave(player.roomID);
+      }
+
+      setTimeout(() => {
+        this.disconnectPlayer(client, io);
+      }, 5000);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
-
-    setTimeout(() => {
-      this.disconnectPlayer(client, io);
-    }, 5000);
   }
 
   disconnectPlayerWhenStatusIsReadyToPlay(player: UserData): UserData {
-    const room = this.findRoomByRoomID(player.roomID);
-    let remainingPlayer: UserData;
-    let leavingPlayer: UserData;
-    if (room.users[0].userID === player.userID) {
-      leavingPlayer = player;
-      remainingPlayer = this.findPlayerByUserID(room.users[1].userID);
-    } else {
-      remainingPlayer = this.findPlayerByUserID(room.users[0].userID);
-      leavingPlayer = player;
+    try {
+      const room = this.findRoomByRoomID(player.roomID);
+      let remainingPlayer: UserData;
+      let leavingPlayer: UserData;
+      if (room.users[0].userID === player.userID) {
+        leavingPlayer = player;
+        remainingPlayer = this.findPlayerByUserID(room.users[1].userID);
+      } else {
+        remainingPlayer = this.findPlayerByUserID(room.users[0].userID);
+        leavingPlayer = player;
+      }
+      this.removeUserFromQueue(leavingPlayer.userID);
+      this.removePlayerFromList(leavingPlayer.userID);
+      remainingPlayer.status = 'searching';
+      this.updatePlayer(remainingPlayer);
+      room.users = room.users.filter(user => {
+        if (user.userID !== leavingPlayer.userID) return user;
+      });
+      this.updateRoom(room);
+      return remainingPlayer;
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
-    this.removeUserFromQueue(leavingPlayer.userID);
-    this.removePlayerFromList(leavingPlayer.userID);
-    remainingPlayer.status = 'searching';
-    this.updatePlayer(remainingPlayer);
-    room.users = room.users.filter(user => {
-      if (user.userID !== leavingPlayer.userID) return user;
-    });
-    this.updateRoom(room);
-    return remainingPlayer;
   }
 
   disconnectPlayer(
     client: SocketWithAuth,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const player = this.findPlayerByUserID(client.userID);
-    if (!player) return;
-    if (player.waitingReconnect && player.isReconnect) {
-      player.waitingReconnect = false;
-      player.isReconnect = false;
-      this.updatePlayer(player);
-      return;
-    } else if (player.status === 'playing') {
-      const match = this.findMatchByRoomID(player.roomID);
-      this.giveUpMatch(match, io);
-      return;
-    } else if (player.status === 'readyToPlay') {
-      const remainingPlayer =
-        this.disconnectPlayerWhenStatusIsReadyToPlay(player);
-      io.to(this.getSocketIdByUserId(remainingPlayer.userID, io)).emit(
-        'status_changed',
-        'searching',
-      );
-    } else if (player.status === 'searching') {
-      this.deleteRoomByRoomID(player.roomID);
-      this.removePlayerFromList(player.userID);
-    } else {
-      this.removePlayerFromList(player.userID);
+    try {
+      const player = this.findPlayerByUserID(client.userID);
+      if (!player) return;
+      if (player.waitingReconnect && player.isReconnect) {
+        player.waitingReconnect = false;
+        player.isReconnect = false;
+        this.updatePlayer(player);
+        return;
+      } else if (player.status === 'playing') {
+        const match = this.findMatchByRoomID(player.roomID);
+        this.giveUpMatch(match, io);
+        return;
+      } else if (player.status === 'readyToPlay') {
+        const remainingPlayer =
+          this.disconnectPlayerWhenStatusIsReadyToPlay(player);
+        io.to(this.getSocketIdByUserId(remainingPlayer.userID, io)).emit(
+          'status_changed',
+          'searching',
+        );
+      } else if (player.status === 'searching') {
+        this.deleteRoomByRoomID(player.roomID);
+        this.removePlayerFromList(player.userID);
+      } else {
+        this.removePlayerFromList(player.userID);
+      }
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
   }
 
@@ -773,33 +866,37 @@ export class GameService {
     roomID: string,
     io: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   ) {
-    const match = this.findMatchByRoomID(roomID);
-    if (match.status === 'end') {
-      const matchResult = await this.endMatch(match);
-      io.to(roomID).emit('end_match', matchResult);
-      io.to(roomID).emit('status_changed', 'connected');
-      io.socketsLeave(roomID);
-      await this.updatePlayerStatus(match.player1.userID, 'online');
-      await this.updatePlayerStatus(match.player2.userID, 'online');
-      io.emit('refresh_list', ``);
-      this.removeMatchFromList(match);
-      return;
-    }
+    try {
+      const match = this.findMatchByRoomID(roomID);
+      if (match.status === 'end') {
+        const matchResult = await this.endMatch(match);
+        io.to(roomID).emit('end_match', matchResult);
+        io.to(roomID).emit('status_changed', 'connected');
+        io.socketsLeave(roomID);
+        await this.updatePlayerStatus(match.player1.userID, 'online');
+        await this.updatePlayerStatus(match.player2.userID, 'online');
+        io.emit('refresh_list', ``);
+        this.removeMatchFromList(match);
+        return;
+      }
 
-    if (match.status === 'pause') {
+      if (match.status === 'pause') {
+        this.refreshMatch(match, io);
+        return;
+      }
+
+      if (match.status === 'play') {
+        this.moveBall(match);
+        this.movePaddle(match);
+        this.checkCollision(match);
+      }
+
       this.refreshMatch(match, io);
-      return;
+
+      setTimeout(() => this.gameInProgress(match.roomID, io), 1000 / 60);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
-
-    if (match.status === 'play') {
-      this.moveBall(match);
-      this.movePaddle(match);
-      this.checkCollision(match);
-    }
-
-    this.refreshMatch(match, io);
-
-    setTimeout(() => this.gameInProgress(match.roomID, io), 1000 / 60);
   }
 
   getAllMatchHistoryByUserID(
@@ -813,57 +910,61 @@ export class GameService {
     client: SocketWithAuth,
     guestID: number,
   ) {
-    const playerOwner = this.findPlayerByUserID(client.userID);
-    const playerGuest = this.findPlayerByUserID(guestID);
+    try {
+      const playerOwner = this.findPlayerByUserID(client.userID);
+      const playerGuest = this.findPlayerByUserID(guestID);
 
-    //todo testar com 3 usuarios logados, abrir um jogo com 2 e tentar chamar o 3 para game
+      //todo testar com 3 usuarios logados, abrir um jogo com 2 e tentar chamar o 3 para game
 
-    if (playerOwner.status !== 'idle') {
-      client.emit(
-        'request_game_error',
-        'You are not allowed to play a new game.',
+      if (playerOwner.status !== 'idle') {
+        client.emit(
+          'request_game_error',
+          'You are not allowed to play a new game.',
+        );
+        return;
+      }
+
+      if (!playerGuest) {
+        client.emit('request_game_error', 'Player not found.');
+        return;
+      }
+
+      const userGuest = await this.usersRespository.findOne(playerGuest.userID);
+      if (userGuest.status !== 'online' || playerGuest.status !== 'idle') {
+        client.emit('request_game_error', 'Player not available.');
+        return;
+      }
+
+      const room = this.createRoom(client);
+      room.users.push(playerGuest);
+
+      playerOwner.status = 'awaiting';
+      playerOwner.roomID = room.ID;
+      this.updatePlayer(playerOwner);
+
+      playerGuest.roomID = room.ID;
+      this.updatePlayer(playerGuest);
+
+      client.join(room.ID);
+
+      this.updateRoom(room);
+
+      client.emit('status_changed', 'awaiting');
+
+      //todo checar se ta emitindo no deploy
+      io.to(this.getSocketIdByUserId(playerGuest.userID, io)).emit(
+        'request_game',
+        {
+          type: 'request',
+          username: playerOwner.username,
+        },
       );
-      return;
+      setTimeout(() => {
+        this.cancelRequestMatch(io, playerOwner.userID);
+      }, this.timeToReturnRequestMatch);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
-
-    if (!playerGuest) {
-      client.emit('request_game_error', 'Player not found.');
-      return;
-    }
-
-    const userGuest = await this.usersRespository.findOne(playerGuest.userID);
-    if (userGuest.status !== 'online' || playerGuest.status !== 'idle') {
-      client.emit('request_game_error', 'Player not available.');
-      return;
-    }
-
-    const room = this.createRoom(client);
-    room.users.push(playerGuest);
-
-    playerOwner.status = 'awaiting';
-    playerOwner.roomID = room.ID;
-    this.updatePlayer(playerOwner);
-
-    playerGuest.roomID = room.ID;
-    this.updatePlayer(playerGuest);
-
-    client.join(room.ID);
-
-    this.updateRoom(room);
-
-    client.emit('status_changed', 'awaiting');
-
-    //todo checar se ta emitindo no deploy
-    io.to(this.getSocketIdByUserId(playerGuest.userID, io)).emit(
-      'request_game',
-      {
-        type: 'request',
-        username: playerOwner.username,
-      },
-    );
-    setTimeout(() => {
-      this.cancelRequestMatch(io, playerOwner.userID);
-    }, this.timeToReturnRequestMatch);
   }
 
   cancelRequestMatch(
@@ -871,32 +972,36 @@ export class GameService {
     userID: number,
     type?: string,
   ) {
-    const playerOwner = this.findPlayerByUserID(userID);
-    const room = this.findRoomByRoomID(playerOwner.roomID);
-    if (!room) return;
-    const playerGuest = this.findPlayerByUserID(
-      room.users[0].userID === playerOwner.userID
-        ? room.users[1].userID
-        : room.users[0].userID,
-    );
+    try {
+      const playerOwner = this.findPlayerByUserID(userID);
+      const room = this.findRoomByRoomID(playerOwner.roomID);
+      if (!room) return;
+      const playerGuest = this.findPlayerByUserID(
+        room.users[0].userID === playerOwner.userID
+          ? room.users[1].userID
+          : room.users[0].userID,
+      );
 
-    if (room.WasRequestReturned) return;
+      if (room.WasRequestReturned) return;
 
-    playerGuest.roomID = '';
-    playerOwner.roomID = '';
-    playerOwner.status = 'idle';
+      playerGuest.roomID = '';
+      playerOwner.roomID = '';
+      playerOwner.status = 'idle';
 
-    io.to(room.ID).emit(
-      'request_game_error',
-      type ? 'Request canceled.' : 'The request was not responded in time.',
-    );
-    io.to(room.ID).emit('status_changed', 'connected');
+      io.to(room.ID).emit(
+        'request_game_error',
+        type ? 'Request canceled.' : 'The request was not responded in time.',
+      );
+      io.to(room.ID).emit('status_changed', 'connected');
 
-    this.updatePlayer(playerGuest);
-    this.updatePlayer(playerOwner);
-    io.in(room.ID).socketsLeave(playerOwner.socketID);
+      this.updatePlayer(playerGuest);
+      this.updatePlayer(playerOwner);
+      io.in(room.ID).socketsLeave(playerOwner.socketID);
 
-    this.deleteRoomByRoomID(room.ID);
+      this.deleteRoomByRoomID(room.ID);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
+    }
   }
 
   responseRequestMatch(
@@ -904,54 +1009,58 @@ export class GameService {
     client: SocketWithAuth,
     response: string,
   ) {
-    const playerGuest = this.findPlayerByUserID(client.userID);
-    const room = this.findRoomByRoomID(playerGuest.roomID);
-    if (!room) {
-      client.emit('request_game_error', 'Request expired.');
-      return;
-    }
-    const playerOwner = this.findPlayerByUserID(
-      room.users[0].userID === client.userID
-        ? room.users[1].userID
-        : room.users[0].userID,
-    );
+    try {
+      const playerGuest = this.findPlayerByUserID(client.userID);
+      const room = this.findRoomByRoomID(playerGuest.roomID);
+      if (!room) {
+        client.emit('request_game_error', 'Request expired.');
+        return;
+      }
+      const playerOwner = this.findPlayerByUserID(
+        room.users[0].userID === client.userID
+          ? room.users[1].userID
+          : room.users[0].userID,
+      );
 
-    room.WasRequestReturned = true;
-    this.updateRoom(room);
+      room.WasRequestReturned = true;
+      this.updateRoom(room);
 
-    if (response === 'refused') {
-      playerGuest.roomID = '';
-      this.updatePlayer(playerGuest);
+      if (response === 'refused') {
+        playerGuest.roomID = '';
+        this.updatePlayer(playerGuest);
 
-      playerOwner.roomID = '';
-      playerOwner.status = 'idle';
-      io.to(room.ID).emit('request_game', {
-        type: 'refused',
-        username: playerGuest.username,
-      });
-      io.to(room.ID).emit('status_changed', 'connected');
+        playerOwner.roomID = '';
+        playerOwner.status = 'idle';
+        io.to(room.ID).emit('request_game', {
+          type: 'refused',
+          username: playerGuest.username,
+        });
+        io.to(room.ID).emit('status_changed', 'connected');
+        this.updatePlayer(playerOwner);
+        io.in(room.ID).socketsLeave(playerOwner.socketID);
+
+        this.deleteRoomByRoomID(room.ID);
+        return;
+      }
+      playerOwner.status = 'readyToPlay';
       this.updatePlayer(playerOwner);
-      io.in(room.ID).socketsLeave(playerOwner.socketID);
 
-      this.deleteRoomByRoomID(room.ID);
-      return;
+      playerGuest.status = 'readyToPlay';
+      playerGuest.roomID = room.ID;
+      this.updatePlayer(playerGuest);
+      client.join(room.ID);
+
+      const now = new Date();
+      room.ExpiredAt = new Date(now.getTime() + this.timeToBeReady);
+      this.updateRoom(room);
+      io.to(room.ID).emit('status_changed', 'readyToPlay');
+      io.to(room.ID).emit('time_to_be_ready', room.ExpiredAt);
+      setTimeout(() => {
+        this.notReadyInTime(room.ID, io);
+      }, this.timeToBeReady);
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
-    playerOwner.status = 'readyToPlay';
-    this.updatePlayer(playerOwner);
-
-    playerGuest.status = 'readyToPlay';
-    playerGuest.roomID = room.ID;
-    this.updatePlayer(playerGuest);
-    client.join(room.ID);
-
-    const now = new Date();
-    room.ExpiredAt = new Date(now.getTime() + this.timeToBeReady);
-    this.updateRoom(room);
-    io.to(room.ID).emit('status_changed', 'readyToPlay');
-    io.to(room.ID).emit('time_to_be_ready', room.ExpiredAt);
-    setTimeout(() => {
-      this.notReadyInTime(room.ID, io);
-    }, this.timeToBeReady);
   }
 
   async findFriends(userId: any): Promise<Friends[] | null> {
@@ -964,40 +1073,48 @@ export class GameService {
 
   async updatePlayerStatus(userID: number, status: string) {
     const user = await this.usersRespository.findOne(userID);
-    if (user.status === 'offline') return;
+    if (!user || user.status === 'offline') return;
     await this.setStatus(userID, status);
   }
 
   async updatePlayerUsernameByUserID(userID: number) {
-    const user = await this.usersRespository.findOne(userID);
-    const player = this.findPlayerByUserID(userID);
-    if (!player) return;
-    if (player.username !== user.username) {
-      player.username = user.username;
-      this.updatePlayer(player);
-      if (player.roomID !== '') {
-        const room = this.findRoomByRoomID(player.roomID);
-        room.users[0].userID === player.userID
-          ? (room.users[0].username = player.username)
-          : (room.users[1].username = player.username);
-        this.updateRoom(room);
-        const match = this.findMatchByRoomID(player.roomID);
-        if (match) {
-          match.player1.userID === player.userID
-            ? (match.player1.username = player.username)
-            : (match.player2.username = player.username);
-          this.updateMatch(match);
+    try {
+      const user = await this.usersRespository.findOne(userID);
+      const player = this.findPlayerByUserID(userID);
+      if (!player) return;
+      if (player.username !== user.username) {
+        player.username = user.username;
+        this.updatePlayer(player);
+        if (player.roomID !== '') {
+          const room = this.findRoomByRoomID(player.roomID);
+          room.users[0].userID === player.userID
+            ? (room.users[0].username = player.username)
+            : (room.users[1].username = player.username);
+          this.updateRoom(room);
+          const match = this.findMatchByRoomID(player.roomID);
+          if (match) {
+            match.player1.userID === player.userID
+              ? (match.player1.username = player.username)
+              : (match.player2.username = player.username);
+            this.updateMatch(match);
+          }
         }
       }
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
   }
 
   getSocketIdByUserId(userId, io: any) {
-    for (const [socketId, socket] of io.server.of('/game').sockets) {
-      if (socket.userID === userId) {
-        return socketId;
+    try {
+      for (const [socketId, socket] of io.server.of('/game').sockets) {
+        if (socket.userID === userId) {
+          return socketId;
+        }
       }
+      return null;
+    } catch {
+      throw new WsException(this.defaultErrorMsg);
     }
-    return null;
   }
 }

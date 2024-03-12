@@ -77,9 +77,9 @@ export class GameGateway
       type === 'keyup' ? 'STOP' : key.replace('Arrow', '').toUpperCase();
     const player = this.gameService.findPlayerByUserID(client.userID);
     const match = this.gameService.findMatchByRoomID(player.roomID);
-    if (match.player1.userID === player.userID)
+    if (match && match.player1.userID === player.userID)
       match.player1.direction = direction;
-    else if (match.player2.userID === player.userID)
+    else if (match && match.player2.userID === player.userID)
       match.player2.direction = direction;
     this.gameService.updateMatch(match);
   }
