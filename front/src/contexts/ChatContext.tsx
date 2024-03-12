@@ -394,10 +394,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		const member = (activeChannelData as iChannelData).channelMembers.find(
 			(member) => member.user_id === userID,
 		)
-		if (member) {
-			return false
-		} else {
+		if (member && member.users.action.includes('kick')) {
 			return true
+		} else {
+			return false
 		}
 	}
 
