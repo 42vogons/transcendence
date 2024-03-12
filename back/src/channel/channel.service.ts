@@ -173,7 +173,7 @@ export class ChannelService {
       );
 
       const isKicked = await this.checkAction(
-        userId,
+        memberDto.member_id,
         memberDto.channel_id,
         AdminActionType.KICKED,
         'status',
@@ -183,11 +183,14 @@ export class ChannelService {
         throw new ConflictException('The member is already in the channel.');
       }
 
-      await this.repository.addUserToChannel(
-        memberDto.member_id,
-        memberDto.channel_id,
-        memberDto.status,
-      );
+      if (!member) {
+        await this.repository.addUserToChannel(
+          memberDto.member_id,
+          memberDto.channel_id,
+          memberDto.status,
+        );
+      }
+
       await this.repository.adminActionRemoveKick(
         memberDto.member_id,
         memberDto.channel_id,
@@ -341,11 +344,13 @@ export class ChannelService {
       throw new ConflictException("You can't join on this channel .");
     }
 
-    await this.repository.addUserToChannel(
-      userId,
-      channelDto.channel_id,
-      ChannelMemberStatus.MEMBER,
-    );
+    if (!member) {
+      await this.repository.addUserToChannel(
+        userId,
+        channelDto.channel_id,
+        ChannelMemberStatus.MEMBER,
+      );
+    }
 
     await this.repository.adminActionRemoveKick(userId, channelDto.channel_id);
     const memberName = await this.userRepository.findUsernameByUserID(userId);

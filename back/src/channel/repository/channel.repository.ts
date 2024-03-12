@@ -172,10 +172,11 @@ export class ChannelRepository {
     const channelsBanned = await this.findChannelBannedByUser(member_id);
     const channelBannedIds = channelsBanned.map(channel => channel.channel_id);
 
-    const myChannels = await this.findMyChannels(member_id);
-    const myChannelds = myChannels.map(channel => channel.channel_id);
+    // const myChannels = await this.findMyChannels(member_id);
+    // const myChannelds = myChannels.map(channel => channel.channel_id);
 
-    const notListChannels = channelBannedIds.concat(myChannelds);
+    // const notListChannels = channelBannedIds.concat(myChannelds);
+    const notListChannels = channelBannedIds;
 
     return await this.prisma.channels.findMany({
       where: {

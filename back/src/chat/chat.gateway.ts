@@ -317,8 +317,8 @@ export class ChatGateway
       }
       this.logger.log(msg + 'on channel' + adminActionDto.channel_id);
       await this.chatService.sendBroadCast(adminActionDto.channel_id, msg);
-      await this.notifyMembers(adminActionDto.channel_id);
       await this.channelService.adminAction(adminActionDto, client.userID);
+      await this.notifyMembers(adminActionDto.channel_id);
     } catch (error) {
       this.sendError(error);
     }
