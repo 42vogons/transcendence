@@ -88,6 +88,13 @@ export class ChatGateway
         'error',
       );
 
+      await this.channelService.checkAction(
+        client.userID,
+        chatDto.channel_id,
+        AdminActionType.MUTED,
+        'error',
+      );
+
       chatDto.sender_id = client.userID;
       await this.chatService.saveMessage(chatDto);
       await this.notifyMembers(chatDto.channel_id);
