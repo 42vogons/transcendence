@@ -162,7 +162,9 @@ export class UsersRepository {
       where: {
         user_id: user_id,
       },
-      data: updateUserGameStatisticDto,
+      data: { total_games: updateUserGameStatisticDto.total_games,
+              total_losses: updateUserGameStatisticDto.total_losses,
+              total_wins: updateUserGameStatisticDto.total_wins },
     });
   }
 
