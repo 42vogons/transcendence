@@ -69,7 +69,21 @@ export class UsersController {
 
   @Patch()
   @UseGuards(AuthGuard)
-  async update(@Req() request, @Body() updateUserDto: UpdateUserDto) {
+  async update(
+    @Req() request,
+    @Body() updateUserDto: UpdateUserDto,
+    @Response() res,
+  ) {
+    try {
+      UpdateUserSchema.parse(updateUserDto);
+      this.usersService.updateUser(request.user.id, updateUserDto, res);
+    } catch (error) {
+      Logger.error(`400 Error to update user: ${error.errors[0]?.message}`);
+      throw new BadRequestException(error.errors);
+    }
+
+
+    /*
     const user = await this.usersService.findOne(request.user.id);
     try {
       UpdateUserSchema.parse(updateUserDto);
@@ -77,7 +91,7 @@ export class UsersController {
       Logger.error(`400 Error to update user: ${error.errors[0]?.message}`);
       throw new BadRequestException(error.errors);
     }
-    return this.usersService.update(user.user_id, updateUserDto);
+    return this.usersService.update(user.user_id, updateUserDto);*/
   }
 
   @UseGuards(AuthGuard)

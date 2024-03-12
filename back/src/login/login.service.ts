@@ -73,6 +73,7 @@ export class LoginService {
       action: action,
     };
     const token = await this.generateToken(payload);
+    const { user_id: userID, username } = profile;
 
     Logger.log('cookie=' + token);
     res.cookie('accessToken', token, {
@@ -80,11 +81,11 @@ export class LoginService {
       httpOnly: true,
       domain: process.env.BACK_DOMAIN,
     });
-    const username = profile.username;
-    const userId = profile.user_id;
+    //const username = profile.username;
+    //const user_Id = profile.user_id;
     return res
       .status(200)
-      .send({ action, user: { userId, username, expiresAt } });
+      .send({ action, user: { userID, username, expiresAt } });
   }
 
   async checkUser(profile: any): Promise<UserEntity | null> {
