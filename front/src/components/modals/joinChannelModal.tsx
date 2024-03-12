@@ -140,7 +140,7 @@ export default function JoinChannelModal({
 				router.push('/chat/' + channel_id)
 			} catch (error: any) {
 				console.log('error:', error)
-				toast(error.message ? error.message : error, {
+				toast(error.response.data.message, {
 					type: 'error',
 				})
 			}
