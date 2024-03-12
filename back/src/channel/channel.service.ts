@@ -171,9 +171,18 @@ export class ChannelService {
         memberDto.member_id,
         memberDto.channel_id,
       );
-      if (member) {
+
+      const isKicked = await this.checkAction(
+        userId,
+        memberDto.channel_id,
+        AdminActionType.KICKED,
+        'status',
+      );
+
+      if (member && !isKicked) {
         throw new ConflictException('The member is already in the channel.');
       }
+
       await this.repository.addUserToChannel(
         memberDto.member_id,
         memberDto.channel_id,
