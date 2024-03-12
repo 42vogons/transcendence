@@ -119,6 +119,23 @@ export const PlayButton = styled('button', {
 		border: '4px solid rgba( 0, 167, 255, 0.8 )',
 		transform: 'scaleY(1.1) scaleX(1.05)',
 	},
+
+	variants: {
+		type: {
+			modal: {
+				width: '97%',
+				'@bp2': {
+					width: 230,
+					fontSize: '$xl',
+					marginRight: 8,
+				},
+
+				'@bp3': {
+					fontSize: '$2xl',
+				},
+			},
+		},
+	},
 })
 
 export const LoadingContainer = styled('div', {

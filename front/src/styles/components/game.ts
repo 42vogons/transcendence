@@ -4,7 +4,7 @@ export const CourtContainer = styled('div', {
 	position: 'relative',
 	backgroundColor: '$blue100',
 	border: '4px solid rgba( 255, 255, 255, 0.9)',
-	// borderRadius: 24,
+	// border: '4px solid rgba( 255, 0, 0, 0.9)',
 
 	'&:before': {
 		position: 'absolute',

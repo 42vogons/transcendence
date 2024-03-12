@@ -79,7 +79,7 @@ export default function Layout({ children }: iLayoutProps) {
 	}
 
 	function closeSidePanel() {
-		if (window.innerWidth < 1024) {
+		if (window.innerWidth < 1100) {
 			setShowSidePanel(false)
 		}
 	}
@@ -97,9 +97,10 @@ export default function Layout({ children }: iLayoutProps) {
 				}
 			}
 
-			if (window.innerWidth <= 1024) {
-				setActivePanel('menu')
+			console.log('window.innerWidth:', window.innerWidth)
+			if (window.innerWidth <= 1100) {
 				setShowSidePanel(false)
+				setActivePanel('menu')
 			} else {
 				setShowSidePanel(true)
 				if (router.asPath.includes('/chat')) {
@@ -142,14 +143,24 @@ export default function Layout({ children }: iLayoutProps) {
 			title: 'Chat',
 			isActive: currentPath.includes('/chat'),
 			handleOnClick: () => {
-				setActivePanel('chat')
+				if (!showSidePanel) {
+					toggleSidePanel()
+					setActivePanel('chat')
+				} else if (activePanel === 'chat') {
+					toggleSidePanel()
+				} else {
+					setActivePanel('chat')
+				}
 			},
 		},
 		{
 			icon: <FaUserFriends size={iconSize} />,
 			title: 'Friends',
 			handleOnClick: () => {
-				if (activePanel === 'friends') {
+				if (!showSidePanel) {
+					toggleSidePanel()
+					setActivePanel('friends')
+				} else if (activePanel === 'friends') {
 					toggleSidePanel()
 				} else {
 					setActivePanel('friends')
@@ -200,17 +211,18 @@ export default function Layout({ children }: iLayoutProps) {
 		<LayoutContainer>
 			<ApplicationContainer>
 				<SidebarContainer>
-					{menuItems.map((item: iMenuItemType) => (
-						<IconButton
-							key={item.title}
-							title={item.title}
-							isActive={item.isActive}
-							handleOnClick={item.handleOnClick}
-							type="desktop"
-						>
-							{item.icon}
-						</IconButton>
-					))}
+					{window.innerWidth >= 100 &&
+						menuItems.map((item: iMenuItemType) => (
+							<IconButton
+								key={item.title}
+								title={item.title}
+								isActive={item.isActive}
+								handleOnClick={item.handleOnClick}
+								type="desktop"
+							>
+								{item.icon}
+							</IconButton>
+						))}
 					<IconButton
 						title="Menu"
 						type="mobile"

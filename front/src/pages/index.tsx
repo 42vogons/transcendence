@@ -186,6 +186,7 @@ export default function Home() {
 						</Button>
 						{match?.pausedByUserID === user?.userID && (
 							<PlayButton
+								type={'modal'}
 								onMouseUp={() => {
 									resume()
 								}}

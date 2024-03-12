@@ -99,7 +99,7 @@ export default function Game() {
 			css={{
 				height,
 				width,
-				borderRadius: width >= 928 ? 24 : width >= 600 ? 16 : 0,
+				borderRadius: width >= 928 ? 24 : width >= 400 ? 16 : 0,
 			}}
 		>
 			<Score
