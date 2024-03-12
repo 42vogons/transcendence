@@ -6,6 +6,8 @@ export enum ActionTypes {
 	REQUEST_GAME = 'REQUEST_GAME',
 	END_MATCH = 'END_MATCH',
 	CLEAR_MATCH = 'CLEAR_MATCH',
+	UPDATE_GAME_CONTAINER_DIMENSIONS = 'UPDATE_GAME_CONTAINER_DIMENSIONS',
+	UPDATE_COURT_COLOR = 'UPDATE_COURT_COLOR',
 }
 
 export function statusChange(status: string) {
@@ -47,5 +49,23 @@ export function endMatch(matchResult: MatchResult) {
 export function clearMatch() {
 	return {
 		type: ActionTypes.CLEAR_MATCH,
+	}
+}
+
+export function updateDimensions(dimensions: number[]) {
+	return {
+		type: ActionTypes.UPDATE_GAME_CONTAINER_DIMENSIONS,
+		payload: {
+			dimensions,
+		},
+	}
+}
+
+export function updateCourtColor(color: string) {
+	return {
+		type: ActionTypes.UPDATE_COURT_COLOR,
+		payload: {
+			color,
+		},
 	}
 }

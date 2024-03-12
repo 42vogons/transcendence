@@ -60,6 +60,7 @@ export default function Layout({ children }: iLayoutProps) {
 	const router = useRouter()
 
 	const { handleLogout } = useContext(UserContext)
+	const { handleUpdateDimensions, PageContainerRef } = useContext(GameContext)
 
 	const [currentPath, setCurrentPath] = useState('')
 	const [showSidePanel, setShowSidePanel] = useState(false)
@@ -78,28 +79,25 @@ export default function Layout({ children }: iLayoutProps) {
 	}
 
 	function closeSidePanel() {
-		if (window.innerWidth < 1024) {
+		if (window.innerWidth < 1100) {
 			setShowSidePanel(false)
 		}
 	}
 
 	const ref = useOutsideMenuClick(closeSidePanel)
 
-	const PageContainerRef = useRef(null)
-
 	useEffect(() => {
 		function handleResize() {
 			if (PageContainerRef) {
-				// console.log(
-				// 	'PageContainerRef:',
-				// 	(PageContainerRef.current as unknown as HTMLElement)
-				// 		?.offsetWidth,
-				// 	(PageContainerRef.current as unknown as HTMLElement)
-				// 		?.offsetHeight,
-				// )
+				if (PageContainerRef.current) {
+					const { offsetWidth, offsetHeight } =
+						PageContainerRef.current as unknown as HTMLElement
+
+					handleUpdateDimensions([offsetWidth, offsetHeight])
+				}
 			}
 
-			if (window.innerWidth < 1024) {
+			if (window.innerWidth <= 1100) {
 				setShowSidePanel(false)
 				setActivePanel('menu')
 			} else {
@@ -112,8 +110,10 @@ export default function Layout({ children }: iLayoutProps) {
 			}
 		}
 		handleResize()
+
 		window.addEventListener('resize', handleResize)
 		return () => window.removeEventListener('resize', handleResize)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [router.asPath])
 
 	const menuItems: iMenuItemType[] = [
@@ -142,14 +142,24 @@ export default function Layout({ children }: iLayoutProps) {
 			title: 'Chat',
 			isActive: currentPath.includes('/chat'),
 			handleOnClick: () => {
-				setActivePanel('chat')
+				if (!showSidePanel) {
+					toggleSidePanel()
+					setActivePanel('chat')
+				} else if (activePanel === 'chat') {
+					toggleSidePanel()
+				} else {
+					setActivePanel('chat')
+				}
 			},
 		},
 		{
 			icon: <FaUserFriends size={iconSize} />,
 			title: 'Friends',
 			handleOnClick: () => {
-				if (activePanel === 'friends') {
+				if (!showSidePanel) {
+					toggleSidePanel()
+					setActivePanel('friends')
+				} else if (activePanel === 'friends') {
 					toggleSidePanel()
 				} else {
 					setActivePanel('friends')
@@ -200,17 +210,18 @@ export default function Layout({ children }: iLayoutProps) {
 		<LayoutContainer>
 			<ApplicationContainer>
 				<SidebarContainer>
-					{menuItems.map((item: iMenuItemType) => (
-						<IconButton
-							key={item.title}
-							title={item.title}
-							isActive={item.isActive}
-							handleOnClick={item.handleOnClick}
-							type="desktop"
-						>
-							{item.icon}
-						</IconButton>
-					))}
+					{window.innerWidth >= 100 &&
+						menuItems.map((item: iMenuItemType) => (
+							<IconButton
+								key={item.title}
+								title={item.title}
+								isActive={item.isActive}
+								handleOnClick={item.handleOnClick}
+								type="desktop"
+							>
+								{item.icon}
+							</IconButton>
+						))}
 					<IconButton
 						title="Menu"
 						type="mobile"
