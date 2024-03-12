@@ -179,6 +179,7 @@ export default function Profile() {
 									key={match.id}
 									players={[match.player1, match.player2]}
 									winnerID={match.winnerID}
+									timestamp={match.endedAt}
 								/>
 							))}
 						</MatchCardsContainer>
