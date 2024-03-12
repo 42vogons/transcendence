@@ -916,8 +916,6 @@ export class GameService {
       const playerOwner = this.findPlayerByUserID(client.userID);
       const playerGuest = this.findPlayerByUserID(guestID);
 
-      //todo testar com 3 usuarios logados, abrir um jogo com 2 e tentar chamar o 3 para game
-
       if (playerOwner.status !== 'idle') {
         client.emit(
           'request_game_error',
@@ -953,7 +951,6 @@ export class GameService {
 
       client.emit('status_changed', 'awaiting');
 
-      //todo checar se ta emitindo no deploy
       io.to(this.getSocketIdByUserId(playerGuest.userID, io)).emit(
         'request_game',
         {
