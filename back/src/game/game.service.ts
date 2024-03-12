@@ -171,15 +171,17 @@ export class GameService {
         client.emit('status_changed', `connected`);
       } else {
         const player = this.findPlayerByUserID(client.userID);
-        player.isReconnect = true;
-        player.socketID = client.id;
-        this.updatePlayer(player);
-        if (player.status === 'playing') {
-          this.reconnectUserWhenStatusIsPlaying(player, client, io);
-        } else if (player.status === 'readyToPlay') {
-          this.reconnectUserWhenStatusIsReadyToPlay(player, client, io);
-        } else if (player.status === 'searching') {
-          this.reconnectUserWhenStatusIsSearching(player, client);
+        if (player) {
+          player.isReconnect = true;
+          player.socketID = client.id;
+          this.updatePlayer(player);
+          if (player.status === 'playing') {
+            this.reconnectUserWhenStatusIsPlaying(player, client, io);
+          } else if (player.status === 'readyToPlay') {
+            this.reconnectUserWhenStatusIsReadyToPlay(player, client, io);
+          } else if (player.status === 'searching') {
+            this.reconnectUserWhenStatusIsSearching(player, client);
+          }
         }
       }
       return this.players;
