@@ -1,4 +1,4 @@
-import { ReactNode, useContext, useEffect, useRef, useState } from 'react'
+import { ReactNode, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { FaGamepad, FaUserAstronaut, FaUserPlus } from 'react-icons/fa6'
 import { FaUserFriends } from 'react-icons/fa'
@@ -310,7 +310,7 @@ export default function Layout({ children }: iLayoutProps) {
 												),
 											)
 										) : (
-											<p>vazio</p>
+											<></>
 										)}
 									</>
 								)}

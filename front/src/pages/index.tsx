@@ -199,7 +199,12 @@ export default function Home() {
 								>
 									<MdColorLens size={32} />
 								</MenuContainer>
-								<MenuContent side="top">
+								<MenuContent
+									side="top"
+									onCloseAutoFocus={(e) => {
+										e.preventDefault()
+									}}
+								>
 									<MenuArrow />
 
 									<MenuItem>

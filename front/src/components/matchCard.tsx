@@ -3,6 +3,7 @@ import Image from 'next/image'
 import {
 	Card,
 	MatchCardContainer,
+	MatchTimestamp,
 	Score,
 	UserContainer,
 	UserImageContainer,
@@ -22,9 +23,14 @@ interface iPlayer {
 export interface MatchProps {
 	players: iPlayer[]
 	winnerID: number
+	timestamp: Date
 }
 
-export default function MatchCard({ players, winnerID }: MatchProps) {
+export default function MatchCard({
+	players,
+	winnerID,
+	timestamp,
+}: MatchProps) {
 	const router = useRouter()
 	const imgSize = 100
 
@@ -84,6 +90,19 @@ export default function MatchCard({ players, winnerID }: MatchProps) {
 
 				<Score>{player2.score}</Score>
 			</Card>
+			<MatchTimestamp>
+				{`@ ${new Date(timestamp)
+					.toLocaleString('en-CA', {
+						hourCycle: 'h23',
+						hour: '2-digit',
+						minute: '2-digit',
+						second: '2-digit',
+						year: 'numeric',
+						month: '2-digit',
+						day: '2-digit',
+					})
+					.replace(',', ' ')}`}
+			</MatchTimestamp>
 		</MatchCardContainer>
 	)
 }

@@ -1,6 +1,7 @@
 import { styled } from '..'
 
 export const MatchCardContainer = styled('div', {
+	position: 'relative',
 	width: '100%',
 	display: 'flex',
 	flexDirection: 'column',
@@ -148,5 +149,21 @@ export const Score = styled('h3', {
 
 	'@bp1': {
 		fontSize: '6rem',
+	},
+})
+
+export const MatchTimestamp = styled('div', {
+	position: 'absolute',
+	color: '$white',
+	width: 220,
+	fontSize: 16,
+	fontWeight: 'bold',
+	top: '98%',
+	left: '50%',
+	transform: 'translate(-50%, -50%)',
+	textAlign: 'center',
+
+	'@bp2': {
+		top: '95.75%',
 	},
 })

@@ -432,7 +432,6 @@ export class ChatGateway
     });
   }
 
-  @SubscribeMessage('notify_members')
   private async notifyMembers(channel_id: number) {
     await setTimeout(100);
     const members = await this.channelService.getChannelMembers(channel_id);
@@ -455,6 +454,11 @@ export class ChatGateway
           .emit('refresh_channel_list', lastMessageChannel);
       }
     });
+  }
+
+  @SubscribeMessage('notify_members')
+  async notifyChannelMembers(client: SocketWithAuth, channel_id: number) {
+    await this.notifyMembers(channel_id);
   }
 
   private sendError(error: any) {
