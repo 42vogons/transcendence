@@ -47,7 +47,6 @@ export default function NewChatModal({
 					<Button
 						buttonType="cancel"
 						onClick={() => {
-							console.log('close')
 							setShowNewChatModal(false)
 						}}
 					>

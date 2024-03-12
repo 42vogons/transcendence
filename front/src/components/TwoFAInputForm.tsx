@@ -14,7 +14,6 @@ export default function TwoFAInputForm({ sendTwoFA }: TwoFAInputFormProps) {
 	const codeInput = useRef(null)
 	function handleSubmit(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault()
-		console.log('2fa: ', value)
 		if (value) {
 			sendTwoFA(value)
 		}

@@ -84,9 +84,9 @@ export default function NewChannelModal({
 			setShowNewChannelModal(false)
 			router.push('/chat/' + data)
 		} catch (error: any) {
-			console.log('error:', error)
 			toast(error.message ? error.message : error, {
 				type: 'error',
+				draggable: false,
 			})
 		}
 	}

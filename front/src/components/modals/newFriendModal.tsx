@@ -20,7 +20,6 @@ export default function NewFriendModal({
 	const [selectedUser, setSelectedUser] = useState<iUser>()
 
 	function handleAddNewFriend() {
-		console.log('new Friend', selectedUser)
 		if (selectedUser) {
 			addFriend(selectedUser.user_id)
 		}
@@ -48,7 +47,6 @@ export default function NewFriendModal({
 					<Button
 						buttonType="cancel"
 						onClick={() => {
-							console.log('close')
 							setShowNewFriendModal(false)
 						}}
 					>

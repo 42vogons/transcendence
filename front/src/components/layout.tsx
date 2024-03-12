@@ -122,7 +122,6 @@ export default function Layout({ children }: iLayoutProps) {
 			title: 'Game',
 			isActive: currentPath === '/',
 			handleOnClick: () => {
-				console.log('game')
 				router.push('/')
 			},
 		},
@@ -194,6 +193,7 @@ export default function Layout({ children }: iLayoutProps) {
 			localStorage.removeItem('@42Transcendence:user')
 			toast('Your session is expired', {
 				type: 'error',
+				draggable: false,
 			})
 			router.push('/login')
 		}
@@ -283,7 +283,6 @@ export default function Layout({ children }: iLayoutProps) {
 										<div className="menuOptions">
 											<IconButton
 												handleOnClick={() => {
-													console.log('new Friend')
 													setShowNewFriendModal(true)
 												}}
 												title="Add Friend"
@@ -322,7 +321,6 @@ export default function Layout({ children }: iLayoutProps) {
 											<IconButton
 												title="Create Direct Chat"
 												handleOnClick={() => {
-													console.log('new chat')
 													setShowNewChatModal(true)
 												}}
 											>
@@ -333,7 +331,6 @@ export default function Layout({ children }: iLayoutProps) {
 											<IconButton
 												title="Create Channel"
 												handleOnClick={() => {
-													console.log('new channel')
 													setShowNewChannelModal(true)
 												}}
 											>
@@ -344,7 +341,6 @@ export default function Layout({ children }: iLayoutProps) {
 											<IconButton
 												title="Join Channel"
 												handleOnClick={() => {
-													console.log('join channel')
 													setShowJoinChannelModal(
 														true,
 													)

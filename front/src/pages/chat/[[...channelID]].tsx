@@ -124,6 +124,7 @@ export default function Chat() {
 			} else {
 				toast('Invalid channel id', {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}
@@ -289,6 +290,8 @@ export default function Chat() {
 																	?.username} to play`,
 																{
 																	type: 'info',
+																	draggable:
+																		false,
 																},
 															)
 														}}
@@ -409,6 +412,8 @@ export default function Chat() {
 																			`You invited ${message.username} to play`,
 																			{
 																				type: 'info',
+																				draggable:
+																					false,
 																			},
 																		)
 																	}}

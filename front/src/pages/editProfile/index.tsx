@@ -68,7 +68,6 @@ export default function EditProfile() {
 
 	async function handleSubmitEditUsername(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault()
-		console.log('submit')
 		const validateUsername = editUsernameSchema.safeParse(username)
 		if (!validateUsername.success) {
 			const errors = (validateUsername as any).error.format()._errors
@@ -84,33 +83,30 @@ export default function EditProfile() {
 				}
 				toast('Username updated.', {
 					type: 'success',
+					draggable: false,
 				})
 				setIsUsernameDisabled(true)
 			} catch (error: any) {
-				console.log('error:', error)
 				toast(error.response.data.message, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}
 	}
 
 	async function handleToogleTwoFA() {
-		console.log('handleToogleTwoFA:', isTwoFactorEnabled)
 		if (isTwoFactorEnabled) {
-			console.log('fazer req')
 			try {
-				const { data } = await api.post(`/users/activeTwoFactor`)
-				console.log('activeTwoFactor data:', data)
+				await api.post(`/users/activeTwoFactor`)
 				setIsTwoFactorEnabled(false)
 			} catch (error: any) {
-				console.log('error:', error)
 				toast(error.message ? error.message : error, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		} else {
-			console.log('abrir modal')
 			setShowEnableTwoFAModal(true)
 		}
 	}
@@ -148,11 +144,12 @@ export default function EditProfile() {
 				setAvatarUrl(response.data.url)
 				toast('Avatar changed successfuly', {
 					type: 'success',
+					draggable: false,
 				})
 			} catch (error: any) {
-				console.log('error:', error)
 				toast(error.response.data.message, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}
@@ -168,13 +165,13 @@ export default function EditProfile() {
 				setIsTwoFactorEnabled(userData.two_factor_enabled)
 				setIsLoading(false)
 			} catch (error: any) {
-				console.log('error:', error)
 				setUsername('')
 				setAvatarUrl('')
 				setIsTwoFactorEnabled(false)
 				setIsLoading(false)
 				toast(error.message ? error.message : error, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}
@@ -185,6 +182,7 @@ export default function EditProfile() {
 			setIsLoading(false)
 			toast('Error', {
 				type: 'error',
+				draggable: false,
 			})
 		}
 	}, [router.isReady, user])

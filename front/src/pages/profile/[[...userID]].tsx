@@ -79,12 +79,12 @@ export default function Profile() {
 			setMatchHistoryData(matchData)
 			setIsLoading(false)
 		} catch (error: any) {
-			console.log('error:', error)
 			setProfileData(undefined)
 			setMatchHistoryData(undefined)
 			setIsLoading(false)
 			toast('Invalid user id', {
 				type: 'error',
+				draggable: false,
 			})
 		}
 	}
@@ -102,6 +102,7 @@ export default function Profile() {
 					setIsLoading(false)
 					toast('This profile is private', {
 						type: 'error',
+						draggable: false,
 					})
 				} else {
 					getUserData(Number(userID))
@@ -110,6 +111,7 @@ export default function Profile() {
 				setIsLoading(false)
 				toast('Invalid user id', {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}

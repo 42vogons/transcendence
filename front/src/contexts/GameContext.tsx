@@ -95,15 +95,14 @@ export function GameProvider({ children }: GameProviderProps) {
 	const router = useRouter()
 
 	function handleErrors(err: any) {
-		console.log('error:', err)
 		toast(err.toString(), {
 			type: 'error',
 			toastId: err.toString(),
+			draggable: false,
 		})
 	}
 
 	useEffect(() => {
-		console.log('user game:', user)
 		socket.on('status_changed', (status) => {
 			dispatch(statusChange(status))
 			if (status === 'readyToPlay') {
@@ -117,7 +116,6 @@ export function GameProvider({ children }: GameProviderProps) {
 			dispatch(requestGame(request))
 		})
 		socket.on('end_match', (matchResult: MatchResult) => {
-			console.log('end_match: ', matchResult)
 			dispatch(endMatch(matchResult))
 		})
 		socket.on('refresh_list', () => {
@@ -143,7 +141,7 @@ export function GameProvider({ children }: GameProviderProps) {
 			status === 'playing' &&
 			match.status === 'pause'
 		) {
-			toast('The game is paused.', { type: 'info' })
+			toast('The game is paused.', { type: 'info', draggable: false })
 		}
 	}, [status, isMatchCompleted, match?.status])
 
@@ -155,6 +153,7 @@ export function GameProvider({ children }: GameProviderProps) {
 			localStorage.removeItem('@42Transcendence:user')
 			toast('Your session is expired', {
 				type: 'error',
+				draggable: false,
 			})
 			router.push('/login')
 		}

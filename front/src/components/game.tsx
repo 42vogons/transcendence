@@ -65,7 +65,6 @@ export default function Game() {
 
 	useEffect(() => {
 		if (containerWidth > containerHeight) {
-			console.log('width maior')
 			if (containerHeight > 1000) {
 				setWidth(928)
 				setHeight(458)
@@ -74,7 +73,6 @@ export default function Game() {
 				setHeight(Math.round((0.7 * containerHeight * 450) / 920) + 8)
 			}
 		} else {
-			console.log('height maior')
 			if (containerWidth > 1000) {
 				setWidth(928)
 				setHeight(458)

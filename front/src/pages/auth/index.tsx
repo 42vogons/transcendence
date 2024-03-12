@@ -17,14 +17,15 @@ export default function Auth() {
 	const [isLoading, setIsLoading] = useState(false)
 	const [request2FA, setRequest2FA] = useState(false)
 
-	console.log(router.query.code)
-
 	useEffect(() => {
 		async function authUser(code: string) {
 			setIsLoading(true)
 			try {
 				const { data } = await api.post('/auth/user', { code })
-				toast('Login was successful', { type: 'success' })
+				toast('Login was successful', {
+					type: 'success',
+					draggable: false,
+				})
 				const { action, user } = data
 				if (action === 'authenticate') {
 					setRequest2FA(true)
@@ -35,16 +36,15 @@ export default function Auth() {
 					router.push('/')
 				}
 			} catch (error) {
-				console.log('error:', error)
 				toast('An error occurred during authentication', {
 					type: 'error',
+					draggable: false,
 				})
 				router.push('/login')
 				setIsLoading(false)
 			}
 		}
 		const code = router.query.code as string
-		console.log('code:', code)
 		if (code) {
 			authUser(code)
 		}
@@ -56,25 +56,26 @@ export default function Auth() {
 		setRequest2FA(false)
 		try {
 			const res = await api.post('/checkTwoFactor', { code: twoFAcode })
-			console.log('res:', res)
 			const { action, user } = res.data
 			if (action === 'logged') {
-				toast('Login was successful', { type: 'success' })
-				console.log('action login:', action)
+				toast('Login was successful', {
+					type: 'success',
+					draggable: false,
+				})
 				handleLogin(user)
 				router.push('/')
 			} else {
-				console.log('erro action:', action)
 				setIsLoading(false)
 				setRequest2FA(true)
 				toast('Invalid code', {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		} catch (error) {
-			console.log('error:', error)
 			toast('An error occurred during authentication', {
 				type: 'error',
+				draggable: false,
 			})
 			// router.push('/login')
 			setIsLoading(false)
@@ -102,7 +103,7 @@ export default function Auth() {
 
 				{/* <button
 					onClick={() => {
-						toast('Authenticated', { type: 'success' })
+						toast('Authenticated', { type: 'success',draggable: false, })
 					}}
 				>
 					Toast

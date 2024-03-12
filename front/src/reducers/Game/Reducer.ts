@@ -13,9 +13,6 @@ interface GameState {
 }
 
 export function GameReducer(state: GameState, action: any) {
-	// console.log('action:', action)
-	// console.log('state:', state)
-
 	switch (action.type) {
 		case ActionTypes.STATUS_CHANGE: {
 			const newState = {

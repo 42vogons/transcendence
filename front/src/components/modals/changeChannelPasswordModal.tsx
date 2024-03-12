@@ -42,23 +42,18 @@ export default function ChangeChannelPasswordModal({
 	const iconSize = 40
 
 	function handleClose() {
-		console.log('close')
 		setShowChangeChannelPasswordModal(false)
 	}
 
 	async function handleChangeChannelPassword() {
-		console.log('ChangeChannelPassowrd:', password)
-
 		const validatePassword = passwordSchema.safeParse(password)
 		if (!validatePassword.success) {
 			const errors = (validatePassword as any).error.format()._errors
 			setError(errors[0])
 		} else {
-			console.log('password changed to: ', password)
 			setError('')
 			try {
 				const data = { password }
-				console.log('data :', data)
 				await api.patch(`/channel/changePassword/${channel_id}`, data)
 				await delayMs(500)
 				getChannelList()
@@ -66,11 +61,12 @@ export default function ChangeChannelPasswordModal({
 				setShowChangeChannelPasswordModal(false)
 				toast('Password changed.', {
 					type: 'info',
+					draggable: false,
 				})
 			} catch (error: any) {
-				console.log('error:', error)
 				toast(error.message ? error.message : error, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}

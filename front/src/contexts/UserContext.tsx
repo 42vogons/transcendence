@@ -5,7 +5,7 @@ import { iUser } from '@/reducers/User/Types'
 import { api } from '@/services/api'
 import { delayMs } from '@/utils/functions'
 import { useRouter } from 'next/router'
-import { ReactNode, createContext, useEffect, useReducer } from 'react'
+import { ReactNode, createContext, useReducer } from 'react'
 import { toast } from 'react-toastify'
 
 interface UserContextType {
@@ -31,7 +31,6 @@ export function UserProvider({ children }: UserProviderProps) {
 				const storedStateAsJSON = localStorage.getItem(
 					'@42Transcendence:user',
 				)
-				console.log('storedStateAsJSON:', storedStateAsJSON)
 				if (storedStateAsJSON) {
 					const newUser = JSON.parse(storedStateAsJSON)
 					if (newUser) {
@@ -61,18 +60,15 @@ export function UserProvider({ children }: UserProviderProps) {
 			dispatch(logout())
 			toast('Logout successful.', {
 				type: 'success',
+				draggable: false,
 			})
 		} catch (error) {
-			console.log('error:', error)
 			toast('An error ocurred.', {
 				type: 'error',
+				draggable: false,
 			})
 		}
 	}
-
-	useEffect(() => {
-		console.log('userChanged:', user)
-	}, [user])
 
 	return (
 		<UserContext.Provider

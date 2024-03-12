@@ -16,7 +16,6 @@ import Image from 'next/image'
 
 import userDefaulAvatar from '../../public/assets/user.png'
 import { useContext } from 'react'
-import { BsChatSquareTextFill } from 'react-icons/bs'
 import { FaGamepad, FaUserAstronaut, FaUserMinus } from 'react-icons/fa6'
 import { useRouter } from 'next/router'
 
@@ -33,14 +32,12 @@ export function FriendListItem({
 	const iconSize = 26
 
 	function handleGameOnClick() {
-		console.log('game', username)
 		if (userID) {
 			requestMatch(userID)
 		}
 	}
 
 	function handleProfileOnClick() {
-		console.log('profile', username)
 		router.push('/profile/' + userID)
 	}
 

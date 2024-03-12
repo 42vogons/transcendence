@@ -20,7 +20,6 @@ export default function ConfirmationModal({
 }: iConfirmationModal) {
 	const [isDisabled, setIsDisabled] = useState(false)
 	async function handleConfirmation() {
-		console.log('confirm')
 		setIsDisabled(true)
 		await onConfirmation()
 		setShowConfirmationModal(false)
@@ -40,7 +39,6 @@ export default function ConfirmationModal({
 					<Button
 						buttonType="cancel"
 						onClick={() => {
-							console.log('close')
 							setShowConfirmationModal(false)
 						}}
 					>

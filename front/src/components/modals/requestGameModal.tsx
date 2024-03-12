@@ -14,12 +14,10 @@ export default function RequestGameModal() {
 		useContext(GameContext)
 
 	function handleAcceptGame() {
-		console.log('acceptGame')
 		answerRequestMatch('accept')
 	}
 
 	function handleRefuseGame() {
-		console.log('refuseGame')
 		answerRequestMatch('refused')
 	}
 

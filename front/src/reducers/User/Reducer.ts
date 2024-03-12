@@ -10,12 +10,8 @@ export function isDateExpired(date: Date) {
 }
 
 export function UserReducer(state: UserState, action: any) {
-	console.log('action user:', action)
-	console.log('state user:', state)
-
 	switch (action.type) {
 		case ActionTypes.LOGIN: {
-			console.log('LOGIN:', action)
 			const newState = {
 				...state,
 				user: action.payload.user,
