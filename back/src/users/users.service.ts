@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  Response,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './repositories/users.repository';
@@ -162,5 +167,44 @@ export class UsersService {
       return true;
     }
     return false;
+  }
+
+  async insertToken(profile: any, @Response() res, action: string) {
+    const expiresAt = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
+    const payload = {
+      id: profile.user_id,
+      login: profile.username,
+      action: action,
+    };
+    const token = await this.generateToken(payload);
+
+    //Logger.log('cookie=' + token);
+    res.cookie('accessToken', token, {
+      expires: expiresAt,
+      httpOnly: true,
+      domain: process.env.BACK_DOMAIN,
+    });
+    const username = profile.username;
+    const userId = profile.user_id;
+    return res
+      .status(200)
+      .send({ action, user: { userId, username, expiresAt } });
+  }
+
+  async generateToken(payload: any): Promise<string> {
+    return await this.jwtService.signAsync(payload, {
+      secret: process.env.SECRET_JWT,
+      expiresIn: '48h',
+    });
+  }
+  async updateUser(
+    user_id: number,
+    updateUserDto: UpdateUserDto,
+    @Response() res,
+  ) {
+    const user = await this.findOne(user_id);
+    user.username = updateUserDto.username;
+    await this.repository.update(user.user_id, user);
+    return await this.insertToken(user, res, 'logged');
   }
 }

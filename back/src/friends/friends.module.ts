@@ -4,17 +4,13 @@ import { FriendsService } from './friends.service';
 import { FriendsRepository } from './repositories/friends.repository';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { UsersService } from 'src/users/users.service';
-import { UsersRepository } from 'src/users/repositories/users.repository';
+//import { UsersService } from 'src/users/users.service';
+//import { UsersRepository } from 'src/users/repositories/users.repository';
 import { TwoFactorAutenticateService } from 'src/two-factor-autenticate/two-factor-autenticate.service';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [
-    JwtModule.register({
-      secret: 'sua_chave_secreta',
-      signOptions: { expiresIn: '1h' },
-    }),
-  ],
+  imports: [JwtModule, UsersModule],
 
   controllers: [FriendsController],
   providers: [
@@ -22,16 +18,16 @@ import { TwoFactorAutenticateService } from 'src/two-factor-autenticate/two-fact
     FriendsRepository,
     PrismaService,
     JwtService,
-    UsersService,
-    UsersRepository,
+    //UsersService,
+    //UsersRepository,
     TwoFactorAutenticateService,
   ],
   exports: [
     FriendsService,
     PrismaService,
     FriendsRepository,
-    UsersService,
-    UsersRepository,
+    //UsersService,
+    //UsersRepository,
   ],
 })
 export class FriendsModule {}
