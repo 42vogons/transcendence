@@ -5,7 +5,6 @@ import {
   HttpCode,
   Response,
   Req,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { LoginService } from './login.service';
 
@@ -18,8 +17,8 @@ export class LoginController {
   async getToken(@Body() body: any, @Response() res): Promise<Response> {
     try {
       return await this.loginService.login(body, res);
-    } catch (Error) {
-      throw new UnauthorizedException('Fail to access intra');
+    } catch (error) {
+      throw new Error('Failed to login: ' + error.message);
     }
   }
 
