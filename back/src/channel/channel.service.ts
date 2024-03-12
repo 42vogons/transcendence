@@ -215,13 +215,13 @@ export class ChannelService {
       }
       await this.repository.adminAction(adminActionDto, userId);
 
-      if (adminActionDto.action === AdminActionType.KICKED) {
+      /*if (adminActionDto.action === AdminActionType.KICKED) {
         await this.repository.removeMemberChannel(
           adminActionDto.member_id,
           adminActionDto.channel_id,
         );
         return 'Member removed.';
-      }
+      }*/
       if (adminActionDto.action === AdminActionType.MUTED) {
         return 'Member muted.';
       }
