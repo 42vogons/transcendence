@@ -144,15 +144,6 @@ export function GameProvider({ children }: GameProviderProps) {
 		) {
 			toast('The game is paused.', { type: 'info' })
 		}
-		return () => {
-			if (
-				!isMatchCompleted &&
-				status === 'playing' &&
-				match.status === 'pause'
-			) {
-				toast('The game restarted.', { type: 'success' })
-			}
-		}
 	}, [status, isMatchCompleted, match?.status])
 
 	function emitSocketIfUserIsNotExpired(ev: string, ...args: any[]) {
