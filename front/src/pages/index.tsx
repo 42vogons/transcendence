@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { ReactElement, useContext, useEffect } from 'react'
+import { ReactElement, useContext, useEffect, useState } from 'react'
 import { FaCheck, FaGamepad, FaUserAstronaut, FaX } from 'react-icons/fa6'
 
 import {
@@ -21,6 +21,7 @@ import { MdClose } from 'react-icons/md'
 import { useRouter } from 'next/router'
 
 export default function Home() {
+	const [isDisabled, setIsDisabled] = useState(false)
 	const {
 		status,
 		match,
@@ -44,6 +45,7 @@ export default function Home() {
 
 	useEffect(() => {
 		console.log('rodou effect game')
+		setIsDisabled(false)
 		return () => {
 			if (!isMatchCompleted && status === 'playing') {
 				sendKey('keydown', 'p')
@@ -136,7 +138,13 @@ export default function Home() {
 						<LoadingContainer>
 							{/* <Loading size={200} /> */}
 							<h3>Ready?</h3>
-							<Button onMouseUp={() => playing()}>
+							<Button
+								disabled={isDisabled}
+								onMouseUp={() => {
+									playing()
+									setIsDisabled(true)
+								}}
+							>
 								<FaCheck /> Ready
 							</Button>
 						</LoadingContainer>

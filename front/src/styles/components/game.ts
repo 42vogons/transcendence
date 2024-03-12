@@ -63,6 +63,7 @@ export const Score = styled('div', {
 		paddingLeft: '1rem',
 		outline: 'none',
 	},
+
 	variants: {
 		playerType: {
 			first: {},
