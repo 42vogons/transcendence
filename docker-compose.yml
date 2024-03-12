@@ -23,6 +23,7 @@ services:
             context: ./front
             args:
                 - NEXT_PUBLIC_FRONT_DOMAIN=${FRONT_DOMAIN}
+                - NEXT_PUBLIC_BACK_HOST=${BACK_HOST}
         image: transcendence_front
         container_name: transcendence_front
         restart: unless-stopped
