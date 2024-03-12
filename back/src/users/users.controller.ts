@@ -149,7 +149,6 @@ export class UsersController {
     @Req() request,
   ) {
     const userId = request.user.id;
-    console.log(userId);
     const path = `./uploads/avatar/${userId}`;
     try {
       await fs.promises.mkdir(path, { recursive: true });
