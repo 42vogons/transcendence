@@ -72,7 +72,7 @@ export const Card = styled('button', {
 	},
 
 	'@bp1': {
-		margin: '1rem',
+		// margin: '1rem',
 		flexDirection: 'row',
 		padding: '0.5rem',
 		'&:nth-child(3)': {
@@ -109,6 +109,7 @@ export const UserContainer = styled('div', {
 
 export const UserImageContainer = styled('div', {
 	img: {
+		backgroundColor: '$blue800',
 		borderRadius: '50%',
 		border: '2px solid $white',
 	},

@@ -118,7 +118,7 @@ export const TitleContainer = styled('div', {
 	alignItems: 'center',
 	gap: 8,
 	color: '$white',
-	padding: '8px 24px',
+	padding: '8px 0',
 	h2: {
 		textAlign: 'center',
 		fontSize: '$xl',
@@ -129,7 +129,7 @@ export const TitleContainer = styled('div', {
 	'@bp1': {
 		gap: 32,
 		h2: {
-			fontSize: '$3xl',
+			fontSize: '$2xl',
 		},
 	},
 })
