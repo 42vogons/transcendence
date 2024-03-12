@@ -98,6 +98,7 @@ export function GameProvider({ children }: GameProviderProps) {
 		toast(err.toString(), {
 			type: 'error',
 			toastId: err.toString(),
+			draggable: false,
 		})
 	}
 
@@ -140,7 +141,7 @@ export function GameProvider({ children }: GameProviderProps) {
 			status === 'playing' &&
 			match.status === 'pause'
 		) {
-			toast('The game is paused.', { type: 'info' })
+			toast('The game is paused.', { type: 'info', draggable: false })
 		}
 	}, [status, isMatchCompleted, match?.status])
 
@@ -152,6 +153,7 @@ export function GameProvider({ children }: GameProviderProps) {
 			localStorage.removeItem('@42Transcendence:user')
 			toast('Your session is expired', {
 				type: 'error',
+				draggable: false,
 			})
 			router.push('/login')
 		}

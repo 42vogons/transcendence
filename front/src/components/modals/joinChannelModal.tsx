@@ -85,6 +85,7 @@ export default function JoinChannelModal({
 		} catch (error: any) {
 			toast(error.message ? error.message : error, {
 				type: 'error',
+				draggable: false,
 			})
 			setIsOptionsLoading(false)
 		}
@@ -134,6 +135,7 @@ export default function JoinChannelModal({
 			} catch (error: any) {
 				toast(error.response.data.message, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}

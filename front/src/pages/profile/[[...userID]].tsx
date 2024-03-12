@@ -84,6 +84,7 @@ export default function Profile() {
 			setIsLoading(false)
 			toast('Invalid user id', {
 				type: 'error',
+				draggable: false,
 			})
 		}
 	}
@@ -101,6 +102,7 @@ export default function Profile() {
 					setIsLoading(false)
 					toast('This profile is private', {
 						type: 'error',
+						draggable: false,
 					})
 				} else {
 					getUserData(Number(userID))
@@ -109,6 +111,7 @@ export default function Profile() {
 				setIsLoading(false)
 				toast('Invalid user id', {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}

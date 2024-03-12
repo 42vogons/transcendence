@@ -83,11 +83,13 @@ export default function EditProfile() {
 				}
 				toast('Username updated.', {
 					type: 'success',
+					draggable: false,
 				})
 				setIsUsernameDisabled(true)
 			} catch (error: any) {
 				toast(error.response.data.message, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}
@@ -101,6 +103,7 @@ export default function EditProfile() {
 			} catch (error: any) {
 				toast(error.message ? error.message : error, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		} else {
@@ -141,10 +144,12 @@ export default function EditProfile() {
 				setAvatarUrl(response.data.url)
 				toast('Avatar changed successfuly', {
 					type: 'success',
+					draggable: false,
 				})
 			} catch (error: any) {
 				toast(error.response.data.message, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}
@@ -166,6 +171,7 @@ export default function EditProfile() {
 				setIsLoading(false)
 				toast(error.message ? error.message : error, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}
@@ -176,6 +182,7 @@ export default function EditProfile() {
 			setIsLoading(false)
 			toast('Error', {
 				type: 'error',
+				draggable: false,
 			})
 		}
 	}, [router.isReady, user])

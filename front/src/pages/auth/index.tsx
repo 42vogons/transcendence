@@ -22,7 +22,10 @@ export default function Auth() {
 			setIsLoading(true)
 			try {
 				const { data } = await api.post('/auth/user', { code })
-				toast('Login was successful', { type: 'success' })
+				toast('Login was successful', {
+					type: 'success',
+					draggable: false,
+				})
 				const { action, user } = data
 				if (action === 'authenticate') {
 					setRequest2FA(true)
@@ -35,6 +38,7 @@ export default function Auth() {
 			} catch (error) {
 				toast('An error occurred during authentication', {
 					type: 'error',
+					draggable: false,
 				})
 				router.push('/login')
 				setIsLoading(false)
@@ -54,7 +58,10 @@ export default function Auth() {
 			const res = await api.post('/checkTwoFactor', { code: twoFAcode })
 			const { action, user } = res.data
 			if (action === 'logged') {
-				toast('Login was successful', { type: 'success' })
+				toast('Login was successful', {
+					type: 'success',
+					draggable: false,
+				})
 				handleLogin(user)
 				router.push('/')
 			} else {
@@ -62,11 +69,13 @@ export default function Auth() {
 				setRequest2FA(true)
 				toast('Invalid code', {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		} catch (error) {
 			toast('An error occurred during authentication', {
 				type: 'error',
+				draggable: false,
 			})
 			// router.push('/login')
 			setIsLoading(false)
@@ -94,7 +103,7 @@ export default function Auth() {
 
 				{/* <button
 					onClick={() => {
-						toast('Authenticated', { type: 'success' })
+						toast('Authenticated', { type: 'success',draggable: false, })
 					}}
 				>
 					Toast

@@ -61,6 +61,7 @@ export default function UserInput({
 					setIsOptionsLoading(false)
 					toast(error.message ? error.message : error, {
 						type: 'error',
+						draggable: false,
 					})
 				}
 			}

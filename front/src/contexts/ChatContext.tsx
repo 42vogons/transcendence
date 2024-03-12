@@ -111,6 +111,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		toast(err.message ? err.message : err, {
 			type: 'error',
 			toastId: err.message ? err.message : err,
+			draggable: false,
 		})
 	}
 
@@ -141,6 +142,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		socket.on('left_the_channel', () => {
 			toast('You left the channel.', {
 				type: 'info',
+				draggable: false,
 			})
 			getChannelList()
 			dispatch(updateChannel(undefined))
@@ -149,6 +151,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		socket.on('announcement', (msg) => {
 			toast(msg, {
 				type: 'info',
+				draggable: false,
 			})
 		})
 		socket.on('connect_error', (err) => handleErrors(err))
@@ -174,6 +177,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			localStorage.removeItem('@42Transcendence:user')
 			toast('Your session is expired', {
 				type: 'error',
+				draggable: false,
 			})
 			router.push('/login')
 		}

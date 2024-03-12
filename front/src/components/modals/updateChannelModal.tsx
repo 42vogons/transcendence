@@ -91,10 +91,12 @@ export default function UpdateChannelModal({
 			setShowUpdateChannelModal(false)
 			toast('Channel updated.', {
 				type: 'info',
+				draggable: false,
 			})
 		} catch (error: any) {
 			toast(error.message ? error.message : error, {
 				type: 'error',
+				draggable: false,
 			})
 		}
 	}

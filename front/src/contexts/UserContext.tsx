@@ -60,10 +60,12 @@ export function UserProvider({ children }: UserProviderProps) {
 			dispatch(logout())
 			toast('Logout successful.', {
 				type: 'success',
+				draggable: false,
 			})
 		} catch (error) {
 			toast('An error ocurred.', {
 				type: 'error',
+				draggable: false,
 			})
 		}
 	}

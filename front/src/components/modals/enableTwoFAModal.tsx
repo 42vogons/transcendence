@@ -41,11 +41,13 @@ export default function EnableTwoFAModal({
 			} catch (error: any) {
 				toast(error.message ? error.message : error, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		} else {
 			toast('The code must contain 6 numbers', {
 				type: 'error',
+				draggable: false,
 			})
 			setHasError(true)
 			;(codeInput.current as unknown as HTMLElement).focus()
@@ -73,6 +75,7 @@ export default function EnableTwoFAModal({
 		} catch (error: any) {
 			toast(error.message ? error.message : error, {
 				type: 'error',
+				draggable: false,
 			})
 		}
 	}

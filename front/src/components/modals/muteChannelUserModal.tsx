@@ -70,6 +70,7 @@ export default function MuteChannelUserModal({
 			if (user_id === 0 || channel_id === 0) {
 				toast('An error ocurred when opening the modal', {
 					type: 'error',
+					draggable: false,
 				})
 				setShowMuteChannelUserModal(false)
 			}

@@ -193,6 +193,7 @@ export default function Layout({ children }: iLayoutProps) {
 			localStorage.removeItem('@42Transcendence:user')
 			toast('Your session is expired', {
 				type: 'error',
+				draggable: false,
 			})
 			router.push('/login')
 		}

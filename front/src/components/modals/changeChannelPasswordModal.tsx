@@ -61,10 +61,12 @@ export default function ChangeChannelPasswordModal({
 				setShowChangeChannelPasswordModal(false)
 				toast('Password changed.', {
 					type: 'info',
+					draggable: false,
 				})
 			} catch (error: any) {
 				toast(error.message ? error.message : error, {
 					type: 'error',
+					draggable: false,
 				})
 			}
 		}

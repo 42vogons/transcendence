@@ -86,6 +86,7 @@ export default function NewChannelModal({
 		} catch (error: any) {
 			toast(error.message ? error.message : error, {
 				type: 'error',
+				draggable: false,
 			})
 		}
 	}
