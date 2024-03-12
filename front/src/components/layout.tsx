@@ -97,7 +97,6 @@ export default function Layout({ children }: iLayoutProps) {
 				}
 			}
 
-			console.log('window.innerWidth:', window.innerWidth)
 			if (window.innerWidth <= 1100) {
 				setShowSidePanel(false)
 				setActivePanel('menu')

@@ -12,7 +12,7 @@ interface Ball {
 }
 
 export default function Game() {
-	const { match, sendKey, containerWidth, containerHeight } =
+	const { match, sendKey, containerWidth, containerHeight, courtColor } =
 		useContext(GameContext)
 
 	const [width, setWidth] = useState(928)
@@ -99,13 +99,14 @@ export default function Game() {
 			css={{
 				height,
 				width,
+				backgroundColor: courtColor,
 				borderRadius: width >= 928 ? 24 : width >= 400 ? 16 : 0,
 			}}
 		>
 			<Score
 				playerType={'first'}
 				gameSize={width >= 400 ? 'l' : 's'}
-				css={{ top: getScoreDistance() }}
+				css={{ color: courtColor, top: getScoreDistance() }}
 			>
 				<p>
 					{match?.player1?.username} <span>{match?.score?.p1}</span>
@@ -115,7 +116,10 @@ export default function Game() {
 			<Score
 				playerType={'second'}
 				gameSize={width >= 400 ? 'l' : 's'}
-				css={{ bottom: getScoreDistance() - (width >= 400 ? 52 : 36) }}
+				css={{
+					color: courtColor,
+					bottom: getScoreDistance() - (width >= 400 ? 52 : 36),
+				}}
 			>
 				<p>
 					{match?.player2?.username} <span>{match?.score?.p2}</span>

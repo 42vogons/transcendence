@@ -2,7 +2,6 @@ import { styled } from '..'
 
 export const CourtContainer = styled('div', {
 	position: 'relative',
-	backgroundColor: '$blue100',
 	border: '4px solid rgba( 255, 255, 255, 0.9)',
 
 	'&:before': {
@@ -32,14 +31,9 @@ export const Ball = styled('div', {
 
 export const Score = styled('div', {
 	position: 'absolute',
-	// display: 'flex',
-	// flexDirection: 'row',
-	// justifyContent: 'space-around',
-	// alignItems: 'center',
 	width: '100%',
 	fontFamily: 'monospace',
 	fontVariantNnumeric: 'slashed-zero',
-	color: '$blue100',
 	outline: 'none',
 	fontWeight: 'bold',
 	left: '50%',

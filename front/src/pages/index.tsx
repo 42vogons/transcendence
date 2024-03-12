@@ -3,10 +3,16 @@ import { ReactElement, useContext, useEffect, useState } from 'react'
 import { FaCheck, FaGamepad, FaUserAstronaut, FaX } from 'react-icons/fa6'
 
 import {
+	ColorAction,
 	GameContainer,
 	Header,
 	HomeContainer,
 	LoadingContainer,
+	MenuArrow,
+	MenuContainer,
+	MenuContent,
+	MenuItem,
+	MenuWrapper,
 	PauseModal,
 	PlayButton,
 } from '@/styles/pages/home'
@@ -17,7 +23,7 @@ import Loading from '@/components/loading'
 import { UserContext } from '@/contexts/UserContext'
 import Modal from '@/components/modals/modal'
 import Button from '@/components/button'
-import { MdClose } from 'react-icons/md'
+import { MdClose, MdColorLens } from 'react-icons/md'
 import { useRouter } from 'next/router'
 
 export default function Home() {
@@ -37,6 +43,8 @@ export default function Home() {
 		sendKey,
 		PageContainerRef,
 		handleUpdateDimensions,
+		handleChangeColor,
+		courtColor,
 	} = useContext(GameContext)
 
 	const { user } = useContext(UserContext)
@@ -161,7 +169,63 @@ export default function Home() {
 							</Button>
 						</LoadingContainer>
 					)}
-					{!isMatchCompleted && status === 'playing' && <Game />}
+					{!isMatchCompleted && status === 'playing' && (
+						<>
+							<Game />
+							<MenuWrapper>
+								<MenuContainer
+									css={{ backgroundColor: courtColor }}
+								>
+									<MdColorLens size={32} />
+								</MenuContainer>
+								<MenuContent side="top">
+									<MenuArrow />
+
+									<MenuItem>
+										<ColorAction
+											css={{ color: '$red' }}
+											onClick={() =>
+												handleChangeColor('$red')
+											}
+										>
+											<MdColorLens size={32} /> red
+										</ColorAction>
+									</MenuItem>
+									<MenuItem>
+										<ColorAction
+											css={{ color: '$orange' }}
+											onClick={() =>
+												handleChangeColor('$orange')
+											}
+										>
+											<MdColorLens size={32} /> orange
+										</ColorAction>
+									</MenuItem>
+									<MenuItem>
+										<ColorAction
+											css={{ color: '$green300' }}
+											onClick={() =>
+												handleChangeColor('$green300')
+											}
+										>
+											<MdColorLens size={32} /> green
+										</ColorAction>
+									</MenuItem>
+
+									<MenuItem>
+										<ColorAction
+											css={{ color: '$blue100' }}
+											onClick={() =>
+												handleChangeColor('$blue100')
+											}
+										>
+											<MdColorLens size={32} /> blue
+										</ColorAction>
+									</MenuItem>
+								</MenuContent>
+							</MenuWrapper>
+						</>
+					)}
 				</GameContainer>
 			</HomeContainer>
 			<Modal

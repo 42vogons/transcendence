@@ -20,7 +20,7 @@ export class GameService {
   private players: UserData[] = [];
   private rooms: Room[] = [];
   private matchs: MatchData[] = [];
-  private maxScore = 5000;
+  private maxScore = 5;
   private court = { width: 200, height: 100 };
   private paddle = {
     width: this.court.width * 0.01,

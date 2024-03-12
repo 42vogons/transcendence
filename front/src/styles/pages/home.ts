@@ -1,5 +1,6 @@
 import { keyframes } from '@stitches/react'
 import { styled } from '..'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 
 export const HomeContainer = styled('main', {
 	position: 'relative',
@@ -31,6 +32,66 @@ export const HomeContainer = styled('main', {
 	},
 	// background: 'rgba(0,167,255,0.15)',
 	backgroundColor: '$blue800',
+})
+
+export const MenuWrapper = styled(DropdownMenu.Root, {})
+
+export const MenuContainer = styled(DropdownMenu.Trigger, {
+	position: 'absolute',
+	bottom: 10,
+	right: 10,
+	color: '$white',
+	width: 60,
+	height: 60,
+	display: 'flex',
+	justifyContent: 'center',
+	alignItems: 'center',
+	border: '2px solid $white',
+	borderRadius: '50%',
+	outline: 'none',
+	cursor: 'pointer',
+
+	'&:hover': {
+		opacity: 0.8,
+	},
+})
+
+export const MenuContent = styled(DropdownMenu.Content, {})
+
+export const MenuArrow = styled(DropdownMenu.Arrow, {
+	fill: 'white',
+})
+
+export const MenuItem = styled(DropdownMenu.Item, {
+	outline: 'none',
+
+	'&:first-of-type button': {
+		borderRadius: '8px 8px 0 0',
+	},
+
+	'&:last-of-type button': {
+		borderBottom: 'none',
+		borderRadius: '0 0 8px 8px',
+	},
+})
+
+export const ColorAction = styled('button', {
+	width: 140,
+	display: 'flex',
+	justifyContent: 'space-between',
+	alignItems: 'center',
+	padding: '0.5rem 12px',
+	backgroundColor: '$white',
+	fontSize: 24,
+	fontWeight: 'bold',
+	border: 'none',
+	outline: 'none',
+	borderBottom: '1px solid $blue100',
+	cursor: 'pointer',
+
+	'&:hover': {
+		backgroundColor: '$gray100',
+	},
 })
 
 export const Header = styled('header', {

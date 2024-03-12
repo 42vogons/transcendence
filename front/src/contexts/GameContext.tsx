@@ -4,6 +4,7 @@ import {
 	matchUpdate,
 	requestGame,
 	statusChange,
+	updateCourtColor,
 	updateDimensions,
 } from '@/reducers/Game/Action'
 import { GameReducer } from '@/reducers/Game/Reducer'
@@ -32,6 +33,7 @@ interface GameContextType {
 	gameRequest: RequestGame
 	containerWidth: number
 	containerHeight: number
+	courtColor: string
 	PageContainerRef: MutableRefObject<null>
 	sendKey: (type: string, key: string) => void
 	joinQueue: () => void
@@ -45,6 +47,7 @@ interface GameContextType {
 	resetGameRequest: () => void
 	clearMatchCompleted: () => void
 	handleUpdateDimensions: (dimensions: number[]) => void
+	handleChangeColor: (color: string) => void
 	closeGameSocket: () => void
 }
 
@@ -70,6 +73,7 @@ export function GameProvider({ children }: GameProviderProps) {
 		gameRequest: {} as RequestGame,
 		containerWidth: 0,
 		containerHeight: 0,
+		courtColor: '$blue100',
 	})
 
 	const { user } = useContext(UserContext)
@@ -85,6 +89,7 @@ export function GameProvider({ children }: GameProviderProps) {
 		gameRequest,
 		containerWidth,
 		containerHeight,
+		courtColor,
 	} = state
 
 	const router = useRouter()
@@ -222,8 +227,11 @@ export function GameProvider({ children }: GameProviderProps) {
 	}
 
 	function handleUpdateDimensions(dimensions: number[]) {
-		console.log('dimensions:', dimensions)
 		dispatch(updateDimensions(dimensions))
+	}
+
+	function handleChangeColor(color: string) {
+		dispatch(updateCourtColor(color))
 	}
 
 	function closeGameSocket() {
@@ -238,6 +246,7 @@ export function GameProvider({ children }: GameProviderProps) {
 				matchResult,
 				containerWidth,
 				containerHeight,
+				courtColor,
 				isMatchCompleted,
 				sendKey,
 				joinQueue,
@@ -252,6 +261,7 @@ export function GameProvider({ children }: GameProviderProps) {
 				resetGameRequest,
 				clearMatchCompleted,
 				handleUpdateDimensions,
+				handleChangeColor,
 				closeGameSocket,
 				PageContainerRef,
 			}}

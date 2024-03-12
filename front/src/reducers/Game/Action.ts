@@ -7,6 +7,7 @@ export enum ActionTypes {
 	END_MATCH = 'END_MATCH',
 	CLEAR_MATCH = 'CLEAR_MATCH',
 	UPDATE_GAME_CONTAINER_DIMENSIONS = 'UPDATE_GAME_CONTAINER_DIMENSIONS',
+	UPDATE_COURT_COLOR = 'UPDATE_COURT_COLOR',
 }
 
 export function statusChange(status: string) {
@@ -56,6 +57,15 @@ export function updateDimensions(dimensions: number[]) {
 		type: ActionTypes.UPDATE_GAME_CONTAINER_DIMENSIONS,
 		payload: {
 			dimensions,
+		},
+	}
+}
+
+export function updateCourtColor(color: string) {
+	return {
+		type: ActionTypes.UPDATE_COURT_COLOR,
+		payload: {
+			color,
 		},
 	}
 }
