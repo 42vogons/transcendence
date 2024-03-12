@@ -13,24 +13,6 @@ export const HomeContainer = styled('main', {
 	alignItems: 'center',
 	fontSize: '$2xl',
 	borderRadius: 32,
-
-	a: {
-		marginTop: '1rem',
-		textDecoration: 'none',
-		background: '$green500',
-		color: '$white',
-
-		padding: '0.5rem 1rem',
-		borderRadius: '16px',
-		fontWeight: 800,
-		transition: '0.2s',
-
-		'&:hover': {
-			color: '$green500',
-			background: '$white',
-		},
-	},
-	// background: 'rgba(0,167,255,0.15)',
 	backgroundColor: '$blue800',
 })
 
@@ -207,6 +189,7 @@ export const LoadingContainer = styled('div', {
 	color: '$blue100',
 	padding: '1rem 2rem',
 	borderRadius: 16,
+	gap: 16,
 
 	button: {
 		margin: '2rem 0 1rem',
@@ -251,5 +234,19 @@ export const PauseModal = styled('div', {
 		'@bp2': {
 			flexDirection: 'row',
 		},
+	},
+})
+
+export const IconContainer = styled('div', {
+	width: '100%',
+	display: 'flex',
+	flexDirection: 'row',
+	justifyContent: 'start',
+	alignItems: 'center',
+	color: '$blue200',
+
+	'.icon': {
+		margin: '0 8px',
+		color: '$blue100',
 	},
 })

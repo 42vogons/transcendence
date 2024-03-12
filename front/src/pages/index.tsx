@@ -7,6 +7,7 @@ import {
 	GameContainer,
 	Header,
 	HomeContainer,
+	IconContainer,
 	LoadingContainer,
 	MenuArrow,
 	MenuContainer,
@@ -24,6 +25,11 @@ import { UserContext } from '@/contexts/UserContext'
 import Modal from '@/components/modals/modal'
 import Button from '@/components/button'
 import { MdClose, MdColorLens } from 'react-icons/md'
+import {
+	TbSquareArrowDown,
+	TbSquareArrowUp,
+	TbSquareLetterP,
+} from 'react-icons/tb'
 import { useRouter } from 'next/router'
 
 export default function Home() {
@@ -146,6 +152,21 @@ export default function Home() {
 						<LoadingContainer>
 							{/* <Loading size={200} /> */}
 							<h3>Ready?</h3>
+							<IconContainer>
+								Press{' '}
+								<TbSquareArrowUp size={48} className="icon" />{' '}
+								for Up
+							</IconContainer>
+							<IconContainer>
+								Press{' '}
+								<TbSquareArrowDown size={48} className="icon" />{' '}
+								for Down
+							</IconContainer>
+							<IconContainer>
+								Press{' '}
+								<TbSquareLetterP size={48} className="icon" />{' '}
+								for Pause
+							</IconContainer>
 							<Button
 								disabled={isDisabled}
 								onMouseUp={() => {
