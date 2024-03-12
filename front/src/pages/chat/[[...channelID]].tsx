@@ -456,9 +456,9 @@ export default function Chat() {
 																!isUserBanned(
 																	message.sender_id,
 																) &&
-																hasPriveleges(
+																!hasPriveleges(
 																	Number(
-																		user?.userID,
+																		message.sender_id,
 																	),
 																	['owner'],
 																) && (
