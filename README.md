@@ -1,4 +1,4 @@
-<h1 align="center">Transcendence</h1>
+<h1 align="center"> <img src="./images/last.png" alt="last" height="30">Transcendence</h1>
 
 <p align="center">
   <img alt="Github top language" src="https://img.shields.io/github/languages/top/42vogons/transcendence?color=56BEB8">
@@ -11,8 +11,6 @@
 
   <img alt="Github issues" src="https://img.shields.io/github/issues/42vogons/transcendence?color=56BEB8" />
 </p>
-
-<hr>
 
 <p align="center">
   <a href="#about">About</a> &#xa0; | &#xa0;
@@ -87,6 +85,8 @@ docker-compose up --build
 ## License ##
 
 This project is under license from MIT. For more details, see the [LICENSE](LICENSE) file.
+
+<img width="1000px" src="./images/game.gif?raw=true" />
 
 &#xa0;
 
