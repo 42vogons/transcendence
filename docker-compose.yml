@@ -8,7 +8,9 @@ services:
         env_file:
             - .env
         volumes:
-            - ./dbdata:/var/lib/postgresql/data
+            - type: volume
+              source: dbtranscendence
+              target: /var/lib/postgresql/data
         environment:
             - POSTGRES_PASSWORD=${DB_PASSWORD}
             - POSTGRES_USER=${DB_USERNAME}
@@ -24,6 +26,7 @@ services:
             args:
                 - NEXT_PUBLIC_FRONT_DOMAIN=${FRONT_DOMAIN}
                 - NEXT_PUBLIC_BACK_HOST=${BACK_HOST}
+                - CLIENT_ID=${CLIENT_ID}
         image: transcendence_front
         container_name: transcendence_front
         restart: unless-stopped
@@ -66,6 +69,9 @@ services:
             sh -c "npx prisma generate && 
             npx prisma migrate deploy && 
             npm run start"
+
+volumes:
+  dbtranscendence:
 
 networks:
     transcendence:
