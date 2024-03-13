@@ -173,7 +173,7 @@ export default function UpdateChannelModal({
 						disabled={isSubmitting}
 					>
 						<MdGroupAdd size={40} />
-						Create
+						Update
 					</Button>
 				</div>
 			</NewChannelModalForm>
